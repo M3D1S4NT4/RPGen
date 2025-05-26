@@ -1,0 +1,21 @@
+# Archivos de compilación
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de Maven
+dependency-reduced-pom.xml
+*.log 
