@@ -4,6 +4,7 @@ import com.rpgen.core.entity.Entity;
 import com.rpgen.core.action.GameAction;
 import java.util.*;
 
+
 public class BaseBattleSystem implements BattleSystem {
     private List<Entity> team1;
     private List<Entity> team2;

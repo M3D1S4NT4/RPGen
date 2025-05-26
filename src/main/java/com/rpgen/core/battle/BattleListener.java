@@ -3,6 +3,7 @@ package com.rpgen.core.battle;
 import com.rpgen.core.entity.Entity;
 import com.rpgen.core.action.GameAction;
 
+
 public interface BattleListener {
     void onBattleStart();
     void onTurnStart();
