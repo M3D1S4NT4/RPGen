@@ -2,6 +2,7 @@ package com.rpgen.core.action;
 
 import com.rpgen.core.entity.Entity;
 
+
 public interface GameAction {
     String getId();
     String getName();

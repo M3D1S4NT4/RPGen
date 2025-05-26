@@ -1,5 +1,6 @@
 package com.rpgen.core.action;
 
+
 import com.rpgen.core.entity.Entity;
 
 public abstract class AbstractGameAction implements GameAction {

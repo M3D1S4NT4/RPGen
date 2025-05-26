@@ -3,6 +3,7 @@ package com.rpgen.core.action;
 import com.rpgen.core.entity.Entity;
 import java.util.Random;
 
+
 public class PredefinedActions {
     public static class RockPaperScissorsAction extends AbstractGameAction {
         private static final Random random = new Random();

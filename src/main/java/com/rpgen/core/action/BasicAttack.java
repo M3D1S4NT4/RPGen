@@ -12,6 +12,7 @@ public class BasicAttack extends AbstractGameAction {
         if (!canExecute(source, target)) {
             return;
         }
+        
 
         int damage = Math.max(1, source.getAttack() - target.getDefense());
         target.takeDamage(damage);
