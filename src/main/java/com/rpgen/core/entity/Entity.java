@@ -1,5 +1,6 @@
 package com.rpgen.core.entity;
 
+
 public interface Entity {
     String getId();
     String getName();

@@ -7,6 +7,7 @@ public class Character implements Entity {
     private final int maxHealth;
     private final int attack;
     private final int defense;
+    
 
     public Character(String id, String name, int maxHealth, int attack, int defense) {
         this.id = id;

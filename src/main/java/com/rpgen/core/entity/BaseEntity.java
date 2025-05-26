@@ -7,6 +7,7 @@ public abstract class BaseEntity implements Entity {
     protected final int maxHealth;
     protected final int attack;
     protected final int defense;
+    
 
     protected BaseEntity(String id, String name, int maxHealth, int attack, int defense) {
         this.id = id;
