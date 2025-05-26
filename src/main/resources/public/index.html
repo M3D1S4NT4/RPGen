@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Combate RPG</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .character-form {
+            display: grid;
+            gap: 10px;
+        }
+        .character-form input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .character-list {
+            display: grid;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .character-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .battle-panel {
+            grid-column: 1 / -1;
+        }
+        .team {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .battle-log {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .battle-log p {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .remove-button {
+            background-color: #ff4444;
+            margin-left: 10px;
+        }
+        .remove-button:hover {
+            background-color: #cc0000;
+        }
+        .battle-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .action-buttons {
+            display: none;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .action-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+        .rock-button {
+            background-color: #8B4513;
+        }
+        .paper-button {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+        .scissors-button {
+            background-color: #C0C0C0;
+        }
+        .action-button:hover {
+            opacity: 0.8;
+        }
+        .character-card.selected {
+            border: 2px solid #4CAF50;
+        }
+        .character-card.target {
+            border: 2px solid #FF4444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sistema de Combate RPG</h1>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>Crear Personaje</h2>
+            <form id="characterForm" class="character-form">
+                <input type="text" id="name" placeholder="Nombre" required>
+                <input type="number" id="maxHealth" placeholder="Salud Máxima" required>
+                <input type="number" id="attack" placeholder="Ataque" required>
+                <input type="number" id="defense" placeholder="Defensa" required>
+                <button type="submit">Crear Personaje</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Personajes Disponibles</h2>
+            <div id="characterList" class="character-list"></div>
+        </div>
+
+        <div class="panel battle-panel">
+            <h2>Batalla</h2>
+            <div class="team">
+                <div>
+                    <h3>Equipo 1</h3>
+                    <div id="team1" class="character-list"></div>
+                </div>
+                <div>
+                    <h3>Equipo 2</h3>
+                    <div id="team2" class="character-list"></div>
+                </div>
+            </div>
+            <div class="battle-controls">
+                <button id="startBattle">Iniciar Batalla</button>
+                <button id="processTurn" disabled>Procesar Turno</button>
+            </div>
+            <div id="actionButtons" class="action-buttons">
+                <button class="action-button rock-button" onclick="selectAction('rock')">Piedra</button>
+                <button class="action-button paper-button" onclick="selectAction('paper')">Papel</button>
+                <button class="action-button scissors-button" onclick="selectAction('scissors')">Tijeras</button>
+            </div>
+            <div id="battleStatus" class="battle-status">Estado: Esperando inicio de batalla</div>
+            <div id="battleLog" class="battle-log">
+                <p>Registro de batalla...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funciones de utilidad
+        const api = {
+            async getCharacters() {
+                const response = await fetch('/api/characters');
+                return await response.json();
+            },
+            async createCharacter(character) {
+                const response = await fetch('/api/characters', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(character)
+                });
+                return await response.json();
+            },
+            async startBattle(team1, team2) {
+                const response = await fetch('/api/battle/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ team1, team2 })
+                });
+                return await response.json();
+            },
+            async performAction(sourceId, targetId, actionType) {
+                const response = await fetch('/api/battle/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sourceId, targetId, actionType })
+                });
+                return await response.json();
+            },
+            async processTurn() {
+                const response = await fetch('/api/battle/process', {
+                    method: 'POST'
+                });
+                return await response.json();
+            }
+        };
+
+        // Estado de la aplicación
+        let characters = [];
+        let selectedTeam1 = [];
+        let selectedTeam2 = [];
+        let battleLog = [];
+        let selectedCharacter = null;
+        let selectedTarget = null;
+        let currentTeam = 1;
+
+        // Funciones de renderizado
+        function renderCharacter(character, includeTeamButtons = true, teamNumber = null) {
+            const isSelected = selectedCharacter && selectedCharacter.id === character.id;
+            const isTarget = selectedTarget && selectedTarget.id === character.id;
+            const cardClass = `character-card ${isSelected ? 'selected' : ''} ${isTarget ? 'target' : ''}`;
+            const healthPercentage = (character.health / character.maxHealth) * 100;
+            const healthColor = healthPercentage > 50 ? '#4CAF50' : healthPercentage > 25 ? '#FFA500' : '#FF4444';
+            
+            const teamButtons = includeTeamButtons ? `
+                <button onclick="addToTeam1('${character.id}')">Añadir a Equipo 1</button>
+                <button onclick="addToTeam2('${character.id}')">Añadir a Equipo 2</button>
+            ` : `
+                <button onclick="selectCharacter('${character.id}', ${teamNumber})">Seleccionar</button>
+                <button class="remove-button" onclick="removeFromTeam(${teamNumber}, '${character.id}')">Eliminar del Equipo</button>
+            `;
+
+            return `
+                <div class="${cardClass}" data-id="${character.id}">
+                    <h3>${character.name}</h3>
+                    <div style="background-color: #ddd; width: 100%; height: 20px; border-radius: 10px; margin: 5px 0;">
+                        <div style="width: ${healthPercentage}%; height: 100%; background-color: ${healthColor}; border-radius: 10px; transition: width 0.3s ease-in-out;"></div>
+                    </div>
+                    <p>Salud: ${character.health}/${character.maxHealth}</p>
+                    <p>Ataque: ${character.attack}</p>
+                    <p>Defensa: ${character.defense}</p>
+                    ${teamButtons}
+                </div>
+            `;
+        }
+
+        function updateCharacterList() {
+            const characterList = document.getElementById('characterList');
+            characterList.innerHTML = characters.map(c => renderCharacter(c, true)).join('');
+        }
+
+        async function updateTeams() {
+            try {
+                // Obtener la lista actualizada de personajes del servidor
+                const updatedCharacters = await api.getCharacters();
+                characters = updatedCharacters;
+
+                // Actualizar los equipos con la información más reciente
+                selectedTeam1 = selectedTeam1.map(teamChar => {
+                    const updatedChar = characters.find(c => c.id === teamChar.id);
+                    return updatedChar || teamChar;
+                });
+
+                selectedTeam2 = selectedTeam2.map(teamChar => {
+                    const updatedChar = characters.find(c => c.id === teamChar.id);
+                    return updatedChar || teamChar;
+                });
+
+                // Actualizar la visualización
+            document.getElementById('team1').innerHTML = selectedTeam1.map(c => renderCharacter(c, false, 1)).join('');
+            document.getElementById('team2').innerHTML = selectedTeam2.map(c => renderCharacter(c, false, 2)).join('');
+            } catch (error) {
+                console.error('Error al actualizar equipos:', error);
+            }
+        }
+
+        function updateBattleLog(message) {
+            battleLog.push(message);
+            const battleLogElement = document.getElementById('battleLog');
+            battleLogElement.innerHTML = battleLog.map(msg => `<p>${msg}</p>`).join('');
+            battleLogElement.scrollTop = battleLogElement.scrollHeight;
+        }
+
+        // Eventos
+        document.getElementById('characterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const character = {
+                name: document.getElementById('name').value,
+                maxHealth: parseInt(document.getElementById('maxHealth').value),
+                attack: parseInt(document.getElementById('attack').value),
+                defense: parseInt(document.getElementById('defense').value)
+            };
+            await api.createCharacter(character);
+            characters = await api.getCharacters();
+            updateCharacterList();
+            e.target.reset();
+            updateBattleLog(`Personaje ${character.name} creado`);
+        });
+
+        document.getElementById('startBattle').addEventListener('click', async () => {
+            if (selectedTeam1.length === 0 || selectedTeam2.length === 0) {
+                alert('Ambos equipos deben tener al menos un personaje');
+                return;
+            }
+            try {
+            const team1Ids = selectedTeam1.map(c => c.id);
+            const team2Ids = selectedTeam2.map(c => c.id);
+                const result = await api.startBattle(team1Ids, team2Ids);
+                
+                if (result.status === 'success') {
+            battleLog = [];
+            updateBattleLog('¡Batalla iniciada!');
+            updateBattleLog(`Equipo 1: ${selectedTeam1.map(c => c.name).join(', ')}`);
+            updateBattleLog(`Equipo 2: ${selectedTeam2.map(c => c.name).join(', ')}`);
+                    document.getElementById('processTurn').disabled = false;
+                    currentTeam = 1;
+                    updateBattleStatus(`Turno del Equipo ${currentTeam}`);
+                } else {
+                    alert(result.message || 'Error al iniciar la batalla');
+                }
+            } catch (error) {
+                console.error('Error al iniciar la batalla:', error);
+                alert('Error al iniciar la batalla');
+            }
+        });
+
+        document.getElementById('processTurn').addEventListener('click', async () => {
+            try {
+            const result = await api.processTurn();
+            if (result.actions) {
+                result.actions.forEach(action => {
+                    updateBattleLog(action);
+                });
+            }
+            if (result.isBattleOver) {
+                updateBattleLog('¡La batalla ha terminado!');
+                    document.getElementById('actionButtons').style.display = 'none';
+                    document.getElementById('processTurn').disabled = true;
+                }
+                await updateTeams(); // Actualizar equipos después de procesar el turno
+            } catch (error) {
+                console.error('Error al procesar turno:', error);
+                alert('Error al procesar el turno');
+            }
+        });
+
+        // Funciones de selección de equipo
+        window.addToTeam1 = function(id) {
+            const character = characters.find(c => c.id === id);
+            if (character && !selectedTeam1.find(c => c.id === id) && !selectedTeam2.find(c => c.id === id)) {
+                selectedTeam1.push(character);
+                updateTeams();
+                updateBattleLog(`${character.name} añadido al Equipo 1`);
+            }
+        }
+
+        window.addToTeam2 = function(id) {
+            const character = characters.find(c => c.id === id);
+            if (character && !selectedTeam2.find(c => c.id === id) && !selectedTeam1.find(c => c.id === id)) {
+                selectedTeam2.push(character);
+                updateTeams();
+                updateBattleLog(`${character.name} añadido al Equipo 2`);
+            }
+        }
+
+        window.removeFromTeam = function(teamNumber, id) {
+            if (teamNumber === 1) {
+                const index = selectedTeam1.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    const character = selectedTeam1[index];
+                    selectedTeam1.splice(index, 1);
+                    updateBattleLog(`${character.name} eliminado del Equipo 1`);
+                }
+            } else {
+                const index = selectedTeam2.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    const character = selectedTeam2[index];
+                    selectedTeam2.splice(index, 1);
+                    updateBattleLog(`${character.name} eliminado del Equipo 2`);
+                }
+            }
+            updateTeams();
+        }
+
+        // Funciones de selección de personajes y acciones
+        window.selectCharacter = function(id, teamNumber) {
+            // Si no hay personaje seleccionado, solo permitir seleccionar del equipo actual
+            if (!selectedCharacter) {
+                if (teamNumber !== currentTeam) {
+                    alert('Debes seleccionar un personaje de tu equipo primero');
+                    return;
+                }
+                const character = teamNumber === 1 ? 
+                    selectedTeam1.find(c => c.id === id) : 
+                    selectedTeam2.find(c => c.id === id);
+                
+                if (character) {
+                    selectedCharacter = character;
+                    updateBattleStatus(`Selecciona un objetivo del equipo ${teamNumber === 1 ? 2 : 1}`);
+                    updateTeams();
+                }
+            }
+            // Si ya hay un personaje seleccionado, solo permitir seleccionar objetivo del equipo contrario
+            else if (!selectedTarget) {
+                const targetTeamNumber = currentTeam === 1 ? 2 : 1;
+                if (teamNumber !== targetTeamNumber) {
+                    alert('Debes seleccionar un objetivo del equipo contrario');
+                    return;
+                }
+                
+                const targetTeam = teamNumber === 1 ? selectedTeam1 : selectedTeam2;
+                const target = targetTeam.find(c => c.id === id);
+                
+                if (target) {
+                    selectedTarget = target;
+                    updateBattleStatus(`Selecciona una acción para ${selectedCharacter.name}`);
+                    updateTeams();
+                }
+            }
+        }
+
+        window.selectAction = async function(actionType) {
+            if (!selectedCharacter || !selectedTarget) {
+                alert('Debes seleccionar un personaje y un objetivo primero');
+                return;
+            }
+
+            try {
+                const result = await api.performAction(selectedCharacter.id, selectedTarget.id, actionType);
+                if (result.status === 'success') {
+                    updateBattleLog(`${selectedCharacter.name} usa ${actionType} contra ${selectedTarget.name}`);
+                    
+                    // Procesar el turno automáticamente después de cada acción
+                    const turnResult = await api.processTurn();
+                    if (turnResult.actions) {
+                        turnResult.actions.forEach(action => {
+                            updateBattleLog(action);
+                        });
+                    }
+                    
+                    // Actualizar el estado de la batalla y los equipos
+                    await updateTeams(); // Actualizar equipos con la información más reciente
+                    selectedCharacter = null;
+                    selectedTarget = null;
+                    currentTeam = currentTeam === 1 ? 2 : 1;
+                    updateBattleStatus(`Turno del Equipo ${currentTeam}`);
+                    
+                    if (turnResult.isBattleOver) {
+                        updateBattleLog('¡La batalla ha terminado!');
+                        document.getElementById('actionButtons').style.display = 'none';
+                        document.getElementById('processTurn').disabled = true;
+                    }
+                } else {
+                    alert(result.message || 'Error al ejecutar la acción');
+                }
+            } catch (error) {
+                console.error('Error al ejecutar la acción:', error);
+                alert('Error al ejecutar la acción');
+            }
+        }
+
+        function updateBattleStatus(message) {
+            const battleStatus = document.getElementById('battleStatus');
+            battleStatus.textContent = `Estado: ${message}`;
+            
+            // Mostrar/ocultar botones de acción según el estado
+            const actionButtons = document.getElementById('actionButtons');
+            if (selectedCharacter && selectedTarget) {
+                actionButtons.style.display = 'flex';
+            } else {
+                actionButtons.style.display = 'none';
+            }
+        }
+
+        // Inicialización
+        async function init() {
+            characters = await api.getCharacters();
+            updateCharacterList();
+            updateBattleLog('Sistema de combate iniciado');
+        }
+
+        init();
+    </script>
+</body>
+</html> 
