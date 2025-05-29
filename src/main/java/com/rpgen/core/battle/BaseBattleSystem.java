@@ -2,18 +2,19 @@ package com.rpgen.core.battle;
 
 import com.rpgen.core.entity.Entity;
 import com.rpgen.core.action.GameAction;
+import com.rpgen.core.action.CombatCommand;
+import com.rpgen.core.action.AbstractCombatCommand;
 import java.util.*;
-
 
 public class BaseBattleSystem implements BattleSystem {
     private List<Entity> team1;
     private List<Entity> team2;
-    private List<BattleAction> pendingActions;
+    private List<CombatCommand> pendingCommands;
     private List<BattleListener> listeners;
     private boolean battleOver;
 
     public BaseBattleSystem() {
-        this.pendingActions = new ArrayList<>();
+        this.pendingCommands = new ArrayList<>();
         this.listeners = new ArrayList<>();
         this.battleOver = false;
     }
@@ -22,31 +23,36 @@ public class BaseBattleSystem implements BattleSystem {
     public void initialize(List<Entity> team1, List<Entity> team2) {
         this.team1 = new ArrayList<>(team1);
         this.team2 = new ArrayList<>(team2);
-        this.pendingActions.clear();
+        this.pendingCommands.clear();
         this.battleOver = false;
     }
 
     @Override
     public void addAction(Entity source, Entity target, GameAction action) {
-        pendingActions.add(new BattleAction(source, target, action));
+        // Este método se mantiene por compatibilidad
+        pendingCommands.add(new AbstractCombatCommand(source, target, action.getName(), action) {});
+    }
+
+    public void addCommand(CombatCommand command) {
+        pendingCommands.add(command);
     }
 
     @Override
     public void processTurn() {
         if (battleOver) return;
 
-        // Procesar todas las acciones pendientes
-        for (BattleAction battleAction : pendingActions) {
-            if (!battleAction.source.isAlive() || !battleAction.target.isAlive()) {
+        // Procesar todos los comandos pendientes
+        for (CombatCommand command : pendingCommands) {
+            if (!command.canExecute()) {
                 continue;
             }
 
-            battleAction.action.execute(battleAction.source, battleAction.target);
-            notifyActionExecuted(battleAction.source, battleAction.target, battleAction.action);
+            command.execute();
+            notifyActionExecuted(command.getSource(), command.getTarget(), null);
         }
 
-        // Limpiar acciones pendientes
-        pendingActions.clear();
+        // Limpiar comandos pendientes
+        pendingCommands.clear();
 
         // Verificar si la batalla ha terminado
         checkBattleEnd();
@@ -89,18 +95,6 @@ public class BaseBattleSystem implements BattleSystem {
     private void notifyActionExecuted(Entity source, Entity target, GameAction action) {
         for (BattleListener listener : listeners) {
             listener.onActionExecuted(source, target, action);
-        }
-    }
-
-    private static class BattleAction {
-        final Entity source;
-        final Entity target;
-        final GameAction action;
-
-        BattleAction(Entity source, Entity target, GameAction action) {
-            this.source = source;
-            this.target = target;
-            this.action = action;
         }
     }
 } 

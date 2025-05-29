@@ -6,7 +6,7 @@ public class Character implements Entity {
     private int health;
     private final int maxHealth;
     private final int attack;
-    private final int defense;
+    private int defense;
     
 
     public Character(String id, String name, int maxHealth, int attack, int defense) {
@@ -46,6 +46,11 @@ public class Character implements Entity {
     @Override
     public int getDefense() {
         return defense;
+    }
+
+    @Override
+    public void setDefense(int defense) {
+        this.defense = defense;
     }
 
     @Override

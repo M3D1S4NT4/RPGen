@@ -1,17 +1,13 @@
 package com.rpgen.core.action;
 
 import com.rpgen.core.entity.Entity;
-import java.util.Random;
-
 
 public class PredefinedActions {
-    public static class RockPaperScissorsAction extends AbstractGameAction {
-        private static final Random random = new Random();
-        private final String choice;
+    public static class BasicAttackAction extends AbstractGameAction {
+        private static final int MIN_DAMAGE = 1;
 
-        public RockPaperScissorsAction(String id, String name, String choice) {
-            super(id, name, 1, "Un ataque basado en " + choice + " que puede vencer o ser vencido");
-            this.choice = choice.toLowerCase();
+        public BasicAttackAction(String id) {
+            super(id, "Ataque Básico", 0, "Un ataque básico que causa daño basado en el ataque del personaje");
         }
 
         @Override
@@ -20,43 +16,74 @@ public class PredefinedActions {
                 return;
             }
             
-            String targetChoice = getRandomChoice();
-            int damage = calculateDamage(choice, targetChoice, source, target);
+            int rawDamage = source.getAttack();
+            int defense = target.getDefense();
+            int finalDamage = Math.max(MIN_DAMAGE, rawDamage - defense);
+            target.takeDamage(finalDamage);
+        }
+    }
+
+    public static class StrongAttackAction extends AbstractGameAction {
+        private static final int MIN_DAMAGE = 1;
+        private static final double DAMAGE_MULTIPLIER = 2.0;
+
+        public StrongAttackAction(String id) {
+            super(id, "Ataque Fuerte", 1, "Un ataque poderoso que causa el doble de daño");
+        }
+
+        @Override
+        public void execute(Entity source, Entity target) {
+            if (!canExecute(source, target)) {
+                return;
+            }
             
-            if (damage > 0) {
-                target.takeDamage(damage);
-            } else if (damage < 0) {
-                source.takeDamage(-damage);
+            int rawDamage = (int)(source.getAttack() * DAMAGE_MULTIPLIER);
+            int defense = target.getDefense();
+            int finalDamage = Math.max(MIN_DAMAGE, rawDamage - defense);
+            target.takeDamage(finalDamage);
+        }
+    }
+
+    public static class ShieldAction extends AbstractGameAction {
+        private static final int SHIELD_DURATION = 1;
+        private int remainingTurns;
+
+        public ShieldAction(String id) {
+            super(id, "Escudo", 2, "Activa un escudo que reduce el daño recibido");
+            this.remainingTurns = SHIELD_DURATION;
+        }
+
+        @Override
+        public void execute(Entity source, Entity target) {
+            if (!canExecute(source, target)) {
+                return;
+            }
+            
+            // El escudo se aplica al usuario que lo activa
+            source.setDefense(source.getDefense() * 2);
+            remainingTurns--;
+            
+            if (remainingTurns <= 0) {
+                // Restaurar la defensa original cuando el escudo se acaba
+                source.setDefense(source.getDefense() / 2);
             }
         }
 
-        private String getRandomChoice() {
-            String[] choices = {"piedra", "papel", "tijeras"};
-            return choices[random.nextInt(choices.length)];
-        }
-
-        private int calculateDamage(String sourceChoice, String targetChoice, Entity source, Entity target) {
-            if (sourceChoice.equals(targetChoice)) {
-                return 0; // Empate
-            }
-
-            boolean sourceWins = (sourceChoice.equals("piedra") && targetChoice.equals("tijeras")) ||
-                               (sourceChoice.equals("papel") && targetChoice.equals("piedra")) ||
-                               (sourceChoice.equals("tijeras") && targetChoice.equals("papel"));
-
-            return sourceWins ? source.getAttack() : -target.getAttack();
+        @Override
+        public boolean canExecute(Entity source, Entity target) {
+            return super.canExecute(source, target) && remainingTurns > 0;
         }
     }
 
-    public static GameAction createRockAction(String id) {
-        return new RockPaperScissorsAction(id, "Piedra", "piedra");
+    public static GameAction createBasicAttack(String id) {
+        return new BasicAttackAction(id);
     }
 
-    public static GameAction createPaperAction(String id) {
-        return new RockPaperScissorsAction(id, "Papel", "papel");
+    public static GameAction createStrongAttack(String id) {
+        return new StrongAttackAction(id);
     }
 
-    public static GameAction createScissorsAction(String id) {
-        return new RockPaperScissorsAction(id, "Tijeras", "tijeras");
+    public static GameAction createShield(String id) {
+        return new ShieldAction(id);
     }
 } 

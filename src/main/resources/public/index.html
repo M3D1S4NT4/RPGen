@@ -104,15 +104,14 @@
             font-weight: bold;
             color: white;
         }
-        .rock-button {
-            background-color: #8B4513;
+        .basic-button {
+            background-color: #4CAF50;
         }
-        .paper-button {
-            background-color: #FFFFFF;
-            color: #000000;
+        .strong-button {
+            background-color: #f44336;
         }
-        .scissors-button {
-            background-color: #C0C0C0;
+        .shield-button {
+            background-color: #2196F3;
         }
         .action-button:hover {
             opacity: 0.8;
@@ -162,9 +161,9 @@
                 <button id="processTurn" disabled>Procesar Turno</button>
             </div>
             <div id="actionButtons" class="action-buttons">
-                <button class="action-button rock-button" onclick="selectAction('rock')">Piedra</button>
-                <button class="action-button paper-button" onclick="selectAction('paper')">Papel</button>
-                <button class="action-button scissors-button" onclick="selectAction('scissors')">Tijeras</button>
+                <button class="action-button basic-button" onclick="selectAction('basic')">Ataque Básico</button>
+                <button class="action-button strong-button" onclick="selectAction('strong')">Ataque Fuerte</button>
+                <!--button class="action-button shield-button" onclick="selectAction('shield')">Escudo</button-->
             </div>
             <div id="battleStatus" class="battle-status">Estado: Esperando inicio de batalla</div>
             <div id="battleLog" class="battle-log">

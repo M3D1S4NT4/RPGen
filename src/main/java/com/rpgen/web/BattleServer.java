@@ -9,6 +9,8 @@ import com.rpgen.core.entity.Character;
 import com.rpgen.core.entity.Entity;
 import com.rpgen.core.action.BasicAttack;
 import com.rpgen.core.action.PredefinedActions;
+import com.rpgen.core.action.CombatCommand;
+import com.rpgen.core.action.CombatCommandFactory;
 import com.google.gson.reflect.TypeToken;
 import com.rpgen.core.battle.BattleListener;
 import com.rpgen.core.action.GameAction;
@@ -128,34 +130,22 @@ public class BattleServer {
                     ));
                 }
                 
-                GameAction action;
-                String actionId = UUID.randomUUID().toString();
-                
-                switch (actionType.toLowerCase()) {
-                    case "rock":
-                        action = PredefinedActions.createRockAction(actionId);
-                        break;
-                    case "paper":
-                        action = PredefinedActions.createPaperAction(actionId);
-                        break;
-                    case "scissors":
-                        action = PredefinedActions.createScissorsAction(actionId);
-                        break;
-                    default:
-                        return gson.toJson(Map.of(
-                            "status", "error",
-                            "message", "Tipo de acción no válido"
-                        ));
+                try {
+                    CombatCommand command = CombatCommandFactory.createCommand(source, target, actionType);
+                    ((BaseBattleSystem) battleSystem).addCommand(command);
+                    
+                    return gson.toJson(Map.of(
+                        "status", "success",
+                        "actionType", actionType,
+                        "sourceName", source.getName(),
+                        "targetName", target.getName()
+                    ));
+                } catch (IllegalArgumentException e) {
+                    return gson.toJson(Map.of(
+                        "status", "error",
+                        "message", e.getMessage()
+                    ));
                 }
-                
-                battleSystem.addAction(source, target, action);
-                
-                return gson.toJson(Map.of(
-                    "status", "success",
-                    "actionType", actionType,
-                    "sourceName", source.getName(),
-                    "targetName", target.getName()
-                ));
             } catch (Exception e) {
                 return gson.toJson(Map.of(
                     "status", "error",
@@ -183,8 +173,8 @@ public class BattleServer {
 
                 @Override
                 public void onActionExecuted(Entity source, Entity target, GameAction action) {
-                    actions.add(String.format("%s usa %s contra %s", 
-                        source.getName(), action.getName(), target.getName()));
+                    actions.add(String.format("%s ataca a %s", 
+                        source.getName(), target.getName()));
                 }
 
                 @Override

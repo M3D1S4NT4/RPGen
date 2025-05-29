@@ -8,6 +8,7 @@ public interface Entity {
     int getMaxHealth();
     int getAttack();
     int getDefense();
+    void setDefense(int defense);
     boolean isAlive();
     void takeDamage(int damage);
     void heal(int amount);
