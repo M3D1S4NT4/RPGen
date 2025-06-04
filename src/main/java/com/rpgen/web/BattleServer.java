@@ -56,6 +56,57 @@ public class BattleServer {
             return gson.toJson(character);
         });
 
+        put("/api/characters/:id", (req, res) -> {
+            res.type("application/json");
+            String id = req.params(":id");
+            Character character = characters.get(id);
+            
+            if (character == null) {
+                res.status(404);
+                return gson.toJson(Map.of(
+                    "status", "error",
+                    "message", "Personaje no encontrado"
+                ));
+            }
+
+            Map<String, Object> data = gson.fromJson(req.body(), Map.class);
+            
+            // Crear un nuevo personaje con los datos actualizados
+            Character updatedCharacter = new Character(
+                id,
+                (String) data.get("name"),
+                ((Double) data.get("maxHealth")).intValue(),
+                ((Double) data.get("attack")).intValue(),
+                ((Double) data.get("defense")).intValue()
+            );
+            
+            characters.put(id, updatedCharacter);
+            return gson.toJson(updatedCharacter);
+        });
+
+        post("/api/battle/reset", (req, res) -> {
+            res.type("application/json");
+            try {
+                // Resetear la salud de todos los personajes
+                for (Character character : characters.values()) {
+                    character.heal(character.getMaxHealth());
+                }
+                
+                // Resetear el sistema de batalla
+                battleSystem = new BaseBattleSystem();
+                
+                return gson.toJson(Map.of(
+                    "status", "success",
+                    "message", "Batalla reseteada correctamente"
+                ));
+            } catch (Exception e) {
+                return gson.toJson(Map.of(
+                    "status", "error",
+                    "message", "Error al resetear la batalla: " + e.getMessage()
+                ));
+            }
+        });
+
         post("/api/battle/start", (req, res) -> {
             res.type("application/json");
             try {
