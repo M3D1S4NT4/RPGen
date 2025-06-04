@@ -59,6 +59,9 @@
         .battle-panel {
             grid-column: 1 / -1;
         }
+        .battle-status {
+            margin-top: 20px;
+        }
         .team {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -91,6 +94,19 @@
             gap: 10px;
             margin-top: 20px;
         }
+        .reset-button {
+            background-color: #FF9800;
+        }
+        .reset-button:hover {
+            background-color: #F57C00;
+        }
+        .edit-button {
+            background-color: #2196F3;
+            margin-left: 5px;
+        }
+        .edit-button:hover {
+            background-color: #1976D2;
+        }
         .action-buttons {
             display: none;
             gap: 10px;
@@ -122,10 +138,36 @@
         .character-card.target {
             border: 2px solid #FF4444;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 50%;
+            max-width: 500px;
+        }
+        .close {
+            float: right;
+            cursor: pointer;
+            font-size: 24px;
+        }
     </style>
 </head>
 <body>
     <h1>Sistema de Combate RPG</h1>
+    
+    <div style="margin-bottom: 20px;">
+        <button onclick="window.location.href='pokemon.html'" style="background-color: #2196F3;">Ir a Pokédex</button>
+    </div>
     
     <div class="container">
         <div class="panel">
@@ -146,29 +188,45 @@
 
         <div class="panel battle-panel">
             <h2>Batalla</h2>
+            <div class="battle-controls">
+                <button id="startBattle">Iniciar Batalla</button>
+                <button id="processTurn" disabled>Procesar Turno</button>
+                <button id="resetBattle" class="reset-button">Resetear Batalla</button>
+            </div>
+            <div id="battleStatus" class="battle-status">Estado: Esperando inicio de batalla</div>
             <div class="team">
                 <div>
                     <h3>Equipo 1</h3>
                     <div id="team1" class="character-list"></div>
                 </div>
                 <div>
-                    <h3>Equipo 2</h3>
+                    <h3>Equipo 2</h3>z
                     <div id="team2" class="character-list"></div>
                 </div>
-            </div>
-            <div class="battle-controls">
-                <button id="startBattle">Iniciar Batalla</button>
-                <button id="processTurn" disabled>Procesar Turno</button>
             </div>
             <div id="actionButtons" class="action-buttons">
                 <button class="action-button basic-button" onclick="selectAction('basic')">Ataque Básico</button>
                 <button class="action-button strong-button" onclick="selectAction('strong')">Ataque Fuerte</button>
                 <!--button class="action-button shield-button" onclick="selectAction('shield')">Escudo</button-->
             </div>
-            <div id="battleStatus" class="battle-status">Estado: Esperando inicio de batalla</div>
             <div id="battleLog" class="battle-log">
                 <p>Registro de batalla...</p>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar personaje -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Editar Personaje</h2>
+            <form id="editForm" class="character-form">
+                <input type="text" id="editName" placeholder="Nombre" required>
+                <input type="number" id="editMaxHealth" placeholder="Salud Máxima" required>
+                <input type="number" id="editAttack" placeholder="Ataque" required>
+                <input type="number" id="editDefense" placeholder="Defensa" required>
+                <button type="submit">Guardar Cambios</button>
+            </form>
         </div>
     </div>
 
@@ -208,6 +266,20 @@
                     method: 'POST'
                 });
                 return await response.json();
+            },
+            async updateCharacter(id, character) {
+                const response = await fetch(`/api/characters/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(character)
+                });
+                return await response.json();
+            },
+            async resetBattle() {
+                const response = await fetch('/api/battle/reset', {
+                    method: 'POST'
+                });
+                return await response.json();
             }
         };
 
@@ -219,6 +291,19 @@
         let selectedCharacter = null;
         let selectedTarget = null;
         let currentTeam = 1;
+        let editingCharacterId = null;
+
+        // Función para cargar equipos de Pokémon
+        function loadPokemonTeams() {
+            const battleTeams = localStorage.getItem('battleTeams');
+            if (battleTeams) {
+                const teams = JSON.parse(battleTeams);
+                selectedTeam1 = teams.team1;
+                selectedTeam2 = teams.team2;
+                updateTeams();
+                updateBattleLog('Equipos de Pokémon cargados');
+            }
+        }
 
         // Funciones de renderizado
         function renderCharacter(character, includeTeamButtons = true, teamNumber = null) {
@@ -228,16 +313,37 @@
             const healthPercentage = (character.health / character.maxHealth) * 100;
             const healthColor = healthPercentage > 50 ? '#4CAF50' : healthPercentage > 25 ? '#FFA500' : '#FF4444';
             
-            const teamButtons = includeTeamButtons ? `
-                <button onclick="addToTeam1('${character.id}')">Añadir a Equipo 1</button>
-                <button onclick="addToTeam2('${character.id}')">Añadir a Equipo 2</button>
-            ` : `
-                <button onclick="selectCharacter('${character.id}', ${teamNumber})">Seleccionar</button>
-                <button class="remove-button" onclick="removeFromTeam(${teamNumber}, '${character.id}')">Eliminar del Equipo</button>
-            `;
+            let teamButtons = '';
+            if (includeTeamButtons) {
+                teamButtons = `
+                    <button onclick="addToTeam1('${character.id}')">Añadir a Equipo 1</button>
+                    <button onclick="addToTeam2('${character.id}')">Añadir a Equipo 2</button>
+                    <button class="edit-button" onclick="openEditModal('${character.id}')">Editar</button>
+                `;
+            } else {
+                teamButtons = `
+                    <button onclick="selectCharacter('${character.id}', ${teamNumber})">Seleccionar</button>
+                    <button class="remove-button" onclick="removeFromTeam(${teamNumber}, '${character.id}')">Eliminar del Equipo</button>
+                `;
+            }
+
+            // Si es un Pokémon, mostrar información adicional
+            let additionalInfo = '';
+            if (character.types) {
+                const typeBadges = character.types.map(type => 
+                    `<span class="type-badge type-${type.toLowerCase()}">${type}</span>`
+                ).join('');
+                additionalInfo = `
+                    <div class="pokemon-types">${typeBadges}</div>
+                    <p>Velocidad: ${character.speed}</p>
+                    <p>Ataque Especial: ${character.specialAttack}</p>
+                    <p>Defensa Especial: ${character.specialDefense}</p>
+                `;
+            }
 
             return `
                 <div class="${cardClass}" data-id="${character.id}">
+                    ${character.imageUrl ? `<img src="${character.imageUrl}" alt="${character.name}" style="width: 100px; height: 100px; object-fit: contain;">` : ''}
                     <h3>${character.name}</h3>
                     <div style="background-color: #ddd; width: 100%; height: 20px; border-radius: 10px; margin: 5px 0;">
                         <div style="width: ${healthPercentage}%; height: 100%; background-color: ${healthColor}; border-radius: 10px; transition: width 0.3s ease-in-out;"></div>
@@ -245,21 +351,27 @@
                     <p>Salud: ${character.health}/${character.maxHealth}</p>
                     <p>Ataque: ${character.attack}</p>
                     <p>Defensa: ${character.defense}</p>
+                    ${additionalInfo}
                     ${teamButtons}
                 </div>
             `;
         }
 
-        function updateCharacterList() {
-            const characterList = document.getElementById('characterList');
-            characterList.innerHTML = characters.map(c => renderCharacter(c, true)).join('');
+        async function updateCharacterList() {
+            try {
+                // Obtener la lista actualizada de personajes del servidor
+                characters = await api.getCharacters();
+                const characterList = document.getElementById('characterList');
+                characterList.innerHTML = characters.map(c => renderCharacter(c, true)).join('');
+            } catch (error) {
+                console.error('Error al actualizar la lista de personajes:', error);
+            }
         }
 
         async function updateTeams() {
             try {
                 // Obtener la lista actualizada de personajes del servidor
-                const updatedCharacters = await api.getCharacters();
-                characters = updatedCharacters;
+                characters = await api.getCharacters();
 
                 // Actualizar los equipos con la información más reciente
                 selectedTeam1 = selectedTeam1.map(teamChar => {
@@ -273,8 +385,8 @@
                 });
 
                 // Actualizar la visualización
-            document.getElementById('team1').innerHTML = selectedTeam1.map(c => renderCharacter(c, false, 1)).join('');
-            document.getElementById('team2').innerHTML = selectedTeam2.map(c => renderCharacter(c, false, 2)).join('');
+                document.getElementById('team1').innerHTML = selectedTeam1.map(c => renderCharacter(c, false, 1)).join('');
+                document.getElementById('team2').innerHTML = selectedTeam2.map(c => renderCharacter(c, false, 2)).join('');
             } catch (error) {
                 console.error('Error al actualizar equipos:', error);
             }
@@ -332,17 +444,28 @@
 
         document.getElementById('processTurn').addEventListener('click', async () => {
             try {
-            const result = await api.processTurn();
-            if (result.actions) {
-                result.actions.forEach(action => {
-                    updateBattleLog(action);
-                });
-            }
-            if (result.isBattleOver) {
-                updateBattleLog('¡La batalla ha terminado!');
+                const result = await api.processTurn();
+                if (result.actions) {
+                    result.actions.forEach(action => {
+                        updateBattleLog(action);
+                    });
+                }
+                if (result.isBattleOver) {
+                    updateBattleLog('¡La batalla ha terminado!');
                     document.getElementById('actionButtons').style.display = 'none';
                     document.getElementById('processTurn').disabled = true;
                 }
+                
+                // Deseleccionar personajes y actualizar el estado
+                selectedCharacter = null;
+                selectedTarget = null;
+                currentTeam = currentTeam === 1 ? 2 : 1;
+                updateBattleStatus(`Turno del Equipo ${currentTeam}`);
+                
+                // Actualizar la visualización para quitar los colores de selección
+                document.getElementById('team1').innerHTML = selectedTeam1.map(c => renderCharacter(c, false, 1)).join('');
+                document.getElementById('team2').innerHTML = selectedTeam2.map(c => renderCharacter(c, false, 2)).join('');
+                
                 await updateTeams(); // Actualizar equipos después de procesar el turno
             } catch (error) {
                 console.error('Error al procesar turno:', error);
@@ -446,10 +569,16 @@
                     
                     // Actualizar el estado de la batalla y los equipos
                     await updateTeams(); // Actualizar equipos con la información más reciente
+                    
+                    // Deseleccionar personajes y actualizar el estado
                     selectedCharacter = null;
                     selectedTarget = null;
                     currentTeam = currentTeam === 1 ? 2 : 1;
                     updateBattleStatus(`Turno del Equipo ${currentTeam}`);
+                    
+                    // Actualizar la visualización para quitar los colores de selección
+                    document.getElementById('team1').innerHTML = selectedTeam1.map(c => renderCharacter(c, false, 1)).join('');
+                    document.getElementById('team2').innerHTML = selectedTeam2.map(c => renderCharacter(c, false, 2)).join('');
                     
                     if (turnResult.isBattleOver) {
                         updateBattleLog('¡La batalla ha terminado!');
@@ -478,10 +607,109 @@
             }
         }
 
+        // Funciones del modal de edición
+        window.openEditModal = function(id) {
+            const character = characters.find(c => c.id === id);
+            if (character) {
+                editingCharacterId = id;
+                document.getElementById('editName').value = character.name;
+                document.getElementById('editMaxHealth').value = character.maxHealth;
+                document.getElementById('editAttack').value = character.attack;
+                document.getElementById('editDefense').value = character.defense;
+                document.getElementById('editModal').style.display = 'block';
+            }
+        }
+
+        window.closeEditModal = function() {
+            document.getElementById('editModal').style.display = 'none';
+            editingCharacterId = null;
+        }
+
+        // Eventos del modal
+        document.querySelector('.close').onclick = closeEditModal;
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target === modal) {
+                closeEditModal();
+            }
+        }
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!editingCharacterId) return;
+
+            const character = {
+                name: document.getElementById('editName').value,
+                maxHealth: parseInt(document.getElementById('editMaxHealth').value),
+                attack: parseInt(document.getElementById('editAttack').value),
+                defense: parseInt(document.getElementById('editDefense').value)
+            };
+
+            try {
+                const updatedCharacter = await api.updateCharacter(editingCharacterId, character);
+                if (updatedCharacter) {
+                    // Actualizar el personaje en el array local
+                    const index = characters.findIndex(c => c.id === editingCharacterId);
+                    if (index !== -1) {
+                        characters[index] = updatedCharacter;
+                    }
+                    
+                    // Actualizar la visualización
+                    await updateCharacterList();
+                    
+                    // Actualizar los equipos si el personaje está en alguno
+                    const team1Index = selectedTeam1.findIndex(c => c.id === editingCharacterId);
+                    if (team1Index !== -1) {
+                        selectedTeam1[team1Index] = updatedCharacter;
+                    }
+                    
+                    const team2Index = selectedTeam2.findIndex(c => c.id === editingCharacterId);
+                    if (team2Index !== -1) {
+                        selectedTeam2[team2Index] = updatedCharacter;
+                    }
+                    
+                    await updateTeams();
+                    closeEditModal();
+                    updateBattleLog(`Personaje ${updatedCharacter.name} actualizado`);
+                } else {
+                    alert('Error al actualizar el personaje');
+                }
+            } catch (error) {
+                console.error('Error al actualizar personaje:', error);
+                alert('Error al actualizar el personaje');
+            }
+        });
+
+        // Evento para resetear la batalla
+        document.getElementById('resetBattle').addEventListener('click', async () => {
+            try {
+                const result = await api.resetBattle();
+                if (result.status === 'success') {
+                    characters = await api.getCharacters();
+                    updateCharacterList();
+                    updateTeams();
+                    battleLog = [];
+                    updateBattleLog('Batalla reseteada');
+                    document.getElementById('processTurn').disabled = true;
+                    document.getElementById('actionButtons').style.display = 'none';
+                    selectedCharacter = null;
+                    selectedTarget = null;
+                    currentTeam = 1;
+                    updateBattleStatus('Estado: Esperando inicio de batalla');
+                } else {
+                    alert(result.message || 'Error al resetear la batalla');
+                }
+            } catch (error) {
+                console.error('Error al resetear la batalla:', error);
+                alert('Error al resetear la batalla');
+            }
+        });
+
         // Inicialización
         async function init() {
             characters = await api.getCharacters();
             updateCharacterList();
+            //loadPokemonTeams(); // Cargar equipos de Pokémon si existen
             updateBattleLog('Sistema de combate iniciado');
         }
 
