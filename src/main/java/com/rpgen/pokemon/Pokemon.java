@@ -3,6 +3,8 @@ package com.rpgen.pokemon;
 import com.rpgen.core.entity.Entity;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class Pokemon implements Entity {
     private final String id;
@@ -18,6 +20,7 @@ public class Pokemon implements Entity {
     private final String imageUrl;
     private int defenseBonus = 0;
     private List<Map<String, Object>> moves;
+    private List<Integer> selectedMoveIndices;
 
     public Pokemon(String id, String name, int maxHealth, int attack, int defense, 
                   List<String> types, int speed, int specialAttack, int specialDefense, String imageUrl, List<Map<String, Object>> moves) {
@@ -33,6 +36,7 @@ public class Pokemon implements Entity {
         this.specialDefense = specialDefense;
         this.imageUrl = imageUrl;
         this.moves = moves;
+        this.selectedMoveIndices = new ArrayList<>();
     }
 
     @Override
@@ -89,6 +93,14 @@ public class Pokemon implements Entity {
         return moves;
     }
 
+    public List<Integer> getSelectedMoveIndices() {
+        return selectedMoveIndices;
+    }
+
+    public void setSelectedMoveIndices(List<Integer> indices) {
+        this.selectedMoveIndices = indices;
+    }
+
     @Override
     public void takeDamage(int damage) {
         health = Math.max(0, health - damage);
@@ -122,5 +134,18 @@ public class Pokemon implements Entity {
 
     public void setHealth(int health) {
         this.health = health;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pokemon pokemon = (Pokemon) o;
+        return Objects.equals(id, pokemon.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 } 

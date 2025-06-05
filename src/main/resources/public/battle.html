@@ -289,8 +289,22 @@
             const savedTeams = localStorage.getItem('pokemonTeams');
             if (savedTeams) {
                 try {
-                    allTeams = JSON.parse(savedTeams);
-                    console.log('Equipos cargados:', allTeams); // Debug
+                    const teamsData = JSON.parse(savedTeams);
+                    console.log('Equipos cargados:', teamsData); // Debug
+                    
+                    // Convertir los hashes en datos de Pokémon
+                    allTeams = {};
+                    for (const [teamName, teamHashes] of Object.entries(teamsData)) {
+                        allTeams[teamName] = teamHashes.map(pokemonHash => {
+                            const savedData = localStorage.getItem(pokemonHash);
+                            if (savedData) {
+                                return JSON.parse(savedData);
+                            }
+                            return null;
+                        }).filter(pokemon => pokemon !== null);
+                    }
+                    
+                    console.log('Equipos procesados:', allTeams); // Debug
                     updateTeamSelectors();
                 } catch (error) {
                     console.error('Error al cargar equipos:', error);
@@ -343,6 +357,9 @@
                 return;
             }
 
+            console.log('Datos del equipo 1:', team1Data); // Debug
+            console.log('Datos del equipo 2:', team2Data); // Debug
+
             // Asegurarnos de que los datos estén completos
             selectedTeam1 = team1Data.map(pokemon => ({
                 ...pokemon,
@@ -353,7 +370,8 @@
                 speed: pokemon.speed,
                 specialAttack: pokemon.specialAttack,
                 specialDefense: pokemon.specialDefense,
-                moves: pokemon.moves || []
+                moves: pokemon.moves || [],
+                selectedMoveIndices: pokemon.selectedMoveIndices || [0, 1, 2, 3]
             }));
 
             selectedTeam2 = team2Data.map(pokemon => ({
@@ -365,15 +383,14 @@
                 speed: pokemon.speed,
                 specialAttack: pokemon.specialAttack,
                 specialDefense: pokemon.specialDefense,
-                moves: pokemon.moves || []
+                moves: pokemon.moves || [],
+                selectedMoveIndices: pokemon.selectedMoveIndices || [0, 1, 2, 3]
             }));
 
             // Seleccionar primer Pokémon de cada equipo
             activePokemon1 = selectedTeam1[0];
             activePokemon2 = selectedTeam2[0];
 
-            console.log('Equipo 1:', selectedTeam1); // Debug
-            console.log('Equipo 2:', selectedTeam2); // Debug
             console.log('Pokémon activo 1:', activePokemon1); // Debug
             console.log('Pokémon activo 2:', activePokemon2); // Debug
 
@@ -437,16 +454,26 @@
 
             if (!pokemon.moves || pokemon.moves.length === 0) {
                 console.error('No hay movimientos disponibles para', pokemon.name);
-                // Añadir movimientos por defecto si no hay ninguno
-                pokemon.moves = [
-                    { name: "Ataque Rápido", power: 40, type: "normal" },
-                    { name: "Placaje", power: 35, type: "normal" },
-                    { name: "Arañazo", power: 30, type: "normal" },
-                    { name: "Destructor", power: 45, type: "normal" }
-                ];
+                return;
             }
 
-            pokemon.moves.forEach(move => {
+            console.log('Actualizando movimientos para', pokemon.name); // Debug
+            console.log('Movimientos disponibles:', pokemon.moves); // Debug
+            console.log('Índices seleccionados:', pokemon.selectedMoveIndices); // Debug
+
+            // Obtener los movimientos seleccionados usando los índices
+            const selectedMoves = pokemon.selectedMoveIndices 
+                ? pokemon.selectedMoveIndices.map(index => pokemon.moves[index])
+                : pokemon.moves.slice(0, 4); // Si no hay índices seleccionados, usar los primeros 4
+
+            console.log('Movimientos seleccionados:', selectedMoves); // Debug
+
+            selectedMoves.forEach(move => {
+                if (!move) {
+                    console.warn('Movimiento nulo encontrado en', pokemon.name); // Debug
+                    return; // Saltar si el movimiento no existe
+                }
+                
                 const button = document.createElement('button');
                 button.className = 'move-button';
                 button.textContent = move.name;
@@ -660,4 +687,4 @@
         loadTeams();
     </script>
 </body>
-</html> 
+</html>
