@@ -127,6 +127,16 @@
             border-bottom: 1px solid #eee;
         }
 
+        .stat-item span:first-child {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-item span:last-child {
+            font-weight: 600;
+            color: #2196F3;
+        }
+
         .loading {
             text-align: center;
             padding: 20px;
@@ -209,19 +219,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: move;
             position: relative;
             transition: all 0.2s ease;
             user-select: none;
-        }
-
-        .team-slot.dragging {
-            z-index: 1001;
-        }
-
-        .team-slot.drag-over {
-            border-color: #4CAF50;
-            background-color: #e8f5e9;
         }
 
         .team-slot.filled {
@@ -778,8 +778,6 @@
                         slot.onclick = null;
                     }
                 });
-                
-                initializeDragAndDrop();
             } catch (error) {
                 console.error('Error al actualizar la visualización del equipo:', error);
             }
@@ -1291,64 +1289,6 @@
             document.getElementById('movesModal').classList.remove('active');
             selectedPokemonForMoves = null;
             selectedMoves.clear();
-        }
-
-        // Funciones para drag and drop
-        function initializeDragAndDrop() {
-            const teamSlots = document.querySelectorAll('.team-slot');
-            
-            teamSlots.forEach(slot => {
-                // Remover eventos anteriores
-                slot.removeEventListener('dragstart', handleDragStart);
-                slot.removeEventListener('dragend', handleDragEnd);
-                slot.removeEventListener('dragover', handleDragOver);
-                slot.removeEventListener('dragleave', handleDragLeave);
-                slot.removeEventListener('drop', handleDrop);
-
-                // Añadir nuevos eventos
-                slot.addEventListener('dragstart', handleDragStart);
-                slot.addEventListener('dragend', handleDragEnd);
-                slot.addEventListener('dragover', handleDragOver);
-                slot.addEventListener('dragleave', handleDragLeave);
-                slot.addEventListener('drop', handleDrop);
-            });
-        }
-
-        function handleDragStart(e) {
-            this.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', this.dataset.slot);
-            e.dataTransfer.effectAllowed = 'move';
-        }
-
-        function handleDragEnd() {
-            this.classList.remove('dragging');
-            this.classList.remove('drag-over');
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            this.classList.add('drag-over');
-        }
-
-        function handleDragLeave() {
-            this.classList.remove('drag-over');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            this.classList.remove('drag-over');
-            
-            const fromSlot = parseInt(e.dataTransfer.getData('text/plain'));
-            const toSlot = parseInt(this.dataset.slot);
-            
-            if (fromSlot !== toSlot) {
-                // Intercambiar Pokémon
-                const temp = teams[currentTeam][fromSlot];
-                teams[currentTeam][fromSlot] = teams[currentTeam][toSlot];
-                teams[currentTeam][toSlot] = temp;
-                updateTeamDisplay();
-            }
         }
     </script>
 </body>

@@ -363,28 +363,28 @@
             // Asegurarnos de que los datos estén completos
             selectedTeam1 = team1Data.map(pokemon => ({
                 ...pokemon,
-                health: pokemon.maxHealth, // Iniciar con salud máxima
-                maxHealth: pokemon.maxHealth,
-                attack: pokemon.attack,
-                defense: pokemon.defense,
-                speed: pokemon.speed,
-                specialAttack: pokemon.specialAttack,
-                specialDefense: pokemon.specialDefense,
-                moves: pokemon.moves || [],
-                selectedMoveIndices: pokemon.selectedMoveIndices || [0, 1, 2, 3]
+                    health: pokemon.maxHealth, // Iniciar con salud máxima
+                    maxHealth: pokemon.maxHealth,
+                    attack: pokemon.attack,
+                    defense: pokemon.defense,
+                    speed: pokemon.speed,
+                    specialAttack: pokemon.specialAttack,
+                    specialDefense: pokemon.specialDefense,
+                    moves: pokemon.moves || [],
+                    selectedMoveIndices: pokemon.selectedMoveIndices || [0, 1, 2, 3]
             }));
 
             selectedTeam2 = team2Data.map(pokemon => ({
                 ...pokemon,
-                health: pokemon.maxHealth, // Iniciar con salud máxima
-                maxHealth: pokemon.maxHealth,
-                attack: pokemon.attack,
-                defense: pokemon.defense,
-                speed: pokemon.speed,
-                specialAttack: pokemon.specialAttack,
-                specialDefense: pokemon.specialDefense,
-                moves: pokemon.moves || [],
-                selectedMoveIndices: pokemon.selectedMoveIndices || [0, 1, 2, 3]
+                    health: pokemon.maxHealth, // Iniciar con salud máxima
+                    maxHealth: pokemon.maxHealth,
+                    attack: pokemon.attack,
+                    defense: pokemon.defense,
+                    speed: pokemon.speed,
+                    specialAttack: pokemon.specialAttack,
+                    specialDefense: pokemon.specialDefense,
+                    moves: pokemon.moves || [],
+                    selectedMoveIndices: pokemon.selectedMoveIndices || [0, 1, 2, 3]
             }));
 
             // Seleccionar primer Pokémon de cada equipo
@@ -687,4 +687,4 @@
         loadTeams();
     </script>
 </body>
-</html>
+</html> 
