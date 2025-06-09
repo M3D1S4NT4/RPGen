@@ -180,6 +180,20 @@
             font-weight: bold;
         }
 
+        .reset-button {
+            background-color: #FF9800;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .reset-button:hover {
+            background-color: #F57C00;
+        }
+
         .pokemon-stats-tooltip {
             display: none;
             position: absolute;
@@ -224,6 +238,7 @@
                 <option value="">Selecciona Equipo 2</option>
             </select>
             <button class="start-battle" onclick="startBattle()">Iniciar Batalla</button>
+            <button id="resetBattle" class="reset-button">Resetear Batalla</button>
         </div>
 
         <div class="battle-arena">
@@ -685,6 +700,33 @@
 
         // Inicialización
         loadTeams();
+
+        // Función para resetear la batalla
+        document.getElementById('resetBattle').addEventListener('click', function() {
+            // Resetear la salud de todos los Pokémon a sus valores originales
+            if (selectedTeam1) {
+                selectedTeam1.forEach(pokemon => {
+                    pokemon.health = pokemon.maxHealth;
+                });
+            }
+            if (selectedTeam2) {
+                selectedTeam2.forEach(pokemon => {
+                    pokemon.health = pokemon.maxHealth;
+                });
+            }
+
+            // Resetear el estado de la batalla
+            selectedMove1 = null;
+            selectedMove2 = null;
+            turnInProgress = false;
+            lastAction1 = null;
+            lastAction2 = null;
+            battleLog = [];
+
+            // Actualizar la visualización
+            updateBattleDisplay();
+            updateBattleLog('Batalla reseteada');
+        });
     </script>
 </body>
 </html> 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokédex</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -491,14 +492,12 @@
         <div class="team-controls">
         <div class="team-selector">
             <select id="teamSelector" onchange="changeTeam()">
-                <option value="team1">Equipo 1</option>
-                <option value="team2">Equipo 2</option>
             </select>
-                <button onclick="createNewTeam()"><i class="fa-solid fa-square-plus"></i> Equipo</button>
-                <button class="delete" onclick="deleteCurrentTeam()"><i class="fa-solid fa-trash"></i> Equipo</button>
+                <button onclick="createNewTeam()" title="Crear equipo"><i class="fa-solid fa-square-plus"></i></button>
+                <button onclick="editTeamName()" title="Cambiar nombre"><i class="fa-solid fa-pen"></i></button>
+                <button class="delete" onclick="deleteCurrentTeam()" title="Eliminar equipo"><i class="fa-solid fa-trash"></i></button>
         </div>
             <button class="battle-button" onclick="startBattle()">Iniciar Batalla</button>
-            <button class="save-team" onclick="saveTeam()">Guardar Equipo</button>
             <button class="clear-team" onclick="clearTeam()">Limpiar Equipo</button>
         </div>
         <div class="team-grid" id="teamGrid">
@@ -519,15 +518,22 @@
         </button>
     </div>
 
+    <div id="teamNameModal" class="moves-modal">
+        <button class="close-button" onclick="closeTeamNameModal()">&times;</button>
+        <div style="padding: 20px;">
+            <h3 id="teamNameModalTitle">Nuevo Equipo</h3>
+            <input type="text" id="newTeamName" placeholder="Nombre del equipo" style="width: 100%; padding: 8px; margin: 10px 0;">
+            <button onclick="confirmNewTeam()" style="margin-top: 15px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Crear Equipo
+            </button>
+        </div>
+    </div>
+
     <script>
         let allPokemon = [];
         let searchTimeout;
-        let teams = {
-            team1: new Array(6).fill(null),
-            team2: new Array(6).fill(null)
-        };
-        let currentTeam = 'team1';
-        let teamCounter = 2;
+        let teams = {};
+        let currentTeam = null;
         let selectedPokemonForMoves = null;
         let selectedMoves = new Set();
         const typeTranslations = {
@@ -576,19 +582,21 @@
                 `<span class="type-badge type-${type.toLowerCase()}">${translateType(type)}</span>`
             ).join('');
 
-            const isSelected = teams[currentTeam].includes(pokemon.id);
+            const isSelected = currentTeam && teams[currentTeam] ? teams[currentTeam].includes(pokemon.id) : false;
             const selectedClass = isSelected ? 'selected' : '';
 
             // Buscar si el Pokémon está en algún equipo para mostrar sus movimientos específicos
             let teamPokemonData = null;
-            for (const [teamName, team] of Object.entries(teams)) {
-                const index = team.indexOf(pokemon.id);
-                if (index !== -1) {
-                    const pokemonHash = generatePokemonTeamHash(pokemon.id, teamName, index);
-                    const savedData = localStorage.getItem(pokemonHash);
-                    if (savedData) {
-                        teamPokemonData = JSON.parse(savedData);
-                        break;
+            if (currentTeam && teams[currentTeam]) {
+                for (const [teamName, team] of Object.entries(teams)) {
+                    const index = team.indexOf(pokemon.id);
+                    if (index !== -1) {
+                        const pokemonHash = generatePokemonTeamHash(pokemon.id, teamName, index);
+                        const savedData = localStorage.getItem(pokemonHash);
+                        if (savedData) {
+                            teamPokemonData = JSON.parse(savedData);
+                            break;
+                        }
                     }
                 }
             }
@@ -653,6 +661,11 @@
 
         // Función para seleccionar un Pokémon
         function selectPokemon(id) {
+            if (!currentTeam) {
+                alert('Primero debes crear o seleccionar un equipo');
+                return;
+            }
+
             const pokemon = allPokemon.find(p => p.id === id);
             if (!pokemon) return;
 
@@ -736,6 +749,7 @@
             teams[currentTeam][slot] = id;
             updateTeamDisplay();
             updatePokemonGrid();
+            saveTeam(); // Guardar automáticamente
         }
 
         // Función para remover un Pokémon del equipo
@@ -743,6 +757,7 @@
             teams[currentTeam][slot] = null;
             updateTeamDisplay();
             updatePokemonGrid();
+            saveTeam(); // Guardar automáticamente
         }
 
         // Función para actualizar la visualización del equipo
@@ -823,7 +838,6 @@
                 // Verificar que se guardó correctamente
                 const savedTeams = localStorage.getItem('pokemonTeams');
                 if (savedTeams === teamsJson) {
-                    alert('Equipos guardados correctamente');
                 } else {
                     throw new Error('Error al verificar el guardado');
                 }
@@ -839,6 +853,7 @@
                 teams[currentTeam] = new Array(6).fill(null);
                 updateTeamDisplay();
                 updatePokemonGrid();
+                saveTeam(); // Guardar automáticamente
             }
         }
 
@@ -850,14 +865,12 @@
                     const loadedTeams = JSON.parse(savedTeams);
                     
                     for (const [teamName, teamHashes] of Object.entries(loadedTeams)) {
-                        if (!teams[teamName]) {
-                            teams[teamName] = new Array(6).fill(null);
-                            const selector = document.getElementById('teamSelector');
-                            const option = document.createElement('option');
-                            option.value = teamName;
-                            option.textContent = teamName.charAt(0).toUpperCase() + teamName.slice(1);
-                            selector.appendChild(option);
-                        }
+                        teams[teamName] = new Array(6).fill(null);
+                        const selector = document.getElementById('teamSelector');
+                        const option = document.createElement('option');
+                        option.value = teamName;
+                        option.textContent = teamName;
+                        selector.appendChild(option);
                         
                         teamHashes.forEach((pokemonHash, index) => {
                             if (index < 6) {
@@ -867,6 +880,13 @@
                             }
                         });
                     }
+                    
+                    // Si hay equipos cargados, seleccionar el primero
+                    if (Object.keys(teams).length > 0) {
+                        currentTeam = Object.keys(teams)[0];
+                        document.getElementById('teamSelector').value = currentTeam;
+                    }
+                    
                     updateTeamDisplay();
                     updatePokemonGrid();
                 }
@@ -971,32 +991,126 @@
 
         // Función para cambiar de equipo
         function changeTeam() {
-            currentTeam = document.getElementById('teamSelector').value;
-            updateTeamDisplay();
-            updatePokemonGrid();
+            const newTeam = document.getElementById('teamSelector').value;
+            if (newTeam) {
+                currentTeam = newTeam;
+                updateTeamDisplay();
+                updatePokemonGrid();
+            }
         }
 
         // Función para crear un nuevo equipo
         function createNewTeam() {
-            const teamName = `team${++teamCounter}`;
-            teams[teamName] = new Array(6).fill(null);
+            document.getElementById('teamNameModalTitle').textContent = 'Nuevo Equipo';
+            document.getElementById('teamNameModal').classList.add('active');
+            document.getElementById('newTeamName').value = '';
+            document.getElementById('newTeamName').focus();
+            saveTeam();
+        }
+
+        function editTeamName() {
+            const currentName = document.getElementById('teamSelector').value;
+            document.getElementById('teamNameModalTitle').textContent = 'Editar Nombre del Equipo';
+            document.getElementById('teamNameModal').classList.add('active');
+            document.getElementById('newTeamName').value = currentName;
+            document.getElementById('newTeamName').focus();
+            saveTeam();
+        }
+
+        function closeTeamNameModal() {
+            document.getElementById('teamNameModal').classList.remove('active');
+        }
+
+        function confirmNewTeam() {
+            const teamName = document.getElementById('newTeamName').value.trim();
+            const isEditing = document.getElementById('teamNameModalTitle').textContent === 'Editar Nombre del Equipo';
+            const oldTeamName = document.getElementById('teamSelector').value;
             
-            const selector = document.getElementById('teamSelector');
-            const option = document.createElement('option');
-            option.value = teamName;
-            option.textContent = `Equipo ${teamCounter}`;
-            selector.appendChild(option);
-            selector.value = teamName;
-            
-            currentTeam = teamName;
+            if (!teamName) {
+                alert('Por favor, ingresa un nombre para el equipo');
+                return;
+            }
+
+            // Si estamos editando y el nombre no cambió, solo cerramos el modal
+            if (isEditing && teamName === oldTeamName) {
+                closeTeamNameModal();
+                return;
+            }
+
+            // Verificar si el nombre ya existe (excepto si estamos editando el mismo equipo)
+            if (teams[teamName] && (!isEditing || teamName !== oldTeamName)) {
+                alert('Ya existe un equipo con ese nombre');
+                return;
+            }
+
+            if (isEditing) {
+                // Si estamos editando, necesitamos mover los datos del equipo
+                teams[teamName] = teams[oldTeamName];
+                
+                // Actualizar las referencias en localStorage para cada Pokémon del equipo
+                teams[oldTeamName].forEach((pokemonId, index) => {
+                    if (pokemonId) {
+                        const oldHash = generatePokemonTeamHash(pokemonId, oldTeamName, index);
+                        const newHash = generatePokemonTeamHash(pokemonId, teamName, index);
+                        const pokemonData = localStorage.getItem(oldHash);
+                        if (pokemonData) {
+                            localStorage.setItem(newHash, pokemonData);
+                            localStorage.removeItem(oldHash);
+                        }
+                    }
+                });
+
+                delete teams[oldTeamName];
+
+                // Actualizar el selector
+                const selector = document.getElementById('teamSelector');
+                const option = selector.options[selector.selectedIndex];
+                option.value = teamName;
+                option.textContent = teamName;
+                
+                currentTeam = teamName;
+            } else {
+                // Crear un nuevo equipo
+                teams[teamName] = new Array(6).fill(null);
+                
+                const selector = document.getElementById('teamSelector');
+                const option = document.createElement('option');
+                option.value = teamName;
+                option.textContent = teamName;
+                selector.appendChild(option);
+                selector.value = teamName;
+                
+                currentTeam = teamName;
+            }
+
+            closeTeamNameModal();
             updateTeamDisplay();
             updatePokemonGrid();
+
+            // Guardar inmediatamente el equipo en localStorage
+            const allTeams = {};
+            for (const [teamName, team] of Object.entries(teams)) {
+                const teamData = team.filter(id => id !== null).map((id, index) => {
+                    const pokemonData = getTeamPokemonData(id, teamName, index);
+                    if (!pokemonData) return null;
+                    return generatePokemonTeamHash(id, teamName, index);
+                }).filter(p => p !== null);
+
+                if (teamData.length > 0) {
+                    allTeams[teamName] = teamData;
+                } else {
+                    // Incluir equipos vacíos
+                    allTeams[teamName] = [];
+                }
+            }
+
+            localStorage.setItem('pokemonTeams', JSON.stringify(allTeams));
         }
 
         // Función para eliminar el equipo actual
         function deleteCurrentTeam() {
-            if (Object.keys(teams).length <= 2) {
-                alert('Debe haber al menos dos equipos');
+            if (Object.keys(teams).length <= 1) {
+                alert('Debe haber al menos un equipo');
                 return;
             }
 
@@ -1005,22 +1119,35 @@
                 const option = selector.options[selector.selectedIndex];
                 selector.removeChild(option);
                 delete teams[currentTeam];
-                currentTeam = 'team1';
-                selector.value = currentTeam;
+                
+                // Seleccionar otro equipo disponible
+                const remainingTeams = Object.keys(teams);
+                if (remainingTeams.length > 0) {
+                    currentTeam = remainingTeams[0];
+                    selector.value = currentTeam;
+                } else {
+                    currentTeam = null;
+                }
+                
                 updateTeamDisplay();
                 updatePokemonGrid();
+                saveTeam();
             }
         }
 
         // Función para iniciar la batalla
         function startBattle() {
-            const team1 = teams.team1.filter(id => id !== null);
-            const team2 = teams.team2.filter(id => id !== null);
+            const validTeams = Object.entries(teams).filter(([_, team]) => 
+                team.some(id => id !== null)
+            );
 
-            if (team1.length === 0 || team2.length === 0) {
-                alert('Ambos equipos deben tener al menos un Pokémon');
+            if (validTeams.length < 2) {
+                alert('Necesitas al menos dos equipos con Pokémon para iniciar una batalla');
                 return;
             }
+
+            const team1 = validTeams[0][1].filter(id => id !== null);
+            const team2 = validTeams[1][1].filter(id => id !== null);
 
             // Preparar datos de los equipos
             const battleTeams = {
@@ -1283,6 +1410,7 @@
             closeMovesModal();
             updateTeamDisplay();
             updatePokemonGrid();
+            saveTeam(); // Guardar automáticamente
         }
 
         function closeMovesModal() {
