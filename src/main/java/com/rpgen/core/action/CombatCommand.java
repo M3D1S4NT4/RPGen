@@ -3,9 +3,10 @@ package com.rpgen.core.action;
 import com.rpgen.core.entity.Entity;
 
 public interface CombatCommand {
-    void execute();
     Entity getSource();
     Entity getTarget();
-    String getActionType();
+    String getActionName();
+    GameAction getAction();
+    void execute();
     boolean canExecute();
 } 

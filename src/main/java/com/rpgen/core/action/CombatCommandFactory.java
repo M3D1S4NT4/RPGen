@@ -1,27 +1,26 @@
 package com.rpgen.core.action;
 
 import com.rpgen.core.entity.Entity;
-import java.util.UUID;
 
 public class CombatCommandFactory {
-    public static CombatCommand createCommand(Entity source, Entity target, String actionType) {
-        String actionId = UUID.randomUUID().toString();
-        GameAction gameAction;
+    public static CombatCommand createCommand(Entity source, Entity target, String actionName) {
+        return new AbstractCombatCommand(source, target, actionName) {
+            @Override
+            public void execute() {
+                if (!canExecute()) return;
+                int damage = Math.max(1, source.getAttack() - target.getDefense());
+                target.takeDamage(damage);
+            }
+        };
+    }
 
-        switch (actionType.toLowerCase()) {
-            case "basic":
-                gameAction = PredefinedActions.createBasicAttack(actionId);
-                break;
-            case "strong":
-                gameAction = PredefinedActions.createStrongAttack(actionId);
-                break;
-            case "shield":
-                gameAction = PredefinedActions.createShield(actionId);
-                break;
-            default:
-                throw new IllegalArgumentException("Tipo de acción no válido: " + actionType);
-        }
-
-        return new AbstractCombatCommand(source, target, actionType, gameAction) {};
+    public static CombatCommand createCommand(Entity source, Entity target, String actionName, GameAction action) {
+        return new AbstractCombatCommand(source, target, actionName, action) {
+            @Override
+            public void execute() {
+                if (!canExecute() || action == null) return;
+                action.execute(source, target);
+            }
+        };
     }
 } 

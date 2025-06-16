@@ -5,21 +5,21 @@ import com.rpgen.core.entity.Entity;
 public abstract class AbstractCombatCommand implements CombatCommand {
     protected final Entity source;
     protected final Entity target;
-    protected final String actionType;
-    protected final GameAction gameAction;
+    protected final String actionName;
+    protected final GameAction action;
 
-    protected AbstractCombatCommand(Entity source, Entity target, String actionType, GameAction gameAction) {
+    public AbstractCombatCommand(Entity source, Entity target, String actionName) {
         this.source = source;
         this.target = target;
-        this.actionType = actionType;
-        this.gameAction = gameAction;
+        this.actionName = actionName;
+        this.action = null;
     }
 
-    @Override
-    public void execute() {
-        if (canExecute()) {
-            gameAction.execute(source, target);
-        }
+    public AbstractCombatCommand(Entity source, Entity target, String actionName, GameAction action) {
+        this.source = source;
+        this.target = target;
+        this.actionName = actionName;
+        this.action = action;
     }
 
     @Override
@@ -33,14 +33,20 @@ public abstract class AbstractCombatCommand implements CombatCommand {
     }
 
     @Override
-    public String getActionType() {
-        return actionType;
+    public String getActionName() {
+        return actionName;
+    }
+
+    @Override
+    public GameAction getAction() {
+        return action;
     }
 
     @Override
     public boolean canExecute() {
-        return source != null && target != null && 
-               source.isAlive() && target.isAlive() &&
-               gameAction.canExecute(source, target);
+        return source != null && target != null && source.isAlive() && target.isAlive();
     }
+
+    @Override
+    public abstract void execute();
 } 
