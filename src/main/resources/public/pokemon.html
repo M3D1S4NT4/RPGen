@@ -601,7 +601,16 @@
                 }
             }
 
-            const displayData = teamPokemonData || pokemon;
+            const displayData = teamPokemonData || {
+                ...pokemon,
+                health: pokemon.health || pokemon.maxHealth,
+                maxHealth: pokemon.maxHealth,
+                attack: pokemon.attack || pokemon.baseAttack,
+                defense: pokemon.defense || pokemon.baseDefense,
+                speed: pokemon.speed || pokemon.baseSpeed,
+                specialAttack: pokemon.specialAttack || pokemon.baseSpecialAttack,
+                specialDefense: pokemon.specialDefense || pokemon.baseSpecialDefense
+            };
 
             return `
                 <div class="pokemon-card ${selectedClass}" onclick="selectPokemon('${pokemon.id}')">
@@ -613,27 +622,27 @@
                         <div class="stats-grid">
                             <div class="stat-item">
                                 <span>HP:</span>
-                                <span>${displayData.health}/${displayData.maxHealth}</span>
+                                <span>${displayData.health || displayData.maxHealth}/${displayData.maxHealth}</span>
                             </div>
                             <div class="stat-item">
                                 <span>Ataque:</span>
-                                <span>${displayData.attack}</span>
+                                <span>${displayData.attack || displayData.baseAttack}</span>
                             </div>
                             <div class="stat-item">
                                 <span>Defensa:</span>
-                                <span>${displayData.defense}</span>
+                                <span>${displayData.defense || displayData.baseDefense}</span>
                             </div>
                             <div class="stat-item">
                                 <span>Ataque Especial:</span>
-                                <span>${displayData.specialAttack}</span>
+                                <span>${displayData.specialAttack || displayData.baseSpecialAttack}</span>
                             </div>
                             <div class="stat-item">
                                 <span>Defensa Especial:</span>
-                                <span>${displayData.specialDefense}</span>
+                                <span>${displayData.specialDefense || displayData.baseSpecialDefense}</span>
                             </div>
                             <div class="stat-item">
                                 <span>Velocidad:</span>
-                                <span>${displayData.speed}</span>
+                                <span>${displayData.speed || displayData.baseSpeed}</span>
                             </div>
                         </div>
                         <div class="moves-section">
@@ -720,18 +729,18 @@
             // Crear un hash único para este Pokémon en este equipo
             const pokemonHash = generatePokemonTeamHash(id, currentTeam, slot);
             
-            // Crear una copia profunda de los datos del Pokémon
+            // Crear una copia profunda de los datos del Pokémon con las estadísticas correctamente inicializadas
             const pokemonData = {
                 id: pokemon.id,
                 name: pokemon.name,
                 types: [...pokemon.types],
                 health: pokemon.maxHealth,
                 maxHealth: pokemon.maxHealth,
-                attack: pokemon.attack,
-                defense: pokemon.defense,
-                speed: pokemon.speed,
-                specialAttack: pokemon.specialAttack,
-                specialDefense: pokemon.specialDefense,
+                attack: pokemon.attack || pokemon.baseAttack,
+                defense: pokemon.defense || pokemon.baseDefense,
+                speed: pokemon.speed || pokemon.baseSpeed,
+                specialAttack: pokemon.specialAttack || pokemon.baseSpecialAttack,
+                specialDefense: pokemon.specialDefense || pokemon.baseSpecialDefense,
                 imageUrl: pokemon.imageUrl,
                 moves: pokemon.moves.map(move => ({
                     name: move.name,
@@ -752,12 +761,51 @@
             saveTeam(); // Guardar automáticamente
         }
 
-        // Función para remover un Pokémon del equipo
-        function removeFromTeam(slot) {
-            teams[currentTeam][slot] = null;
-            updateTeamDisplay();
-            updatePokemonGrid();
-            saveTeam(); // Guardar automáticamente
+        function renderTeamSlot(pokemonId, index) {
+            const slot = document.getElementById(`teamSlot${index}`);
+            if (!slot) {
+                console.warn(`Slot teamSlot${index} no encontrado.`);
+                return;
+            }
+        }
+
+        // Función para eliminar un Pokémon del equipo
+        function removeFromTeam(index) {
+            const team = teams[currentTeam];
+            if (team && team[index]) {
+                // Eliminar los datos del Pokémon en el índice especificado
+                const oldHash = generatePokemonTeamHash(team[index], currentTeam, index);
+                localStorage.removeItem(oldHash);
+                
+                // Desplazar los Pokémon posteriores hacia atrás
+                for (let i = index; i < team.length - 1; i++) {
+                    if (team[i + 1]) {
+                        // Guardar temporalmente los datos del Pokémon que se va a mover
+                        const oldHash = generatePokemonTeamHash(team[i + 1], currentTeam, i + 1);
+                        const pokemonData = localStorage.getItem(oldHash);
+                        
+                        // Eliminar los datos antiguos
+                        localStorage.removeItem(oldHash);
+                        
+                        // Mover el Pokémon
+                        team[i] = team[i + 1];
+                        
+                        // Guardar los datos en la nueva posición
+                        if (pokemonData) {
+                            const newHash = generatePokemonTeamHash(team[i], currentTeam, i);
+                            localStorage.setItem(newHash, pokemonData);
+                        }
+                    } else {
+                        team[i] = null;
+                    }
+                }
+                
+                // Añadir un null al final para mantener el tamaño del equipo
+                team[team.length - 1] = null;
+                
+                updateTeamDisplay();
+                saveTeam(); // Guardar automáticamente
+            }
         }
 
         // Función para actualizar la visualización del equipo

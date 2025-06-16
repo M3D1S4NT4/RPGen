@@ -1,7 +1,7 @@
 package com.rpgen.core.action;
 
 import com.rpgen.core.entity.Entity;
-import com.rpgen.core.entity.Pokemon;
+import com.rpgen.pokemon.Pokemon;
 import java.util.Random;
 
 public class StatusMove extends PokemonMove {
