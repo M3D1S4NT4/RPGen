@@ -434,11 +434,20 @@ public class PokemonBattleServer {
                         continue;
                     }
 
-                    // Verificar si el Pokémon objetivo sigue vivo
+                    // Verificar si el Pokémon objetivo sigue vivo y obtener el Pokémon activo actual
                     Map<String, Object> targetInTeam = findPokemonInTeams(target);
                     if (targetInTeam == null) {
                         System.err.println("Error: No se encontró el Pokémon objetivo en los equipos");
                         continue;
+                    }
+
+                    // Obtener el equipo del objetivo
+                    boolean isTeam1Target = team1.stream().anyMatch(p -> p.get("id").equals(target.get("id")));
+                    Map<String, Object> currentActiveTarget = isTeam1Target ? team1ActivePokemon : team2ActivePokemon;
+
+                    // Si el objetivo ha sido cambiado, usar el nuevo Pokémon activo
+                    if (!currentActiveTarget.get("id").equals(targetInTeam.get("id"))) {
+                        targetInTeam = currentActiveTarget;
                     }
 
                     int targetHealth = ((Number) targetInTeam.getOrDefault("health", 0)).intValue();

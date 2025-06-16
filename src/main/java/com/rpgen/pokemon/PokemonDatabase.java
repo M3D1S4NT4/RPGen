@@ -19,11 +19,12 @@ public class PokemonDatabase {
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private static final HttpClient httpClient = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(10))
+        .version(HttpClient.Version.HTTP_1_1)
         .build();
     private static final Gson gson = new Gson();
-    private static final int TOTAL_POKEMON = 1302; // Primera generación
-    private static final Semaphore requestSemaphore = new Semaphore(20); // Aumentado a 20 peticiones simultáneas
-    private static final ExecutorService pokemonExecutor = Executors.newFixedThreadPool(10); // Pool para procesar Pokémon
+    private static final int TOTAL_POKEMON = 1302;
+    private static final Semaphore requestSemaphore = new Semaphore(10); // Aumentado a 20 peticiones simultáneas
+    private static final ExecutorService pokemonExecutor = Executors.newFixedThreadPool(2); // Pool para procesar Pokémon
 
     public static void initialize() {
         // Cargar el primer lote
@@ -34,7 +35,7 @@ public class PokemonDatabase {
             if (hasMore) {
                 loadNextBatch();
             }
-        }, 0, 100, TimeUnit.MILLISECONDS); // Reducido el intervalo entre lotes
+        }, 0, 500, TimeUnit.MILLISECONDS); // Aumentado a 500ms entre lotes
     }
 
     public static void loadNextBatch() {
@@ -104,163 +105,169 @@ public class PokemonDatabase {
     }
 
     private static Pokemon loadPokemonDetails(String url) {
-        try {
-            requestSemaphore.acquire();
+        int maxRetries = 3;
+        int retryCount = 0;
+        
+        while (retryCount < maxRetries) {
             try {
-                HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .GET()
-                    .build();
-
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                JsonObject pokemonData = gson.fromJson(response.body(), JsonObject.class);
-
-                String id = pokemonData.get("id").getAsString();
-                if (loadedPokemonIds.contains(id)) {
-                    return null;
-                }
-
-                String name = pokemonData.get("name").getAsString();
-                
-                // Cargar estadísticas base
-                JsonArray statsArray = pokemonData.getAsJsonArray("stats");
-                int maxHealth = statsArray.get(0).getAsJsonObject().get("base_stat").getAsInt() * 2;
-                int attack = statsArray.get(1).getAsJsonObject().get("base_stat").getAsInt();
-                int defense = statsArray.get(2).getAsJsonObject().get("base_stat").getAsInt();
-                int specialAttack = statsArray.get(3).getAsJsonObject().get("base_stat").getAsInt();
-                int specialDefense = statsArray.get(4).getAsJsonObject().get("base_stat").getAsInt();
-                int speed = statsArray.get(5).getAsJsonObject().get("base_stat").getAsInt();
-
-                // Cargar tipos
-                List<String> types = new ArrayList<>();
-                JsonArray typesArray = pokemonData.getAsJsonArray("types");
-                for (JsonElement typeElement : typesArray) {
-                    String type = typeElement.getAsJsonObject()
-                        .getAsJsonObject("type")
-                        .get("name").getAsString();
-                    types.add(type);
-                }
-
-                // Cargar imagen
-                String imageUrl = pokemonData.getAsJsonObject("sprites")
-                    .getAsJsonObject("other")
-                    .getAsJsonObject("official-artwork")
-                    .get("front_default").getAsString();
-
-                // Cargar movimientos (todos los disponibles)
-                List<Map<String, Object>> moves = new ArrayList<>();
-                JsonArray movesArray = pokemonData.getAsJsonArray("moves");
-                Set<String> addedMoveNames = new HashSet<>();
-                
-                // Procesar todos los movimientos
-                ExecutorService moveExecutor = Executors.newFixedThreadPool(5);
-                
+                requestSemaphore.acquire();
                 try {
-                    List<CompletableFuture<Map<String, Object>>> moveFutures = new ArrayList<>();
+                    HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .GET()
+                        .build();
+
+                    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                    JsonObject pokemonData = gson.fromJson(response.body(), JsonObject.class);
+
+                    String id = pokemonData.get("id").getAsString();
+                    if (loadedPokemonIds.contains(id)) {
+                        return null;
+                    }
+
+                    String name = pokemonData.get("name").getAsString();
                     
-                    for (JsonElement moveElement : movesArray) {
-                        JsonObject moveData = moveElement.getAsJsonObject();
-                        JsonObject moveInfo = moveData.getAsJsonObject("move");
-                        String moveUrl = moveInfo.get("url").getAsString();
+                    // Cargar estadísticas base
+                    JsonArray statsArray = pokemonData.getAsJsonArray("stats");
+                    int maxHealth = statsArray.get(0).getAsJsonObject().get("base_stat").getAsInt() * 2;
+                    int attack = statsArray.get(1).getAsJsonObject().get("base_stat").getAsInt();
+                    int defense = statsArray.get(2).getAsJsonObject().get("base_stat").getAsInt();
+                    int specialAttack = statsArray.get(3).getAsJsonObject().get("base_stat").getAsInt();
+                    int specialDefense = statsArray.get(4).getAsJsonObject().get("base_stat").getAsInt();
+                    int speed = statsArray.get(5).getAsJsonObject().get("base_stat").getAsInt();
+
+                    // Cargar tipos
+                    List<String> types = new ArrayList<>();
+                    JsonArray typesArray = pokemonData.getAsJsonArray("types");
+                    for (JsonElement typeElement : typesArray) {
+                        String type = typeElement.getAsJsonObject()
+                            .getAsJsonObject("type")
+                            .get("name").getAsString();
+                        types.add(type);
+                    }
+
+                    // Cargar imagen
+                    String imageUrl = pokemonData.getAsJsonObject("sprites")
+                        .getAsJsonObject("other")
+                        .getAsJsonObject("official-artwork")
+                        .get("front_default").getAsString();
+
+                    // Cargar movimientos (todos los disponibles)
+                    List<Map<String, Object>> moves = new ArrayList<>();
+                    JsonArray movesArray = pokemonData.getAsJsonArray("moves");
+                    Set<String> addedMoveNames = new HashSet<>();
+                    
+                    // Procesar todos los movimientos
+                    ExecutorService moveExecutor = Executors.newFixedThreadPool(5);
+                    
+                    try {
+                        List<CompletableFuture<Map<String, Object>>> moveFutures = new ArrayList<>();
                         
-                        CompletableFuture<Map<String, Object>> moveFuture = CompletableFuture.supplyAsync(() -> {
-                            try {
-                                requestSemaphore.acquire();
+                        for (JsonElement moveElement : movesArray) {
+                            JsonObject moveData = moveElement.getAsJsonObject();
+                            JsonObject moveInfo = moveData.getAsJsonObject("move");
+                            String moveUrl = moveInfo.get("url").getAsString();
+                            
+                            CompletableFuture<Map<String, Object>> moveFuture = CompletableFuture.supplyAsync(() -> {
                                 try {
-                                    HttpRequest moveRequest = HttpRequest.newBuilder()
-                                        .uri(URI.create(moveUrl))
-                                        .GET()
-                                        .build();
-                                    
-                                    HttpResponse<String> moveResponse = httpClient.send(moveRequest, HttpResponse.BodyHandlers.ofString());
-                                    JsonObject moveDetails = gson.fromJson(moveResponse.body(), JsonObject.class);
-                                    
-                                    String moveName = moveDetails.get("name").getAsString();
-                                    if (!addedMoveNames.contains(moveName)) {
-                                        Map<String, Object> move = new HashMap<>();
-                                        move.put("name", moveName);
+                                    requestSemaphore.acquire();
+                                    try {
+                                        HttpRequest moveRequest = HttpRequest.newBuilder()
+                                            .uri(URI.create(moveUrl))
+                                            .GET()
+                                            .build();
                                         
-                                        JsonElement powerElement = moveDetails.get("power");
-                                        int power = powerElement.isJsonNull() ? 0 : powerElement.getAsInt();
-                                        move.put("power", power);
+                                        HttpResponse<String> moveResponse = httpClient.send(moveRequest, HttpResponse.BodyHandlers.ofString());
+                                        JsonObject moveDetails = gson.fromJson(moveResponse.body(), JsonObject.class);
                                         
-                                        String moveType = moveDetails.getAsJsonObject("type").get("name").getAsString();
-                                        move.put("type", moveType);
-                                        
-                                        String category = moveDetails.getAsJsonObject("damage_class").get("name").getAsString();
-                                        move.put("category", category);
-                                        
-                                        addedMoveNames.add(moveName);
-                                        return move;
+                                        String moveName = moveDetails.get("name").getAsString();
+                                        if (!addedMoveNames.contains(moveName)) {
+                                            Map<String, Object> move = new HashMap<>();
+                                            move.put("name", moveName);
+                                            
+                                            JsonElement powerElement = moveDetails.get("power");
+                                            int power = powerElement.isJsonNull() ? 0 : powerElement.getAsInt();
+                                            move.put("power", power);
+                                            
+                                            String moveType = moveDetails.getAsJsonObject("type").get("name").getAsString();
+                                            move.put("type", moveType);
+                                            
+                                            String category = moveDetails.getAsJsonObject("damage_class").get("name").getAsString();
+                                            move.put("category", category);
+                                            
+                                            addedMoveNames.add(moveName);
+                                            return move;
+                                        }
+                                    } finally {
+                                        requestSemaphore.release();
                                     }
-                                } finally {
-                                    requestSemaphore.release();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        }, moveExecutor);
-                        
-                        moveFutures.add(moveFuture);
-                    }
-
-                    // Esperar a que todos los movimientos se carguen
-                    CompletableFuture.allOf(moveFutures.toArray(new CompletableFuture[0])).join();
-                    
-                    // Recopilar los resultados
-                    for (CompletableFuture<Map<String, Object>> future : moveFutures) {
-                        Map<String, Object> move = future.get();
-                        if (move != null) {
-                            moves.add(move);
+                                return null;
+                            }, moveExecutor);
+                            
+                            moveFutures.add(moveFuture);
                         }
+
+                        // Esperar a que todos los movimientos se carguen
+                        CompletableFuture.allOf(moveFutures.toArray(new CompletableFuture[0])).join();
+                        
+                        // Recopilar los resultados
+                        for (CompletableFuture<Map<String, Object>> future : moveFutures) {
+                            Map<String, Object> move = future.get();
+                            if (move != null) {
+                                moves.add(move);
+                            }
+                        }
+                    } finally {
+                        moveExecutor.shutdown();
                     }
+
+                    // Ordenar movimientos por poder
+                    moves.sort((a, b) -> Integer.compare(
+                        (int) b.get("power"),
+                        (int) a.get("power")
+                    ));
+
+                    // Si no hay movimientos, añadir movimientos por defecto
+                    if (moves.isEmpty()) {
+                        moves.add(createDefaultMove("Ataque Rápido", 40, "normal"));
+                        moves.add(createDefaultMove("Placaje", 35, "normal"));
+                        moves.add(createDefaultMove("Arañazo", 30, "normal"));
+                        moves.add(createDefaultMove("Destructor", 45, "normal"));
+                    }
+
+                    Pokemon pokemon = new Pokemon(
+                        id,
+                        name,
+                        maxHealth,
+                        attack,
+                        defense,
+                        types,
+                        speed,
+                        specialAttack,
+                        specialDefense,
+                        imageUrl,
+                        moves
+                    );
+
+                    List<Integer> defaultIndices = new ArrayList<>();
+                    for (int i = 0; i < Math.min(4, moves.size()); i++) {
+                        defaultIndices.add(i);
+                    }
+                    pokemon.setSelectedMoveIndices(defaultIndices);
+
+                    return pokemon;
                 } finally {
-                    moveExecutor.shutdown();
+                    requestSemaphore.release();
                 }
-
-                // Ordenar movimientos por poder
-                moves.sort((a, b) -> Integer.compare(
-                    (int) b.get("power"),
-                    (int) a.get("power")
-                ));
-
-                // Si no hay movimientos, añadir movimientos por defecto
-                if (moves.isEmpty()) {
-                    moves.add(createDefaultMove("Ataque Rápido", 40, "normal"));
-                    moves.add(createDefaultMove("Placaje", 35, "normal"));
-                    moves.add(createDefaultMove("Arañazo", 30, "normal"));
-                    moves.add(createDefaultMove("Destructor", 45, "normal"));
-                }
-
-                Pokemon pokemon = new Pokemon(
-                    id,
-                    name,
-                    maxHealth,
-                    attack,
-                    defense,
-                    types,
-                    speed,
-                    specialAttack,
-                    specialDefense,
-                    imageUrl,
-                    moves
-                );
-
-                List<Integer> defaultIndices = new ArrayList<>();
-                for (int i = 0; i < Math.min(4, moves.size()); i++) {
-                    defaultIndices.add(i);
-                }
-                pokemon.setSelectedMoveIndices(defaultIndices);
-
-                return pokemon;
-            } finally {
-                requestSemaphore.release();
+            } catch (Exception e) {
+                e.printStackTrace();
+                retryCount++;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     private static Map<String, Object> createDefaultMove(String name, int power, String type) {
