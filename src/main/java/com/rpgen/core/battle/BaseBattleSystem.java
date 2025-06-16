@@ -7,8 +7,8 @@ import com.rpgen.core.action.AbstractCombatCommand;
 import java.util.*;
 
 public class BaseBattleSystem implements BattleSystem {
-    private List<Entity> team1;
-    private List<Entity> team2;
+    protected List<Entity> team1;
+    protected List<Entity> team2;
     private List<CombatCommand> pendingCommands;
     private List<BattleListener> listeners;
     private boolean battleOver;
@@ -29,8 +29,13 @@ public class BaseBattleSystem implements BattleSystem {
 
     @Override
     public void addAction(Entity source, Entity target, GameAction action) {
-        // Este método se mantiene por compatibilidad
-        pendingCommands.add(new AbstractCombatCommand(source, target, action.getName(), action) {});
+        pendingCommands.add(new AbstractCombatCommand(source, target, action.getName(), action) {
+            @Override
+            public void execute() {
+                if (!canExecute() || action == null) return;
+                action.execute(source, target);
+            }
+        });
     }
 
     public void addCommand(CombatCommand command) {
@@ -41,20 +46,16 @@ public class BaseBattleSystem implements BattleSystem {
     public void processTurn() {
         if (battleOver) return;
 
-        // Procesar todos los comandos pendientes
         for (CombatCommand command : pendingCommands) {
             if (!command.canExecute()) {
                 continue;
             }
 
             command.execute();
-            notifyActionExecuted(command.getSource(), command.getTarget(), null);
+            notifyActionExecuted(command.getSource(), command.getTarget(), command.getAction());
         }
 
-        // Limpiar comandos pendientes
         pendingCommands.clear();
-
-        // Verificar si la batalla ha terminado
         checkBattleEnd();
     }
 
@@ -83,7 +84,7 @@ public class BaseBattleSystem implements BattleSystem {
         listeners.remove(listener);
     }
 
-    private void checkBattleEnd() {
+    protected void checkBattleEnd() {
         boolean team1Alive = team1.stream().anyMatch(Entity::isAlive);
         boolean team2Alive = team2.stream().anyMatch(Entity::isAlive);
 
@@ -92,9 +93,15 @@ public class BaseBattleSystem implements BattleSystem {
         }
     }
 
-    private void notifyActionExecuted(Entity source, Entity target, GameAction action) {
+    protected void notifyActionExecuted(Entity source, Entity target, GameAction action) {
         for (BattleListener listener : listeners) {
             listener.onActionExecuted(source, target, action);
+        }
+    }
+
+    protected void notifyTurnStart() {
+        for (BattleListener listener : listeners) {
+            listener.onTurnStart();
         }
     }
 } 

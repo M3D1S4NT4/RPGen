@@ -1,5 +1,7 @@
 package com.rpgen.core.entity;
 
+import com.rpgen.core.action.GameAction;
+import java.util.List;
 
 public interface Entity {
     String getId();
@@ -8,9 +10,12 @@ public interface Entity {
     int getMaxHealth();
     int getAttack();
     int getDefense();
-    void setDefense(int defense);
+    int getSpeed();
     boolean isAlive();
     void takeDamage(int damage);
     void heal(int amount);
+    void setDefense(int bonus);
+    List<GameAction> getAvailableActions();
+    void setAvailableActions(List<GameAction> actions);
     boolean isDefeated();
 } 
