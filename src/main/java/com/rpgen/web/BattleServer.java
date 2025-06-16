@@ -5,8 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.rpgen.core.battle.BattleSystem;
 import com.rpgen.core.battle.BaseBattleSystem;
-import com.rpgen.core.entity.Character;
 import com.rpgen.core.entity.Entity;
+import com.rpgen.core.entity.Character;
 import com.rpgen.core.action.BasicAttack;
 import com.rpgen.core.action.PredefinedActions;
 import com.rpgen.core.action.CombatCommand;
@@ -20,16 +20,20 @@ import java.util.stream.Collectors;
 
 public class BattleServer {
     private final Gson gson;
-    private static BattleSystem battleSystem;
-    private static Map<String, Character> characters = new HashMap<>();
+    private final BattleSystem battleSystem;
+    private final Map<String, List<Entity>> teams;
+    private final Map<String, Character> characters;
 
     public BattleServer() {
         this.gson = new GsonBuilder().setPrettyPrinting().create();
+        this.battleSystem = new BaseBattleSystem();
+        this.teams = new HashMap<>();
+        this.characters = new HashMap<>();
     }
 
     public void init() {
         // Inicializar el sistema de batalla
-        battleSystem = new BaseBattleSystem();
+        // battleSystem = new BaseBattleSystem();
         
         // Configurar el servidor
         // port(4567); // ELIMINADA: solo debe estar en Main.java
@@ -44,15 +48,13 @@ public class BattleServer {
         post("/api/characters", (req, res) -> {
             res.type("application/json");
             Map<String, Object> data = gson.fromJson(req.body(), Map.class);
-            String id = UUID.randomUUID().toString();
             Character character = new Character(
-                id,
                 (String) data.get("name"),
                 ((Double) data.get("maxHealth")).intValue(),
                 ((Double) data.get("attack")).intValue(),
                 ((Double) data.get("defense")).intValue()
             );
-            characters.put(id, character);
+            characters.put(character.getId(), character);
             return gson.toJson(character);
         });
 
@@ -64,8 +66,7 @@ public class BattleServer {
             if (character == null) {
                 res.status(404);
                 return gson.toJson(Map.of(
-                    "status", "error",
-                    "message", "Personaje no encontrado"
+                    "error", "Personaje no encontrado"
                 ));
             }
 
@@ -73,7 +74,6 @@ public class BattleServer {
             
             // Crear un nuevo personaje con los datos actualizados
             Character updatedCharacter = new Character(
-                id,
                 (String) data.get("name"),
                 ((Double) data.get("maxHealth")).intValue(),
                 ((Double) data.get("attack")).intValue(),
@@ -88,21 +88,16 @@ public class BattleServer {
             res.type("application/json");
             try {
                 // Resetear la salud de todos los personajes
-                for (Character character : characters.values()) {
-                    character.heal(character.getMaxHealth());
-                }
+                characters.values().forEach(character -> character.heal(character.getMaxHealth()));
                 
                 // Resetear el sistema de batalla
-                battleSystem = new BaseBattleSystem();
+                battleSystem.initialize(new ArrayList<>(), new ArrayList<>());
                 
-                return gson.toJson(Map.of(
-                    "status", "success",
-                    "message", "Batalla reseteada correctamente"
-                ));
+                return gson.toJson(Map.of("status", "success"));
             } catch (Exception e) {
+                res.status(500);
                 return gson.toJson(Map.of(
-                    "status", "error",
-                    "message", "Error al resetear la batalla: " + e.getMessage()
+                    "error", "Error al resetear la batalla: " + e.getMessage()
                 ));
             }
         });
@@ -110,14 +105,14 @@ public class BattleServer {
         post("/api/battle/start", (req, res) -> {
             res.type("application/json");
             try {
-                Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
-                List<String> team1Ids = gson.fromJson(gson.toJson(data.get("team1")), new TypeToken<List<String>>(){}.getType());
-                List<String> team2Ids = gson.fromJson(gson.toJson(data.get("team2")), new TypeToken<List<String>>(){}.getType());
+                Map<String, Object> data = gson.fromJson(req.body(), Map.class);
+                List<String> team1Ids = (List<String>) data.get("team1");
+                List<String> team2Ids = (List<String>) data.get("team2");
 
-                if (team1Ids.isEmpty() || team2Ids.isEmpty()) {
+                if (team1Ids == null || team2Ids == null) {
+                    res.status(400);
                     return gson.toJson(Map.of(
-                        "status", "error",
-                        "message", "Ambos equipos deben tener al menos un personaje"
+                        "error", "Se requieren ambos equipos"
                     ));
                 }
 
@@ -131,19 +126,23 @@ public class BattleServer {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-                if (team1.size() != team1Ids.size() || team2.size() != team2Ids.size()) {
+                if (team1.isEmpty() || team2.isEmpty()) {
+                    res.status(400);
                     return gson.toJson(Map.of(
-                        "status", "error",
-                        "message", "Uno o más personajes no fueron encontrados"
+                        "error", "Los equipos no pueden estar vacíos"
                     ));
                 }
 
-                battleSystem.initialize(team1, team2);
-                return gson.toJson(Map.of("status", "success"));
-            } catch (Exception e) {
+                String battleId = UUID.randomUUID().toString();
+                initializeBattle(battleId, team1, team2);
                 return gson.toJson(Map.of(
-                    "status", "error",
-                    "message", "Error al iniciar la batalla: " + e.getMessage()
+                    "status", "success",
+                    "battleId", battleId
+                ));
+            } catch (Exception e) {
+                res.status(500);
+                return gson.toJson(Map.of(
+                    "error", "Error al iniciar la batalla: " + e.getMessage()
                 ));
             }
         });
@@ -151,121 +150,89 @@ public class BattleServer {
         post("/api/battle/action", (req, res) -> {
             res.type("application/json");
             try {
-                Map<String, String> params = gson.fromJson(req.body(), new TypeToken<Map<String, String>>(){}.getType());
-                
-                String sourceId = params.get("sourceId");
-                String targetId = params.get("targetId");
-                String actionType = params.get("actionType");
+                Map<String, Object> data = gson.fromJson(req.body(), Map.class);
+                String sourceId = (String) data.get("sourceId");
+                String targetId = (String) data.get("targetId");
+                String actionType = (String) data.get("actionType");
                 
                 if (sourceId == null || targetId == null || actionType == null) {
+                    res.status(400);
                     return gson.toJson(Map.of(
-                        "status", "error",
-                        "message", "Faltan parámetros requeridos"
-                    ));
-                }
-            
-                Character source = characters.get(sourceId);
-                Character target = characters.get(targetId);
-            
-                if (source == null || target == null) {
-                    return gson.toJson(Map.of(
-                        "status", "error",
-                        "message", "Personajes no encontrados"
+                        "error", "Se requieren sourceId, targetId y actionType"
                     ));
                 }
                 
-                if (!source.isAlive() || !target.isAlive()) {
+                Character source = characters.get(sourceId);
+                Character target = characters.get(targetId);
+                
+                if (source == null || target == null) {
+                    res.status(404);
                     return gson.toJson(Map.of(
-                        "status", "error",
-                        "message", "Uno o ambos personajes no están vivos"
+                        "error", "Personaje no encontrado"
                     ));
                 }
                 
                 try {
-                    CombatCommand command = CombatCommandFactory.createCommand(source, target, actionType);
-                    ((BaseBattleSystem) battleSystem).addCommand(command);
+                    addAction(UUID.randomUUID().toString(), source, target, actionType);
                     
                     return gson.toJson(Map.of(
-                        "status", "success",
-                        "actionType", actionType,
-                        "sourceName", source.getName(),
-                        "targetName", target.getName()
+                        "status", "success"
                     ));
-                } catch (IllegalArgumentException e) {
+                } catch (Exception e) {
+                    res.status(400);
                     return gson.toJson(Map.of(
-                        "status", "error",
-                        "message", e.getMessage()
+                        "error", "Error al ejecutar la acción: " + e.getMessage()
                     ));
                 }
             } catch (Exception e) {
+                res.status(500);
                 return gson.toJson(Map.of(
-                    "status", "error",
-                    "message", "Error al procesar la acción: " + e.getMessage()
+                    "error", "Error al procesar la acción: " + e.getMessage()
                 ));
             }
         });
 
         post("/api/battle/process", (req, res) -> {
             res.type("application/json");
-            battleSystem.processTurn();
-            List<Entity> activeEntities = battleSystem.getActiveEntities();
+            processTurn(UUID.randomUUID().toString());
+            List<Entity> activeEntities = getActiveEntities(UUID.randomUUID().toString());
             List<String> actions = new ArrayList<>();
-            
-            BattleListener listener = new BattleListener() {
-                @Override
-                public void onBattleStart() {
-                    // No es necesario implementar
-                }
-
-                @Override
-                public void onTurnStart() {
-                    // No es necesario implementar
-                }
-
-                @Override
-                public void onActionExecuted(Entity source, Entity target, GameAction action) {
-                    actions.add(String.format("%s ataca a %s", 
-                        source.getName(), target.getName()));
-                }
-
-                @Override
-                public void onEntityDamaged(Entity entity, int damage) {
-                    actions.add(String.format("%s recibe %d de daño", 
-                        entity.getName(), damage));
-                }
-
-                @Override
-                public void onEntityHealed(Entity entity, int amount) {
-                    // No es necesario implementar
-                }
-
-                @Override
-                public void onEntityDefeated(Entity entity) {
-                    actions.add(String.format("%s ha sido derrotado", 
-                        entity.getName()));
-                }
-
-                @Override
-                public void onBattleEnd() {
-                    // No es necesario implementar
-                }
-            };
-            
-            battleSystem.registerBattleListener(listener);
             
             return gson.toJson(Map.of(
                 "status", "success",
-                "isBattleOver", battleSystem.isBattleOver(),
+                "isBattleOver", isBattleOver(UUID.randomUUID().toString()),
                 "actions", actions,
                 "activeEntities", activeEntities.stream()
-                    .map(e -> Map.of(
-                        "id", e.getId(),
-                        "name", e.getName(),
-                        "health", e.getHealth(),
-                        "maxHealth", e.getMaxHealth()
-                    ))
+                    .map(Entity::toString)
                     .collect(Collectors.toList())
             ));
         });
+    }
+
+    public void initializeBattle(String battleId, List<Entity> team1, List<Entity> team2) {
+        teams.put(battleId + "_team1", new ArrayList<>(team1));
+        teams.put(battleId + "_team2", new ArrayList<>(team2));
+        battleSystem.initialize(team1, team2);
+    }
+
+    public void addAction(String battleId, Entity source, Entity target, String actionName) {
+        CombatCommand command = CombatCommandFactory.createCommand(source, target, actionName);
+        battleSystem.addAction(source, target, command.getAction());
+    }
+
+    public void processTurn(String battleId) {
+        battleSystem.processTurn();
+    }
+
+    public List<Entity> getActiveEntities(String battleId) {
+        return battleSystem.getActiveEntities();
+    }
+
+    public boolean isBattleOver(String battleId) {
+        return battleSystem.isBattleOver();
+    }
+
+    public List<Entity> getTeam(String battleId, int teamNumber) {
+        return teams.get(battleId + "_team" + teamNumber);
     }
 } 
