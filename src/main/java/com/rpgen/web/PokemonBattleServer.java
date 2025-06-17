@@ -43,6 +43,9 @@ public class PokemonBattleServer {
         // Endpoint para iniciar una batalla
         post("/api/pokemon-battle/start", (req, res) -> {
             try {
+                System.out.println("Recibida solicitud para iniciar batalla");
+                System.out.println("Body de la solicitud: " + req.body());
+                
                 Map<String, Object> data = gson.fromJson(req.body(), Map.class);
                 List<Map<String, Object>> team1 = (List<Map<String, Object>>) data.get("team1");
                 List<Map<String, Object>> team2 = (List<Map<String, Object>>) data.get("team2");
@@ -58,10 +61,9 @@ public class PokemonBattleServer {
                 PokemonBattle battle = new PokemonBattle(team1, team2);
                 activeBattles.put(battleId, battle);
 
-                // Marcar las acciones iniciales como seleccionadas al inicio de la batalla
-                // battle.team1ActionSelected = true;
-                // battle.team2ActionSelected = true;
-                System.out.println("Servidor: Batalla iniciada. Flags de acción inicializadas. Equipo 1: " + battle.team1ActionSelected + ", Equipo 2: " + battle.team2ActionSelected);
+                System.out.println("Batalla iniciada con ID: " + battleId);
+                System.out.println("Equipo 1: " + team1.size() + " Pokémon");
+                System.out.println("Equipo 2: " + team2.size() + " Pokémon");
                 
                 return gson.toJson(Map.of(
                     "status", "success",
@@ -69,6 +71,8 @@ public class PokemonBattleServer {
                     "message", "Batalla iniciada correctamente"
                 ));
             } catch (Exception e) {
+                System.err.println("Error al iniciar la batalla: " + e.getMessage());
+                e.printStackTrace();
                 res.status(500);
                 return gson.toJson(Map.of(
                     "error", "Error al iniciar la batalla: " + e.getMessage()
@@ -287,12 +291,6 @@ public class PokemonBattleServer {
                     // Verificar si el Pokémon está debilitado
                     if (((Number) team.get(i).getOrDefault("health", 0)).intValue() <= 0) {
                         return Map.of("error", "No puedes cambiar a un Pokémon debilitado");
-                    }
-
-                    // Verificar si el Pokémon ya está activo en el mismo equipo
-                    Map<String, Object> currentActive = isTeam1 ? team1ActivePokemon : team2ActivePokemon;
-                    if (currentActive != null && currentActive.get("id").equals(newPokemon.get("id"))) {
-                        return Map.of("error", "Este Pokémon ya está en combate");
                     }
 
                     // Actualizar el Pokémon en el equipo

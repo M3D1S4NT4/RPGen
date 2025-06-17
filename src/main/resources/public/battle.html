@@ -490,50 +490,35 @@
 
         // Función para habilitar/deshabilitar botones de movimientos y cambios
         function setMoveAndSwitchButtonsEnabled(enabled) {
-            // Movimientos
+            // Deshabilitar todos los botones si el turno está en progreso o la batalla ha terminado
+            const shouldDisable = !enabled || turnInProgress || battleOver;
+            
+            // Actualizar botones de movimientos
             document.querySelectorAll('.move-button').forEach(btn => {
-                btn.disabled = !enabled || turnInProgress || battleOver;
+                btn.disabled = shouldDisable;
             });
             
-            // Cambios de Pokémon
+            // Actualizar botones de cambio de Pokémon
             document.querySelectorAll('.pokemon-card').forEach(card => {
-                const pokemonId = card.getAttribute('data-pokemon-id');
-                const teamId = card.getAttribute('data-team');
-                const team = teamId === 'team1' ? selectedTeam1 : selectedTeam2;
-                const pokemon = team ? team.find(p => String(p.uniqueId) === String(pokemonId)) : null;
+                const pokemon = card.dataset.pokemonId;
+                const team = card.dataset.team;
                 
-                // Permitir seleccionar mientras no haya batalla iniciada
-                if (!currentBattleId) {
-                    card.style.pointerEvents = '';
-                    card.style.opacity = '';
-                    return;
-                }
-
-                // Si el Pokémon está debilitado, deshabilitar la tarjeta
-                if (pokemon && pokemon.health <= 0) {
+                // Solo habilitar si el Pokémon tiene HP > 0 y su equipo no ha seleccionado una acción
+                const pokemonData = team === 'team1' ? 
+                    selectedTeam1.find(p => p.uniqueId === pokemon) :
+                    selectedTeam2.find(p => p.uniqueId === pokemon);
+                
+                const hasSelectedAction = team === 'team1' ? 
+                    (selectedMove1 || lastAction1 === 'move') :
+                    (selectedMove2 || lastAction2 === 'move');
+                
+                if (pokemonData && pokemonData.health > 0 && !hasSelectedAction) {
+                    card.style.pointerEvents = shouldDisable ? 'none' : 'auto';
+                    card.style.opacity = shouldDisable ? '0.5' : '1';
+                } else {
                     card.style.pointerEvents = 'none';
-                    card.style.opacity = '0.7';
-                    return;
+                    card.style.opacity = '0.5';
                 }
-
-                // Si no hay Pokémon activo en el equipo, habilitar la selección
-                const activePokemon = teamId === 'team1' ? activePokemon1 : activePokemon2;
-                if (!activePokemon) {
-                    card.style.pointerEvents = '';
-                    card.style.opacity = '';
-                    return;
-                }
-
-                // Si el turno está en progreso o la batalla ha terminado, deshabilitar
-                if (turnInProgress || battleOver) {
-                    card.style.pointerEvents = 'none';
-                    card.style.opacity = '0.7';
-                    return;
-                }
-
-                // En cualquier otro caso, habilitar la tarjeta
-                card.style.pointerEvents = '';
-                card.style.opacity = '';
             });
         }
 
@@ -596,100 +581,20 @@
             requestAnimationFrame(animate);
         }
 
-        // Función para animar el ataque
-        async function animateAttack(source, target) {
-            return new Promise((resolve) => {
-                // Buscar los elementos de los Pokémon en la arena de batalla
-                const sourceElement = document.querySelector(`.pokemon-card[data-pokemon-id="${source.uniqueId}"].active`);
-                const targetElement = document.querySelector(`.pokemon-card[data-pokemon-id="${target.uniqueId}"].active`);
-
-                if (!sourceElement || !targetElement) {
-                    console.warn('No se encontraron elementos para animar:', { source, target });
-                    resolve();
-                    return;
-                }
-
-                // Determinar qué movimiento mostrar basado en el equipo del Pokémon atacante
-                let moveToShow;
-                if (source.team === 'team1') {
-                    moveToShow = selectedMove1;
-                } else if (source.team === 'team2') {
-                    moveToShow = selectedMove2;
-                }
-
-                if (!moveToShow) {
-                    console.warn('No se encontró el movimiento para mostrar:', { source, target });
-                    resolve();
-                    return;
-                }
-
-                // Crear el texto del movimiento
-                const moveText = document.createElement('div');
-                moveText.className = 'move-text';
-                moveText.textContent = `${source.name} usa ${moveToShow.name}!`;
-                document.querySelector('.battle-arena').appendChild(moveText);
-
-                // Aplicar la animación de ataque
-                sourceElement.classList.add('attacking');
-                targetElement.classList.add('taking-damage');
-
-                // Limpiar las animaciones después de que terminen
-                setTimeout(() => {
-                    sourceElement.classList.remove('attacking');
-                    targetElement.classList.remove('taking-damage');
-                    moveText.remove();
-                    resolve();
-                }, ATTACK_ANIMATION_DURATION);
-            });
-        }
-
-        // Función para verificar si un equipo está derrotado
-        function isTeamDefeated(team) {
-            return team.every(pokemon => pokemon.health <= 0);
-        }
-
-        // Función para verificar si la batalla ha terminado
-        function checkBattleEnd() {
-            if (!selectedTeam1 || !selectedTeam2) return false;
-            
-            const team1Defeated = isTeamDefeated(selectedTeam1);
-            const team2Defeated = isTeamDefeated(selectedTeam2);
-            
-            if (team1Defeated || team2Defeated) {
-                battleOver = true;
-                const winner = team1Defeated ? 'Equipo 2' : 'Equipo 1';
-                updateBattleLog(`¡La batalla ha terminado! ${winner} ha ganado.`);
-                return true;
-            }
-            return false;
-        }
-
-        // Actualizar registro de batalla
-        function updateBattleLog(message) {
-            battleLog.push(message);
-            const battleLogElement = document.getElementById('battleLog');
-            battleLogElement.innerHTML = battleLog.map(msg => `<p>${msg}</p>`).join('');
-            battleLogElement.scrollTop = battleLogElement.scrollHeight;
-        }
-
-        // --- Funciones que llaman a selectMove y switchPokemon ---
-
         // Actualizar movimientos
         function updateMoves(teamId, pokemon) {
             const movesContainer = document.getElementById(`${teamId}Moves`);
             movesContainer.innerHTML = '';
 
-            console.log(`Updating moves for ${pokemon.name}. Moves:`, pokemon.moves);
-
-            if (!pokemon.moves || pokemon.moves.length === 0) {
-                console.error('No hay movimientos disponibles para', pokemon.name);
+            if (!pokemon || !pokemon.moves) {
+                console.warn('No hay movimientos disponibles para', pokemon?.name);
                 return;
             }
 
-            // Obtener los movimientos seleccionados usando los índices
-            const selectedMoves = pokemon.selectedMoveIndices 
-                ? pokemon.selectedMoveIndices.map(index => pokemon.moves[index])
-                : pokemon.moves.slice(0, 4);
+            // Solo mostrar los movimientos seleccionados
+            const selectedMoves = pokemon.selectedMoveIndices ? 
+                pokemon.selectedMoveIndices.map(index => pokemon.moves[index]).filter(move => move) :
+                [];
 
             selectedMoves.forEach(move => {
                 if (!move) {
@@ -697,21 +602,10 @@
                     return;
                 }
                 
-                // Asegurarse de que el movimiento tenga todas las propiedades necesarias
-                const moveData = {
-                    id: move.id || `move_${Date.now()}`,
-                    name: move.name || 'Movimiento',
-                    type: move.type || 'normal',
-                    category: move.category || 'physical',
-                    power: parseInt(move.power) || 40,
-                    accuracy: parseInt(move.accuracy) || 100,
-                    description: move.description || 'Un movimiento básico'
-                };
-                
                 const button = document.createElement('button');
                 button.className = 'move-button';
-                button.textContent = `${moveData.name} (${moveData.power})`;
-                button.addEventListener('click', () => selectMove(teamId, moveData));
+                button.textContent = `${move.name} (${move.power})`;
+                button.addEventListener('click', () => selectMove(teamId, move));
                 movesContainer.appendChild(button);
             });
         }
@@ -728,8 +622,8 @@
                 card.dataset.team = teamId;
                 
                 // Añadir clase si es el Pokémon activo
-                if ((teamId === 'team1' && activePokemon1 && activePokemon1.uniqueId === pokemon.uniqueId) ||
-                    (teamId === 'team2' && activePokemon2 && activePokemon2.uniqueId === pokemon.uniqueId)) {
+                if ((teamId === 'team1' && activePokemon1 && activePokemon1.id === pokemon.id) ||
+                    (teamId === 'team2' && activePokemon2 && activePokemon2.id === pokemon.id)) {
                     card.classList.add('active');
                 }
 
@@ -738,24 +632,100 @@
                     card.classList.add('fainted');
                 }
 
+                // Calcular el porcentaje de HP para la barra de vida
+                const hpPercentage = (pokemon.health / pokemon.maxHealth) * 100;
+
                 card.innerHTML = `
                     <img src="${pokemon.imageUrl}" alt="${pokemon.name}">
                     <h3>${pokemon.name}</h3>
                     <div class="health-bar">
-                        <div class="health-bar-fill" style="width: ${(pokemon.health / pokemon.maxHealth) * 100}%;"></div>
+                        <div class="health-bar-fill" style="width: ${hpPercentage}%;"></div>
                     </div>
                     <p>HP: ${pokemon.health}/${pokemon.maxHealth}</p>
                 `;
 
                 // Solo permitir seleccionar Pokémon con HP > 0
                 if (pokemon.health > 0) {
-                    card.addEventListener('click', () => {
-                        if (teamId === 'team1') {
-                            activePokemon1 = pokemon;
-                        } else {
-                            activePokemon2 = pokemon;
+                    card.addEventListener('click', async () => {
+                        // Si no hay batalla activa, solo seleccionar el Pokémon inicial
+                        if (!currentBattleId) {
+                            if (teamId === 'team1') {
+                                activePokemon1 = pokemon;
+                            } else {
+                                activePokemon2 = pokemon;
+                            }
+                            updateBattleDisplay();
+                            return;
                         }
-                        updateBattleDisplay();
+
+                        // Lógica para cambio durante la batalla
+                        if (turnInProgress || battleOver) return;
+                        
+                        const selectedMove = teamId === 'team1' ? selectedMove1 : selectedMove2;
+                        const lastAction = teamId === 'team1' ? lastAction1 : lastAction2;
+                        
+                        if (selectedMove || lastAction === 'move') {
+                            updateBattleLog(`El ${teamId === 'team1' ? 'Equipo 1' : 'Equipo 2'} ya ha seleccionado un movimiento en este turno`);
+                            return;
+                        }
+
+                        try {
+                            pokemon.team = teamId;
+                            const result = await api.switchPokemon(currentBattleId, pokemon, teamId === 'team1');
+                            
+                            if (result.error) {
+                                updateBattleLog(result.error);
+                                return;
+                            }
+
+                            if (result.message) {
+                                if (teamId === 'team1') {
+                                    // Preservar el HP del Pokémon activo
+                                    const currentHP = activePokemon1 ? activePokemon1.health : 0;
+                                    activePokemon1 = {...result.newActivePokemon, team: 'team1'};
+                                    if (currentHP > 0) {
+                                        activePokemon1.health = currentHP;
+                                    }
+                                    selectedMove1 = null;
+                                    lastAction1 = 'switch';
+                                    waitingForTeam1 = false;
+                                } else {
+                                    // Preservar el HP del Pokémon activo
+                                    const currentHP = activePokemon2 ? activePokemon2.health : 0;
+                                    activePokemon2 = {...result.newActivePokemon, team: 'team2'};
+                                    if (currentHP > 0) {
+                                        activePokemon2.health = currentHP;
+                                    }
+                                    selectedMove2 = null;
+                                    lastAction2 = 'switch';
+                                    waitingForTeam2 = false;
+                                }
+
+                                if (result.battleOver !== undefined) {
+                                    battleOver = result.battleOver;
+                                }
+
+                                // Actualizar la interfaz inmediatamente
+                                updateBattleDisplay();
+                                updateMoveButtons();
+                                updateBattleLog(`${pokemon.name} ha entrado en combate`);
+
+                                // Si ambos equipos han seleccionado una acción, procesar el turno
+                                if (!waitingForTeam1 && !waitingForTeam2) {
+                                    turnInProgress = true;
+                                    // Actualizar los botones antes de procesar el turno
+                                    setMoveAndSwitchButtonsEnabled(false);
+                                    await processTurn();
+                                } else {
+                                    // Si aún esperamos una acción, actualizar los botones apropiadamente
+                                    setMoveAndSwitchButtonsEnabled(true);
+                                    updateBattleLog(`Esperando a que el ${waitingForTeam1 ? 'Equipo 1' : 'Equipo 2'} seleccione una acción`);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error al cambiar Pokémon:', error);
+                            updateBattleLog(`Error al cambiar Pokémon: ${error.message}`);
+                        }
                     });
                 }
 
@@ -767,49 +737,34 @@
 
         // Seleccionar movimiento
         function selectMove(teamId, move) {
-            if (battleOver) {
-                updateBattleLog('La batalla ha terminado');
+            if (turnInProgress || battleOver) return;
+
+            const selectedMove = teamId === 'team1' ? selectedMove1 : selectedMove2;
+            const lastAction = teamId === 'team1' ? lastAction1 : lastAction2;
+
+            if (lastAction === 'switch') {
+                updateBattleLog(`El ${teamId === 'team1' ? 'Equipo 1' : 'Equipo 2'} ya ha cambiado de Pokémon en este turno`);
                 return;
             }
-
-            if (turnInProgress) {
-                updateBattleLog('Espera a que termine el turno actual');
-                return;
-            }
-
-            // Verificar si el equipo ya ha seleccionado una acción
-            if ((teamId === 'team1' && actionSelected1) || (teamId === 'team2' && actionSelected2)) {
-                updateBattleLog(`El ${teamId === 'team1' ? 'Equipo 1' : 'Equipo 2'} ya ha seleccionado una acción para este turno`);
-                return;
-            }
-
-            // Crear el objeto de movimiento con toda la información necesaria
-            const moveData = {
-                id: move.id || `move_${Date.now()}`,
-                name: move.name,
-                type: move.type || 'normal',
-                category: move.category || 'physical',
-                power: parseInt(move.power) || 40,
-                accuracy: parseInt(move.accuracy) || 100,
-                description: move.description || 'Un movimiento básico'
-            };
 
             if (teamId === 'team1') {
-                selectedMove1 = moveData;
-                actionSelected1 = true;
-                updateBattleLog(`Equipo 1 ha seleccionado ${moveData.name}`);
+                selectedMove1 = move;
+                lastAction1 = 'move';
+                waitingForTeam1 = false;
             } else {
-                selectedMove2 = moveData;
-                actionSelected2 = true;
-                updateBattleLog(`Equipo 2 ha seleccionado ${moveData.name}`);
+                selectedMove2 = move;
+                lastAction2 = 'move';
+                waitingForTeam2 = false;
             }
 
-            // Si ambos equipos han seleccionado una acción, procesar el turno
-            if (actionSelected1 && actionSelected2) {
+            updateBattleDisplay();
+            setMoveAndSwitchButtonsEnabled(true);
+
+            if (!waitingForTeam1 && !waitingForTeam2) {
                 turnInProgress = true;
                 processTurn();
             } else {
-                updateBattleLog(`Esperando a que el ${!actionSelected1 ? 'Equipo 1' : 'Equipo 2'} seleccione una acción`);
+                updateBattleLog(`Esperando a que el ${waitingForTeam1 ? 'Equipo 1' : 'Equipo 2'} seleccione una acción`);
             }
         }
 
@@ -817,6 +772,8 @@
             // Resetear las variables de selección de acción
             actionSelected1 = false;
             actionSelected2 = false;
+            waitingForTeam1 = true;
+            waitingForTeam2 = true;
 
             // Determinar el orden de ataque basado en la velocidad
             const firstAttacker = activePokemon1.speed >= activePokemon2.speed ? 
@@ -830,14 +787,14 @@
             // Esperar un momento antes de comenzar el turno
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            // Realizar el primer ataque
-            await performAttack(firstAttacker, secondAttacker.pokemon);
+            // Realizar el primer ataque si hay un movimiento seleccionado
+            if (firstAttacker.move) {
+                await performAttack(firstAttacker, secondAttacker.pokemon);
+            }
             
             // Verificar si el segundo Pokémon ha sido derrotado
             if (secondAttacker.pokemon.health <= 0) {
-                updateBattleLog(`${secondAttacker.pokemon.name} se ha debilitado!`);
-                
-                // Verificar si el equipo ha sido derrotado
+                updateBattleLog(`${secondAttacker.pokemon.name} ha sido derrotado!`);
                 if (checkBattleEnd()) {
                     turnInProgress = false;
                     selectedMove1 = null;
@@ -864,17 +821,14 @@
                 return;
             }
 
-            // Esperar un momento antes del segundo ataque
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Realizar el segundo ataque si hay un movimiento seleccionado
+            if (secondAttacker.move) {
+                await performAttack(secondAttacker, firstAttacker.pokemon);
+            }
 
-            // Si el segundo Pokémon sigue vivo, realizar su ataque
-            await performAttack(secondAttacker, firstAttacker.pokemon);
-            
             // Verificar si el primer Pokémon ha sido derrotado
             if (firstAttacker.pokemon.health <= 0) {
-                updateBattleLog(`${firstAttacker.pokemon.name} se ha debilitado!`);
-                
-                // Verificar si el equipo ha sido derrotado
+                updateBattleLog(`${firstAttacker.pokemon.name} ha sido derrotado!`);
                 if (checkBattleEnd()) {
                     turnInProgress = false;
                     selectedMove1 = null;
@@ -891,33 +845,19 @@
                     activePokemon2 = null;
                 }
                 updateBattleDisplay();
-                // Pasar al siguiente turno automáticamente
-                turnInProgress = false;
-                selectedMove1 = null;
-                selectedMove2 = null;
-                actionSelected1 = false;
-                actionSelected2 = false;
-                setMoveAndSwitchButtonsEnabled(true);
-                return;
             }
 
             // Resetear los movimientos seleccionados y el estado del turno
             selectedMove1 = null;
             selectedMove2 = null;
             turnInProgress = false;
+            lastAction1 = null;
+            lastAction2 = null;
             updateBattleDisplay();
 
-            if (!waitingForTeam1 && !waitingForTeam2) {
-                await processTurn();
-                waitingForTeam1 = true;
-                waitingForTeam2 = true;
-                setMoveAndSwitchButtonsEnabled(true);
-                lastAction1 = null;
-                lastAction2 = null;
-            } else {
-                updateBattleLog(`Esperando a que el ${waitingForTeam1 ? 'Equipo 1' : 'Equipo 2'} seleccione una acción`);
-                setMoveAndSwitchButtonsEnabled(true);
-            }
+            // Esperar por las acciones de ambos equipos
+            updateBattleLog('Esperando a que ambos equipos seleccionen una acción');
+            setMoveAndSwitchButtonsEnabled(true);
         }
 
         async function performAttack(attacker, defender) {
@@ -925,6 +865,13 @@
                 // Asegurarnos de que el Pokémon atacante tenga el equipo correcto
                 attacker.pokemon.team = attacker.team;
                 
+                // Verificar que el movimiento existe
+                if (!attacker.move) {
+                    console.error('No hay movimiento seleccionado para el atacante:', attacker);
+                    updateBattleLog('Error: No hay movimiento seleccionado');
+                    return;
+                }
+
                 // Animar el ataque
                 await animateAttack(attacker.pokemon, defender);
 
@@ -976,42 +923,14 @@
         }
 
         // Cambiar Pokémon
-        async function switchPokemon(teamId, pokemon) {
-            if (!currentBattleId) {
-                updateBattleLog('No hay una batalla activa');
-                return;
-            }
+        async function switchPokemon(pokemon, teamId) {
+            if (turnInProgress || battleOver) return;
 
-            if (initialSelectionPending) {
-                updateBattleLog('Debes seleccionar ambos Pokémon iniciales antes de cambiar.');
-                return;
-            }
-
-            if (turnInProgress) {
-                updateBattleLog('No puedes cambiar de Pokémon durante un turno');
-                return;
-            }
-
-            if (battleOver) {
-                updateBattleLog('No se pueden realizar más acciones, la batalla ha terminado');
-                return;
-            }
-
-            if (pokemon.health <= 0) {
-                updateBattleLog(`${pokemon.name} está debilitado y no puede entrar en combate`);
-                return;
-            }
-
-            // Verificar si el Pokémon ya está activo en el mismo equipo
-            const currentActive = teamId === 'team1' ? activePokemon1 : activePokemon2;
-            if (currentActive && currentActive.uniqueId === pokemon.uniqueId) {
-                updateBattleLog(`${pokemon.name} ya está en combate`);
-                return;
-            }
-
+            const selectedMove = teamId === 'team1' ? selectedMove1 : selectedMove2;
             const lastAction = teamId === 'team1' ? lastAction1 : lastAction2;
-            if (lastAction === 'switch') {
-                updateBattleLog(`El ${teamId === 'team1' ? 'Equipo 1' : 'Equipo 2'} ya ha cambiado de Pokémon en este turno`);
+
+            if (selectedMove || lastAction === 'move') {
+                updateBattleLog(`El ${teamId === 'team1' ? 'Equipo 1' : 'Equipo 2'} ya ha seleccionado un movimiento en este turno`);
                 return;
             }
 
@@ -1046,13 +965,10 @@
                     updateBattleLog(`${pokemon.name} ha entrado en combate`);
 
                     if (!waitingForTeam1 && !waitingForTeam2) {
+                        turnInProgress = true;
                         await processTurn();
-                        waitingForTeam1 = true;
-                        waitingForTeam2 = true;
-                        setMoveAndSwitchButtonsEnabled(true);
                     } else {
                         updateBattleLog(`Esperando a que el ${waitingForTeam1 ? 'Equipo 1' : 'Equipo 2'} seleccione una acción`);
-                        setMoveAndSwitchButtonsEnabled(true);
                     }
                 }
             } catch (error) {
@@ -1299,33 +1215,110 @@
             const team1Moves = document.getElementById('team1Moves');
             const team2Moves = document.getElementById('team2Moves');
             
-            // Limpiar los contenedores de movimientos
+            // Limpiar los botones existentes
             team1Moves.innerHTML = '';
             team2Moves.innerHTML = '';
-            
-            // Actualizar movimientos del Equipo 1
-            if (activePokemon1 && activePokemon1.moves) {
+
+            // Mostrar los movimientos del equipo que no ha seleccionado una acción
+            if (activePokemon1 && !selectedMove1 && !lastAction1) {
                 activePokemon1.moves.forEach(move => {
-                    const moveButton = document.createElement('button');
-                    moveButton.className = 'move-button';
-                    moveButton.textContent = move.name;
-                    moveButton.onclick = () => selectMove('team1', move);
-                    moveButton.disabled = turnInProgress || battleOver || !currentBattleId;
-                    team1Moves.appendChild(moveButton);
+                    const button = document.createElement('button');
+                    button.className = 'move-button';
+                    button.textContent = move.name;
+                    button.onclick = () => selectMove('team1', move);
+                    button.disabled = turnInProgress || battleOver;
+                    team1Moves.appendChild(button);
                 });
             }
-            
-            // Actualizar movimientos del Equipo 2
-            if (activePokemon2 && activePokemon2.moves) {
+
+            if (activePokemon2 && !selectedMove2 && !lastAction2) {
                 activePokemon2.moves.forEach(move => {
-                    const moveButton = document.createElement('button');
-                    moveButton.className = 'move-button';
-                    moveButton.textContent = move.name;
-                    moveButton.onclick = () => selectMove('team2', move);
-                    moveButton.disabled = turnInProgress || battleOver || !currentBattleId;
-                    team2Moves.appendChild(moveButton);
+                    const button = document.createElement('button');
+                    button.className = 'move-button';
+                    button.textContent = move.name;
+                    button.onclick = () => selectMove('team2', move);
+                    button.disabled = turnInProgress || battleOver;
+                    team2Moves.appendChild(button);
                 });
             }
+
+            // Actualizar el estado de los botones
+            setMoveAndSwitchButtonsEnabled(!turnInProgress && !battleOver);
+        }
+
+        async function animateAttack(source, target) {
+            return new Promise((resolve) => {
+                // Buscar los elementos de los Pokémon en la arena de batalla
+                const sourceElement = document.querySelector(`.pokemon-card[data-pokemon-id="${source.uniqueId}"].active`);
+                const targetElement = document.querySelector(`.pokemon-card[data-pokemon-id="${target.uniqueId}"].active`);
+
+                if (!sourceElement || !targetElement) {
+                    console.warn('No se encontraron elementos para animar:', { source, target });
+                    resolve();
+                    return;
+                }
+
+                // Determinar qué movimiento mostrar basado en el equipo del Pokémon atacante
+                let moveToShow;
+                if (source.team === 'team1') {
+                    moveToShow = selectedMove1;
+                } else if (source.team === 'team2') {
+                    moveToShow = selectedMove2;
+                }
+
+                if (!moveToShow) {
+                    console.warn('No se encontró el movimiento para mostrar:', { source, target });
+                    resolve();
+                    return;
+                }
+
+                // Crear el texto del movimiento
+                const moveText = document.createElement('div');
+                moveText.className = 'move-text';
+                moveText.textContent = `${source.name} usa ${moveToShow.name}!`;
+                document.querySelector('.battle-arena').appendChild(moveText);
+
+                // Aplicar la animación de ataque
+                sourceElement.classList.add('attacking');
+                targetElement.classList.add('taking-damage');
+
+                // Limpiar las animaciones después de que terminen
+                setTimeout(() => {
+                    sourceElement.classList.remove('attacking');
+                    targetElement.classList.remove('taking-damage');
+                    moveText.remove();
+                    resolve();
+                }, ATTACK_ANIMATION_DURATION);
+            });
+        }
+
+        // Función para verificar si un equipo está derrotado
+        function isTeamDefeated(team) {
+            return team.every(pokemon => pokemon.health <= 0);
+        }
+
+        // Función para verificar si la batalla ha terminado
+        function checkBattleEnd() {
+            if (!selectedTeam1 || !selectedTeam2) return false;
+            
+            const team1Defeated = isTeamDefeated(selectedTeam1);
+            const team2Defeated = isTeamDefeated(selectedTeam2);
+            
+            if (team1Defeated || team2Defeated) {
+                battleOver = true;
+                const winner = team1Defeated ? 'Equipo 2' : 'Equipo 1';
+                updateBattleLog(`¡La batalla ha terminado! ${winner} ha ganado.`);
+                return true;
+            }
+            return false;
+        }
+
+        // Actualizar registro de batalla
+        function updateBattleLog(message) {
+            battleLog.push(message);
+            const battleLogElement = document.getElementById('battleLog');
+            battleLogElement.innerHTML = battleLog.map(msg => `<p>${msg}</p>`).join('');
+            battleLogElement.scrollTop = battleLogElement.scrollHeight;
         }
     </script>
     <script>
