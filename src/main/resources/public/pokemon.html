@@ -11,6 +11,12 @@
             margin: 0;
             padding: 20px;
             background-color: #f0f0f0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: #181818;
+            color: #f0f0f0;
         }
 
         .container {
@@ -25,12 +31,10 @@
             gap: 10px;
         }
 
-        .search-bar input {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+        body.dark-mode .search-bar input {
+            background: #232323;
+            color: #f0f0f0;
+            border: 2px solid #444;
         }
 
         .pokemon-grid {
@@ -45,13 +49,25 @@
             padding: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, background-color 0.3s, color 0.3s, border-color 0.3s;
             position: relative;
         }
-
         .pokemon-card:hover {
             transform: translateY(-5px);
             z-index: 1001;
+        }
+        body.dark-mode .pokemon-card {
+            background: #232323;
+            color: #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            border: 1px solid #444;
+        }
+        body.dark-mode .pokemon-card.selected {
+            background: #294d29;
+            border-color: #6fcf97;
+        }
+        body.dark-mode .pokemon-card:hover {
+            background: #333;
         }
 
         .pokemon-image {
@@ -98,9 +114,10 @@
             display: none;
             z-index: 1000;
         }
-
-        .pokemon-details.active {
-            display: block;
+        body.dark-mode .pokemon-details {
+            background: #232323;
+            color: #f0f0f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .close-button {
@@ -112,6 +129,9 @@
             font-size: 24px;
             cursor: pointer;
             color: #666;
+        }
+        body.dark-mode .close-button {
+            color: #bbb;
         }
 
         .stats-grid {
@@ -177,6 +197,12 @@
             z-index: 1000;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark-mode .team-section {
+            background: #232323;
+            color: #f0f0f0;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.5);
         }
 
         .team-controls {
@@ -187,6 +213,9 @@
             padding: 10px;
             background: #f5f5f5;
             border-radius: 10px;
+        }
+        body.dark-mode .team-controls {
+            background: #181818;
         }
 
         .team-controls button {
@@ -199,6 +228,10 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        body.dark-mode .team-controls button {
+            background-color: #294d29;
+            color: #f0f0f0;
         }
 
         .team-grid {
@@ -221,13 +254,16 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            transition: all 0.2s ease;
+            transition: all 0.2s ease, background-color 0.3s, color 0.3s, border-color 0.3s;
             user-select: none;
         }
-
-        .team-slot.filled {
-            border-style: solid;
-            border-color: #4CAF50;
+        body.dark-mode .team-slot {
+            background: #232323;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+        body.dark-mode .team-slot.filled {
+            border-color: #6fcf97;
         }
 
         .team-slot img {
@@ -261,6 +297,10 @@
             right: 5px;
             font-size: 14px;
             display: none;
+        }
+        body.dark-mode .remove-pokemon {
+            background: #a22;
+            color: #fff;
         }
 
         .team-slot.filled:hover .remove-pokemon {
@@ -323,6 +363,11 @@
             overflow-y: auto;
             z-index: 2000;
         }
+        body.dark-mode .moves-modal {
+            background: #232323;
+            color: #f0f0f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
 
         .moves-modal.active {
             display: block;
@@ -340,15 +385,14 @@
             transition: all 0.2s ease;
             margin-bottom: 5px;
         }
-
-        .move-item:hover {
-            background: #e8f5e9;
-            border-color: #4CAF50;
+        body.dark-mode .move-item {
+            background: #232323;
+            color: #f0f0f0;
+            border-color: #444;
         }
-
-        .move-item.selected {
-            background-color: #e8f5e9;
-            border-color: #4CAF50;
+        body.dark-mode .move-item.selected, body.dark-mode .move-item:hover {
+            background: #294d29;
+            border-color: #6fcf97;
         }
 
         .move-item .move-name {
@@ -415,6 +459,11 @@
             border-radius: 5px;
             border: 1px solid #ddd;
         }
+        body.dark-mode .selected-moves {
+            background: #181818;
+            border-color: #444;
+            color: #f0f0f0;
+        }
 
         .selected-moves h4 {
             margin-top: 0;
@@ -473,13 +522,57 @@
             display: none;
             margin-top: 10px;
         }
+        body.dark-mode .hover-details {
+            background: #232323;
+            color: #f0f0f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
 
         .pokemon-card:hover .hover-details {
             display: block;
         }
+
+        .theme-toggle {
+            margin-right: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .theme-toggle:hover {
+            background-color: #45a049;
+        }
+        body.dark-mode .theme-toggle {
+            background-color: #666;
+        }
+        body.dark-mode .theme-toggle:hover {
+            background-color: #777;
+        }
+
+        body.dark-mode .selected-move-item {
+            background: #181818;
+            color: #f0f0f0;
+            border-color: #444;
+        }
+        body.dark-mode .selected-move-item .move-type,
+        body.dark-mode .selected-move-item .move-category {
+            background: #333 !important;
+            color: #f0f0f0 !important;
+            border: none;
+        }
+        body.dark-mode .selected-move-item .move-power {
+            background: #232323;
+            color: #b0e0ff;
+        }
     </style>
 </head>
 <body>
+    <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+        <button class="theme-toggle" onclick="toggleDarkMode()">Cambiar Tema</button>
+    </div>
     <div class="container main-content">
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Buscar Pokémon por nombre">
@@ -1466,6 +1559,18 @@
             selectedPokemonForMoves = null;
             selectedMoves.clear();
         }
+
+        // Modo oscuro
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+        // Cargar preferencia de tema al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        });
     </script>
 </body>
 </html> 

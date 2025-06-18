@@ -369,6 +369,89 @@ public class PokemonBattleServer {
             grass.put("bug", 0.5); grass.put("rock", 2.0); grass.put("dragon", 0.5);
             grass.put("steel", 0.5);
             typeChart.put("grass", grass);
+
+            // Ice
+            Map<String, Double> ice = new HashMap<>();
+            ice.put("fire", 0.5); ice.put("water", 0.5); ice.put("grass", 2.0);
+            ice.put("ice", 0.5); ice.put("ground", 2.0); ice.put("flying", 2.0);
+            ice.put("dragon", 2.0); ice.put("steel", 0.5);
+            typeChart.put("ice", ice);
+
+            // Fighting
+            Map<String, Double> fighting = new HashMap<>();
+            fighting.put("normal", 2.0); fighting.put("ice", 2.0); fighting.put("poison", 0.5);
+            fighting.put("flying", 0.5); fighting.put("psychic", 0.5); fighting.put("bug", 0.5);
+            fighting.put("rock", 2.0); fighting.put("ghost", 0.0); fighting.put("dark", 2.0);
+            fighting.put("steel", 2.0);
+            typeChart.put("fighting", fighting);
+
+            // Poison
+            Map<String, Double> poison = new HashMap<>();
+            poison.put("grass", 2.0); poison.put("poison", 0.5); poison.put("ground", 0.5);
+            poison.put("rock", 0.5); poison.put("ghost", 0.5); poison.put("steel", 0.0);
+            typeChart.put("poison", poison);
+
+            // Ground
+            Map<String, Double> ground = new HashMap<>();
+            ground.put("fire", 2.0); ground.put("electric", 2.0); ground.put("grass", 0.5);
+            ground.put("poison", 2.0); ground.put("flying", 0.0); ground.put("bug", 0.5);
+            ground.put("rock", 2.0); ground.put("steel", 2.0);
+            typeChart.put("ground", ground);
+
+            // Flying
+            Map<String, Double> flying = new HashMap<>();
+            flying.put("electric", 0.5); flying.put("grass", 2.0); flying.put("fighting", 2.0);
+            flying.put("bug", 2.0); flying.put("rock", 0.5); flying.put("steel", 0.5);
+            typeChart.put("flying", flying);
+
+            // Psychic
+            Map<String, Double> psychic = new HashMap<>();
+            psychic.put("fighting", 2.0); psychic.put("poison", 2.0); psychic.put("psychic", 0.5);
+            psychic.put("dark", 0.0); psychic.put("steel", 0.5);
+            typeChart.put("psychic", psychic);
+
+            // Bug
+            Map<String, Double> bug = new HashMap<>();
+            bug.put("fire", 0.5); bug.put("grass", 2.0); bug.put("fighting", 0.5);
+            bug.put("poison", 0.5); bug.put("flying", 0.5); bug.put("psychic", 2.0);
+            bug.put("ghost", 0.5); bug.put("dark", 2.0); bug.put("steel", 0.5);
+            typeChart.put("bug", bug);
+
+            // Rock
+            Map<String, Double> rock = new HashMap<>();
+            rock.put("fire", 2.0); rock.put("ice", 2.0); rock.put("fighting", 0.5);
+            rock.put("ground", 0.5); rock.put("flying", 2.0); rock.put("bug", 2.0);
+            rock.put("steel", 0.5);
+            typeChart.put("rock", rock);
+
+            // Ghost
+            Map<String, Double> ghost = new HashMap<>();
+            ghost.put("normal", 0.0); ghost.put("psychic", 2.0); ghost.put("ghost", 2.0);
+            ghost.put("dark", 0.5);
+            typeChart.put("ghost", ghost);
+
+            // Dragon
+            Map<String, Double> dragon = new HashMap<>();
+            dragon.put("dragon", 2.0); dragon.put("steel", 0.5);
+            typeChart.put("dragon", dragon);
+
+            // Dark
+            Map<String, Double> dark = new HashMap<>();
+            dark.put("fighting", 0.5); dark.put("psychic", 2.0); dark.put("ghost", 2.0);
+            dark.put("dark", 0.5);
+            typeChart.put("dark", dark);
+
+            // Steel
+            Map<String, Double> steel = new HashMap<>();
+            steel.put("fire", 0.5); steel.put("water", 0.5); steel.put("electric", 0.5);
+            steel.put("ice", 2.0); steel.put("rock", 2.0); steel.put("steel", 0.5);
+            typeChart.put("steel", steel);
+
+            // Fairy
+            Map<String, Double> fairy = new HashMap<>();
+            fairy.put("fire", 0.5); fairy.put("fighting", 2.0); fairy.put("poison", 0.5);
+            fairy.put("dragon", 2.0); fairy.put("dark", 2.0); fairy.put("steel", 0.5);
+            typeChart.put("fairy", fairy);
             
             for (String defenderType : defenderTypes) {
                 Map<String, Double> typeRelations = typeChart.getOrDefault(attackType, Collections.emptyMap());
