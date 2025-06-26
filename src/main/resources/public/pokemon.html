@@ -567,6 +567,312 @@
             background: #232323;
             color: #b0e0ff;
         }
+
+        .stat-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-input-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+        }
+
+        .stat-input-group input {
+            width: 60px;
+            padding: 4px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        body.dark-mode .stat-input-group input {
+            background: #232323;
+            color: #f0f0f0;
+            border-color: #444;
+        }
+
+        .config-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        body.dark-mode .config-section {
+            background: #181818;
+            border-color: #444;
+            color: #f0f0f0;
+        }
+
+        .config-section h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        body.dark-mode .config-section h4 {
+            color: #f0f0f0;
+        }
+
+        .ability-item, .item-item, .nature-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 5px 0;
+            cursor: pointer;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        body.dark-mode .ability-item, 
+        body.dark-mode .item-item, 
+        body.dark-mode .nature-item {
+            background: #232323;
+            border-color: #444;
+            color: #f0f0f0;
+        }
+
+        .ability-item:hover, .item-item:hover, .nature-item:hover {
+            background: #e8f5e9;
+            border-color: #4CAF50;
+        }
+
+        body.dark-mode .ability-item:hover, 
+        body.dark-mode .item-item:hover, 
+        body.dark-mode .nature-item:hover {
+            background: #294d29;
+            border-color: #6fcf97;
+        }
+
+        .ability-item.selected, .item-item.selected, .nature-item.selected {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        body.dark-mode .ability-item.selected, 
+        body.dark-mode .item-item.selected, 
+        body.dark-mode .nature-item.selected {
+            background: #6fcf97;
+            color: #000;
+        }
+
+        .config-button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 12px;
+        }
+
+        .config-button:hover {
+            background: #1976D2;
+        }
+
+        .stats-display {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .stat-display {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+
+        body.dark-mode .stat-display {
+            background: #232323;
+            color: #f0f0f0;
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: #4CAF50;
+            border-bottom-color: #4CAF50;
+        }
+
+        body.dark-mode .tab-button {
+            color: #bbb;
+        }
+
+        body.dark-mode .tab-button.active {
+            color: #6fcf97;
+            border-bottom-color: #6fcf97;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .config-section-full {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        body.dark-mode .config-section-full {
+            background: #181818;
+            border-color: #444;
+            color: #f0f0f0;
+        }
+
+        .save-all-button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .save-all-button:hover {
+            background: #45a049;
+        }
+
+        /* Estilos para la sección de estadísticas calculadas en modo oscuro */
+        body.dark-mode .stats-display {
+            background: #181818;
+        }
+
+        body.dark-mode .stats-display h4 {
+            color: #f0f0f0;
+        }
+
+        /* Estilos para el selector de naturaleza en modo oscuro */
+        body.dark-mode select#natureSelect {
+            background: #232323;
+            color: #f0f0f0;
+            border-color: #444;
+        }
+
+        body.dark-mode select#natureSelect option {
+            background: #232323;
+            color: #f0f0f0;
+        }
+
+        /* Estilos para la sección de naturaleza en modo oscuro */
+        body.dark-mode .config-section-full {
+            background: #181818;
+            border-color: #444;
+            color: #f0f0f0;
+        }
+
+        /* Clases para secciones con estilos inline */
+        .nature-selector-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        body.dark-mode .nature-selector-section {
+            background: #181818;
+            border-color: #444;
+            color: #f0f0f0;
+        }
+
+        .stats-calculated-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        body.dark-mode .stats-calculated-section {
+            background: #181818;
+            color: #f0f0f0;
+        }
+
+        .config-info-section {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+
+        body.dark-mode .config-info-section {
+            background: #181818;
+            color: #f0f0f0;
+        }
+
+        /* Estilos para el selector de naturaleza en modo oscuro */
+        body.dark-mode #natureSelect {
+            background: #232323;
+            color: #f0f0f0;
+            border-color: #444;
+        }
+
+        body.dark-mode #natureSelect option {
+            background: #232323;
+            color: #f0f0f0;
+        }
+
+        body.dark-mode #natureSelect option {
+            background: #232323;
+            color: #f0f0f0;
+        }
+
+        /* Estilos para elementos h4 en modo oscuro */
+        body.dark-mode .nature-selector-section h4,
+        body.dark-mode .stats-calculated-section h4,
+        body.dark-mode .config-info-section h4 {
+            color: #f0f0f0;
+        }
+
+        /* Clase para descripciones */
+        .description-text {
+            font-size: 12px;
+            color: #666;
+        }
+
+        body.dark-mode .description-text {
+            color: #bbb;
+        }
     </style>
 </head>
 <body>
@@ -605,10 +911,9 @@
 
     <div id="movesModal" class="moves-modal">
         <button class="close-button" onclick="closeMovesModal()">&times;</button>
-        <div id="movesContent"></div>
-        <button onclick="saveSelectedMoves()" style="margin-top: 15px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Guardar Movimientos
-        </button>
+        <div id="movesContent">
+            <!-- Contenido dinámico con pestañas -->
+        </div>
     </div>
 
     <div id="teamNameModal" class="moves-modal">
@@ -618,6 +923,88 @@
             <input type="text" id="newTeamName" placeholder="Nombre del equipo" style="width: 100%; padding: 8px; margin: 10px 0;">
             <button onclick="confirmNewTeam()" style="margin-top: 15px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
                 Crear Equipo
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para configurar Pokémon -->
+    <div id="pokemonConfigModal" class="moves-modal">
+        <button class="close-button" onclick="closePokemonConfigModal()">&times;</button>
+        <div style="padding: 20px;">
+            <h3 id="pokemonConfigTitle">Configurar Pokémon</h3>
+            <div id="pokemonConfigContent">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para configurar IVs y EVs -->
+    <div id="statsConfigModal" class="moves-modal">
+        <button class="close-button" onclick="closeStatsConfigModal()">&times;</button>
+        <div style="padding: 20px;">
+            <h3>Configurar IVs y EVs</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>IVs (0-31)</h4>
+                    <div class="stat-input-group">
+                        <label>HP: <input type="number" id="hpIV" min="0" max="31" value="31"></label>
+                        <label>Ataque: <input type="number" id="attackIV" min="0" max="31" value="31"></label>
+                        <label>Defensa: <input type="number" id="defenseIV" min="0" max="31" value="31"></label>
+                        <label>Ataque Especial: <input type="number" id="specialAttackIV" min="0" max="31" value="31"></label>
+                        <label>Defensa Especial: <input type="number" id="specialDefenseIV" min="0" max="31" value="31"></label>
+                        <label>Velocidad: <input type="number" id="speedIV" min="0" max="31" value="31"></label>
+                    </div>
+                </div>
+                <div>
+                    <h4>EVs (0-252, máximo 510 total)</h4>
+                    <div class="stat-input-group">
+                        <label>HP: <input type="number" id="hpEV" min="0" max="252" value="0"></label>
+                        <label>Ataque: <input type="number" id="attackEV" min="0" max="252" value="0"></label>
+                        <label>Defensa: <input type="number" id="defenseEV" min="0" max="252" value="0"></label>
+                        <label>Ataque Especial: <input type="number" id="specialAttackEV" min="0" max="252" value="0"></label>
+                        <label>Defensa Especial: <input type="number" id="specialDefenseEV" min="0" max="252" value="0"></label>
+                        <label>Velocidad: <input type="number" id="speedEV" min="0" max="252" value="0"></label>
+                    </div>
+                    <p id="evTotal" style="margin-top: 10px; font-weight: bold;">Total EVs: 0/510</p>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <label>Nivel: <input type="number" id="pokemonLevel" min="1" max="100" value="50"></label>
+            </div>
+            
+            <!-- Sección de estadísticas en tiempo real -->
+            <div class="stats-calculated-section">
+                <h4 style="margin-top: 0;">Estadísticas Calculadas</h4>
+                <div id="calculatedStats" class="stats-display">
+                    <div class="stat-display">
+                        <span>HP:</span>
+                        <span id="calcHP">0</span>
+                    </div>
+                    <div class="stat-display">
+                        <span>Ataque:</span>
+                        <span id="calcAttack">0</span>
+                    </div>
+                    <div class="stat-display">
+                        <span>Defensa:</span>
+                        <span id="calcDefense">0</span>
+                    </div>
+                    <div class="stat-display">
+                        <span>Ataque Especial:</span>
+                        <span id="calcSpecialAttack">0</span>
+                    </div>
+                    <div class="stat-display">
+                        <span>Defensa Especial:</span>
+                        <span id="calcSpecialDefense">0</span>
+                    </div>
+                    <div class="stat-display">
+                        <span>Velocidad:</span>
+                        <span id="calcSpeed">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="saveStatsConfig()" style="margin-top: 15px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Guardar Configuración
             </button>
         </div>
     </div>
@@ -705,12 +1092,26 @@
                 specialDefense: pokemon.specialDefense || pokemon.baseSpecialDefense
             };
 
+            // Obtener información de configuración
+            const nature = displayData.nature ? displayData.nature.name : 'Aleatoria';
+            const heldItem = displayData.heldItem && displayData.heldItem !== null && displayData.heldItem !== undefined ? displayData.heldItem.name : 'Ninguno';
+            const selectedAbility = displayData.selectedAbility ? displayData.selectedAbility.name : 'Ninguna';
+            const level = displayData.level || 50;
+
             return `
                 <div class="pokemon-card ${selectedClass}" onclick="selectPokemon('${pokemon.id}')">
                     <img src="${pokemon.imageUrl}" alt="${pokemon.name}" class="pokemon-image" 
                          onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png'">
                     <div class="pokemon-name">${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}</div>
                     <div class="pokemon-types">${typeBadges}</div>
+                    
+                    <!-- Botones de configuración -->
+                    <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+                        <button class="config-button" onclick="event.stopPropagation(); showMovesModal('${pokemon.id}', '${currentTeam || ''}', ${teams[currentTeam] ? teams[currentTeam].indexOf(pokemon.id) : -1})" title="Configurar Pokémon">
+                            <i class="fa-solid fa-cog"></i>
+                        </button>
+                    </div>
+                    
                     <div class="hover-details">
                         <div class="stats-grid">
                             <div class="stat-item">
@@ -738,6 +1139,18 @@
                                 <span>${displayData.speed || displayData.baseSpeed}</span>
                             </div>
                         </div>
+                        
+                        <!-- Información de configuración -->
+                        <div class="config-info-section">
+                            <h4 style="margin: 0 0 10px 0; font-size: 14px;">Configuración</h4>
+                            <div style="font-size: 12px; line-height: 1.4;">
+                                <div><strong>Nivel:</strong> ${level}</div>
+                                <div><strong>Naturaleza:</strong> ${nature}</div>
+                                <div><strong>Objeto:</strong> ${heldItem}</div>
+                                <div><strong>Habilidad:</strong> ${selectedAbility}</div>
+                            </div>
+                        </div>
+                        
                         <div class="moves-section">
                             <h4>Movimientos Seleccionados</h4>
                             <div class="selected-moves-list">
@@ -841,7 +1254,30 @@
                     type: move.type,
                     category: move.category
                 })),
-                selectedMoveIndices: [] // Inicializar sin movimientos seleccionados
+                selectedMoveIndices: [], // Inicializar sin movimientos seleccionados
+                level: 50, // Nivel por defecto
+                stats: {
+                    hp: pokemon.maxHealth / 2, // HP base
+                    attack: pokemon.baseAttack || pokemon.attack,
+                    defense: pokemon.baseDefense || pokemon.defense,
+                    speed: pokemon.baseSpeed || pokemon.speed,
+                    specialAttack: pokemon.baseSpecialAttack || pokemon.specialAttack,
+                    specialDefense: pokemon.baseSpecialDefense || pokemon.specialDefense,
+                    // IVs por defecto (perfectos)
+                    hpIV: 31,
+                    attackIV: 31,
+                    defenseIV: 31,
+                    specialAttackIV: 31,
+                    specialDefenseIV: 31,
+                    speedIV: 31,
+                    // EVs por defecto (0)
+                    hpEV: 0,
+                    attackEV: 0,
+                    defenseEV: 0,
+                    specialAttackEV: 0,
+                    specialDefenseEV: 0,
+                    speedEV: 0
+                }
             };
 
             // Guardar los datos del Pokémon en localStorage
@@ -913,6 +1349,12 @@
                         const pokemonHash = generatePokemonTeamHash(pokemonId, currentTeam, index);
                         const savedData = localStorage.getItem(pokemonHash);
                         const pokemonData = savedData ? JSON.parse(savedData) : allPokemon.find(p => p.id === pokemonId);
+                        
+                        console.log(`Actualizando slot ${index} para Pokémon ${pokemonId}:`, {
+                            hasSavedData: !!savedData,
+                            heldItem: pokemonData?.heldItem,
+                            pokemonData: pokemonData
+                        });
                         
                         if (pokemonData) {
                             slot.innerHTML = `
@@ -1339,7 +1781,10 @@
 
         function showMovesModal(pokemonId, teamName, slotIndex) {
             const pokemonData = getTeamPokemonData(pokemonId, teamName, slotIndex);
-            if (!pokemonData) return;
+            if (!pokemonData) {
+                alert('No se encontraron datos del Pokémon');
+                return;
+            }
 
             console.log('Mostrando modal para:', {
                 pokemon: pokemonData.name,
@@ -1364,76 +1809,174 @@
                 });
             }
 
-            const movesContent = document.getElementById('movesContent');
-            movesContent.innerHTML = `
-                <div class="pokemon-stats-modal">
-                    <div>
-                        <img src="${pokemonData.imageUrl}" alt="${pokemonData.name}">
-                        <h3>${pokemonData.name}</h3>
-                        <div class="pokemon-types">
-                            ${pokemonData.types.map(type => 
-                                `<span class="type-badge type-${type.toLowerCase()}">${translateType(type)}</span>`
-                            ).join('')}
+            // Cargar datos de configuración
+            loadConfigurationData().then(() => {
+                loadPokemonAbilities(pokemonId).then(abilities => {
+                    console.log('Habilidades cargadas:', abilities);
+                    
+                    // Actualizar las habilidades del Pokémon
+                    selectedPokemonForMoves.abilities = abilities;
+                    
+                    const movesContent = document.getElementById('movesContent');
+                    movesContent.innerHTML = `
+                        <div class="tab-container">
+                            <button class="tab-button active" onclick="switchTab('moves')">Movimientos</button>
+                            <button class="tab-button" onclick="switchTab('abilities')">Habilidades</button>
+                            <button class="tab-button" onclick="switchTab('items')">Objetos</button>
+                            <button class="tab-button" onclick="switchTab('stats')">Estadísticas</button>
                         </div>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span>HP:</span>
-                            <span>${pokemonData.health}/${pokemonData.maxHealth}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Ataque:</span>
-                            <span>${pokemonData.attack}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Defensa:</span>
-                            <span>${pokemonData.defense}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Ataque Especial:</span>
-                            <span>${pokemonData.specialAttack}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Defensa Especial:</span>
-                            <span>${pokemonData.specialDefense}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Velocidad:</span>
-                            <span>${pokemonData.speed}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="moves-container">
-                    <div>
-                        <h3>Lista de Movimientos Disponibles</h3>
-                        <div class="moves-list">
-                            ${pokemonData.moves.map((move, index) => {
-                                const categoryClass = `category-${(move.category || 'status').toLowerCase()}`;
-                                const isSelected = selectedMoves.has(index.toString());
-                                return `
-                                    <div class="move-item ${isSelected ? 'selected' : ''}" 
-                                         onclick="toggleMove(${index})">
-                                        <span class="move-name">${move.name}</span>
-                                        <div class="move-details">
-                                            <span class="move-power">${move.power || 0} PWR</span>
-                                            <span class="move-type type-${(move.type || 'normal').toLowerCase()}">${translateType(move.type || 'normal')}</span>
-                                            <span class="move-category ${categoryClass}">${move.category || 'status'}</span>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                    <div class="selected-moves">
-                        <h4>Movimientos Seleccionados (${selectedMoves.size}/4)</h4>
-                        <div id="selectedMovesList"></div>
-                    </div>
-                </div>
-            `;
 
-            const modal = document.getElementById('movesModal');
-            modal.classList.add('active');
-            updateSelectedMovesList();
+                        <!-- Pestaña Movimientos -->
+                        <div id="tab-moves" class="tab-content active">
+                            <div class="config-grid">
+                                <div>
+                                    <h3>Lista de Movimientos Disponibles</h3>
+                                    <div class="moves-list">
+                                        ${pokemonData.moves.map((move, index) => {
+                                            const categoryClass = `category-${(move.category || 'status').toLowerCase()}`;
+                                            const isSelected = selectedMoves.has(index.toString());
+                                            return `
+                                                <div class="move-item ${isSelected ? 'selected' : ''}" 
+                                                     onclick="toggleMove(${index})">
+                                                    <span class="move-name">${move.name}</span>
+                                                    <div class="move-details">
+                                                        <span class="move-power">${move.power || 0} PWR</span>
+                                                        <span class="move-type type-${(move.type || 'normal').toLowerCase()}">${translateType(move.type || 'normal')}</span>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                                <div class="selected-moves">
+                                    <h4>Movimientos Seleccionados (${selectedMoves.size}/4)</h4>
+                                    <div id="selectedMovesList"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Habilidades -->
+                        <div id="tab-abilities" class="tab-content">
+                            <div class="config-section-full">
+                                <h4>Habilidades</h4>
+                                ${abilities.map(ability => `
+                                    <div class="ability-item ${pokemonData.selectedAbility && pokemonData.selectedAbility.id === ability.id ? 'selected' : ''}" 
+                                         onclick="selectAbility('${ability.id}')">
+                                        <div><strong>${ability.name}</strong></div>
+                                        <div style="font-size: 12px; color: #666;">${ability.description}</div>
+                                        ${ability.isHidden ? '<div style="font-size: 11px; color: #ff6b6b;">Habilidad Oculta</div>' : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Objetos -->
+                        <div id="tab-items" class="tab-content">
+                            <div class="config-section-full">
+                                <h4>Objeto Equipado</h4>
+                                <div class="item-item ${!pokemonData.heldItem || pokemonData.heldItem === null || pokemonData.heldItem === undefined ? 'selected' : ''}" onclick="selectItem('')">
+                                    <div><strong>Ninguno</strong></div>
+                                    <div class="description-text">Sin objeto equipado</div>
+                                </div>
+                                ${Object.values(allItems).map(item => `
+                                    <div class="item-item ${pokemonData.heldItem && pokemonData.heldItem.id === item.id ? 'selected' : ''}" 
+                                         onclick="selectItem('${item.id}')">
+                                        <div><strong>${item.name}</strong></div>
+                                        <div class="description-text">${item.description}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Estadísticas -->
+                        <div id="tab-stats" class="tab-content">
+                            <!-- Selector de Naturaleza -->
+                            <div class="nature-selector-section">
+                                <h4 style="margin-top: 0;">Naturaleza</h4>
+                                <select id="natureSelect" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+                                    <option value="">Seleccionar Naturaleza</option>
+                                ${Object.values(allNatures).map(nature => `
+                                        <option value="${nature.id}" ${pokemonData.nature && pokemonData.nature.id === nature.id ? 'selected' : ''}>
+                                            ${nature.name} - ${nature.description}
+                                        </option>
+                                `).join('')}
+                                </select>
+                        </div>
+
+                            <!-- Configuración de IVs y EVs -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                <div>
+                                    <h4>IVs (0-31)</h4>
+                                    <div class="stat-input-group">
+                                        <label>HP: <input type="number" id="hpIV" min="0" max="31" value="${pokemonData.stats ? pokemonData.stats.hpIV || 31 : 31}"></label>
+                                        <label>Ataque: <input type="number" id="attackIV" min="0" max="31" value="${pokemonData.stats ? pokemonData.stats.attackIV || 31 : 31}"></label>
+                                        <label>Defensa: <input type="number" id="defenseIV" min="0" max="31" value="${pokemonData.stats ? pokemonData.stats.defenseIV || 31 : 31}"></label>
+                                        <label>Ataque Especial: <input type="number" id="specialAttackIV" min="0" max="31" value="${pokemonData.stats ? pokemonData.stats.specialAttackIV || 31 : 31}"></label>
+                                        <label>Defensa Especial: <input type="number" id="specialDefenseIV" min="0" max="31" value="${pokemonData.stats ? pokemonData.stats.specialDefenseIV || 31 : 31}"></label>
+                                        <label>Velocidad: <input type="number" id="speedIV" min="0" max="31" value="${pokemonData.stats ? pokemonData.stats.speedIV || 31 : 31}"></label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4>EVs (0-252, máximo 510 total)</h4>
+                                    <div class="stat-input-group">
+                                        <label>HP: <input type="number" id="hpEV" min="0" max="252" value="${pokemonData.stats ? pokemonData.stats.hpEV || 0 : 0}"></label>
+                                        <label>Ataque: <input type="number" id="attackEV" min="0" max="252" value="${pokemonData.stats ? pokemonData.stats.attackEV || 0 : 0}"></label>
+                                        <label>Defensa: <input type="number" id="defenseEV" min="0" max="252" value="${pokemonData.stats ? pokemonData.stats.defenseEV || 0 : 0}"></label>
+                                        <label>Ataque Especial: <input type="number" id="specialAttackEV" min="0" max="252" value="${pokemonData.stats ? pokemonData.stats.specialAttackEV || 0 : 0}"></label>
+                                        <label>Defensa Especial: <input type="number" id="specialDefenseEV" min="0" max="252" value="${pokemonData.stats ? pokemonData.stats.specialDefenseEV || 0 : 0}"></label>
+                                        <label>Velocidad: <input type="number" id="speedEV" min="0" max="252" value="${pokemonData.stats ? pokemonData.stats.speedEV || 0 : 0}"></label>
+                                    </div>
+                                    <p id="evTotal" style="margin-top: 10px; font-weight: bold;">Total EVs: 0/510</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Nivel -->
+                            <div style="margin-bottom: 20px;">
+                                <label>Nivel: <input type="number" id="pokemonLevel" min="1" max="100" value="${pokemonData.level || 50}"></label>
+                            </div>
+                            
+                            <!-- Sección de estadísticas en tiempo real -->
+                            <div class="stats-calculated-section">
+                                <h4 style="margin-top: 0;">Estadísticas Calculadas</h4>
+                                <div id="calculatedStats" class="stats-display">
+                                    <div class="stat-display">
+                                        <span>HP:</span>
+                                        <span id="calcHP">0</span>
+                                    </div>
+                                    <div class="stat-display">
+                                        <span>Ataque:</span>
+                                        <span id="calcAttack">0</span>
+                                    </div>
+                                    <div class="stat-display">
+                                        <span>Defensa:</span>
+                                        <span id="calcDefense">0</span>
+                                    </div>
+                                    <div class="stat-display">
+                                        <span>Ataque Especial:</span>
+                                        <span id="calcSpecialAttack">0</span>
+                                    </div>
+                                    <div class="stat-display">
+                                        <span>Defensa Especial:</span>
+                                        <span id="calcSpecialDefense">0</span>
+                                    </div>
+                                    <div class="stat-display">
+                                        <span>Velocidad:</span>
+                                        <span id="calcSpeed">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    updateSelectedMovesList();
+                    updateEVTotal();
+                    updateCalculatedStats();
+                    initializeStatsEventListeners();
+                    updateNatureSelection(); // Sincronizar selección visual de naturaleza
+                    const modal = document.getElementById('movesModal');
+                    modal.classList.add('active');
+                });
+            });
         }
 
         function toggleMove(index) {
@@ -1456,6 +1999,7 @@
 
             updateSelectedMovesList();
             updateMovesList();
+            saveAllConfig();
         }
 
         function updateMovesList() {
@@ -1472,7 +2016,6 @@
                         <div class="move-details">
                             <span class="move-power">${move.power || 0} PWR</span>
                             <span class="move-type type-${(move.type || 'normal').toLowerCase()}">${translateType(move.type || 'normal')}</span>
-                            <span class="move-category ${categoryClass}">${move.category || 'status'}</span>
                         </div>
                     </div>
                 `;
@@ -1571,6 +2114,792 @@
                 document.body.classList.add('dark-mode');
             }
         });
+
+        // Variables globales para configuración
+        let allNatures = {};
+        let allItems = {};
+        let currentConfigPokemon = null;
+
+        // Función para cargar naturalezas y objetos
+        async function loadConfigurationData() {
+            try {
+                const [naturesResponse, itemsResponse] = await Promise.all([
+                    fetch('/api/pokemon/natures'),
+                    fetch('/api/pokemon/items')
+                ]);
+                
+                if (naturesResponse.ok) {
+                    allNatures = await naturesResponse.json();
+                    window.allNatures = allNatures; // Hacer global
+                }
+                
+                if (itemsResponse.ok) {
+                    allItems = await itemsResponse.json();
+                    window.allItems = allItems; // Hacer global
+                }
+            } catch (error) {
+                console.error('Error al cargar datos de configuración:', error);
+            }
+        }
+
+        // Función para mostrar el modal de configuración de Pokémon
+        async function showPokemonConfig(pokemonId) {
+            currentConfigPokemon = pokemonId;
+            const pokemon = allPokemon.find(p => p.id === pokemonId);
+            if (!pokemon) return;
+
+            // Cargar datos de configuración si no están cargados
+            if (Object.keys(allNatures).length === 0) {
+                await loadConfigurationData();
+            }
+
+            // Cargar habilidades del Pokémon
+            let abilities = [];
+            try {
+                const abilitiesResponse = await fetch(`/api/pokemon/${pokemonId}/abilities`);
+                if (abilitiesResponse.ok) {
+                    abilities = await abilitiesResponse.json();
+                }
+            } catch (error) {
+                console.error('Error al cargar habilidades:', error);
+            }
+
+            // Obtener configuración actual del Pokémon
+            let currentConfig = {};
+            if (currentTeam && teams[currentTeam]) {
+                for (const [teamName, team] of Object.entries(teams)) {
+                    const index = team.indexOf(pokemonId);
+                    if (index !== -1) {
+                        const pokemonHash = generatePokemonTeamHash(pokemonId, teamName, index);
+                        const savedData = localStorage.getItem(pokemonHash);
+                        if (savedData) {
+                            currentConfig = JSON.parse(savedData);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const content = document.getElementById('pokemonConfigContent');
+            content.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <img src="${pokemon.imageUrl}" alt="${pokemon.name}" style="width: 150px; height: 150px; object-fit: contain;">
+                        <h4>${pokemon.name}</h4>
+                        <div class="pokemon-types">
+                            ${pokemon.types.map(type => 
+                                `<span class="type-badge type-${type.toLowerCase()}">${translateType(type)}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="config-section">
+                            <h4>Habilidades</h4>
+                            ${abilities.map(ability => `
+                                <div class="ability-item ${currentConfig.selectedAbility && currentConfig.selectedAbility.id === ability.id ? 'selected' : ''}" 
+                                     onclick="selectAbility('${ability.id}')">
+                                    <div><strong>${ability.name}</strong></div>
+                                    <div style="font-size: 12px; color: #666;">${ability.description}</div>
+                                    ${ability.isHidden ? '<div style="font-size: 11px; color: #ff6b6b;">Habilidad Oculta</div>' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="config-section">
+                            <h4>Objeto Equipado</h4>
+                            <div class="item-item ${!currentConfig.heldItem ? 'selected' : ''}" onclick="selectItem('')">
+                                <div><strong>Ninguno</strong></div>
+                                <div style="font-size: 12px; color: #666;">Sin objeto equipado</div>
+                            </div>
+                            ${Object.values(allItems).map(item => `
+                                <div class="item-item ${currentConfig.heldItem && currentConfig.heldItem.id === item.id ? 'selected' : ''}" 
+                                     onclick="selectItem('${item.id}')">
+                                    <div><strong>${item.name}</strong></div>
+                                    <div style="font-size: 12px; color: #666;">${item.description}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="config-section">
+                            <h4>Naturaleza</h4>
+                            ${Object.values(allNatures).map(nature => `
+                                <div class="nature-item ${currentConfig.nature && currentConfig.nature.id === nature.id ? 'selected' : ''}" 
+                                     onclick="selectNature('${nature.id}')">
+                                    <div><strong>${nature.name}</strong></div>
+                                    <div style="font-size: 12px; color: #666;">${nature.description}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="savePokemonConfig()" style="margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Guardar Configuración
+                </button>
+            `;
+
+            document.getElementById('pokemonConfigModal').classList.add('active');
+        }
+
+        // Función para mostrar el modal de configuración de estadísticas
+        async function showStatsConfig(pokemonId) {
+            currentConfigPokemon = pokemonId;
+            
+            // Obtener configuración actual del Pokémon
+            let currentConfig = {};
+            if (currentTeam && teams[currentTeam]) {
+                for (const [teamName, team] of Object.entries(teams)) {
+                    const index = team.indexOf(pokemonId);
+                    if (index !== -1) {
+                        const pokemonHash = generatePokemonTeamHash(pokemonId, teamName, index);
+                        const savedData = localStorage.getItem(pokemonHash);
+                        if (savedData) {
+                            currentConfig = JSON.parse(savedData);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Cargar estadísticas actuales
+            try {
+                const statsResponse = await fetch(`/api/pokemon/${pokemonId}/stats`);
+                if (statsResponse.ok) {
+                    const stats = await statsResponse.json();
+                    
+                    // Rellenar formulario con valores actuales
+                    if (stats.baseStats) {
+                        document.getElementById('hpIV').value = stats.baseStats.hpIV || 31;
+                        document.getElementById('attackIV').value = stats.baseStats.attackIV || 31;
+                        document.getElementById('defenseIV').value = stats.baseStats.defenseIV || 31;
+                        document.getElementById('specialAttackIV').value = stats.baseStats.specialAttackIV || 31;
+                        document.getElementById('specialDefenseIV').value = stats.baseStats.specialDefenseIV || 31;
+                        document.getElementById('speedIV').value = stats.baseStats.speedIV || 31;
+                        
+                        document.getElementById('hpEV').value = stats.baseStats.hpEV || 0;
+                        document.getElementById('attackEV').value = stats.baseStats.attackEV || 0;
+                        document.getElementById('defenseEV').value = stats.baseStats.defenseEV || 0;
+                        document.getElementById('specialAttackEV').value = stats.baseStats.specialAttackEV || 0;
+                        document.getElementById('specialDefenseEV').value = stats.baseStats.specialDefenseEV || 0;
+                        document.getElementById('speedEV').value = stats.baseStats.speedEV || 0;
+                    }
+                    
+                    document.getElementById('pokemonLevel').value = stats.level || 50;
+                    
+                    updateEVTotal();
+                    updateCalculatedStats();
+                    initializeStatsEventListeners();
+                    updateNatureSelection(); // Sincronizar selección visual de naturaleza
+                }
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+            }
+
+            document.getElementById('statsConfigModal').classList.add('active');
+        }
+
+        // Función para inicializar event listeners de estadísticas
+        function initializeStatsEventListeners() {
+            const evInputs = ['hpEV', 'attackEV', 'defenseEV', 'specialAttackEV', 'specialDefenseEV', 'speedEV'];
+            const ivInputs = ['hpIV', 'attackIV', 'defenseIV', 'specialAttackIV', 'specialDefenseIV', 'speedIV'];
+            const levelInput = 'pokemonLevel';
+            
+            // Event listeners para EVs
+            evInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    // Remover event listeners existentes para evitar duplicados
+                    element.removeEventListener('input', updateEVTotal);
+                    element.removeEventListener('input', updateCalculatedStats);
+                    
+                    // Agregar nuevos event listeners
+                    element.addEventListener('input', () => {
+                        updateEVTotal();
+                        updateCalculatedStats();
+                    });
+                }
+            });
+            
+            // Event listeners para IVs
+            ivInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    // Remover event listeners existentes
+                    element.removeEventListener('input', updateCalculatedStats);
+                    
+                    // Agregar nuevo event listener
+                    element.addEventListener('input', updateCalculatedStats);
+                }
+            });
+            
+            // Event listener para nivel
+            const levelElement = document.getElementById(levelInput);
+            if (levelElement) {
+                // Remover event listener existente
+                levelElement.removeEventListener('input', updateCalculatedStats);
+                
+                // Agregar nuevo event listener
+                levelElement.addEventListener('input', updateCalculatedStats);
+            }
+            
+            // Event listener para selector de naturaleza
+            const natureSelect = document.getElementById('natureSelect');
+            if (natureSelect) {
+                // Remover event listener existente
+                natureSelect.removeEventListener('change', updateCalculatedStats);
+                natureSelect.removeEventListener('change', updateNatureSelection);
+                
+                // Agregar nuevos event listeners
+                natureSelect.addEventListener('change', updateCalculatedStats);
+                natureSelect.addEventListener('change', updateNatureSelection);
+            }
+        }
+
+        // Event listeners para EVs
+        document.addEventListener('DOMContentLoaded', () => {
+            const evInputs = ['hpEV', 'attackEV', 'defenseEV', 'specialAttackEV', 'specialDefenseEV', 'speedEV'];
+            const ivInputs = ['hpIV', 'attackIV', 'defenseIV', 'specialAttackIV', 'specialDefenseIV', 'speedIV'];
+            const levelInput = 'pokemonLevel';
+            
+            // Event listeners para EVs
+            evInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', () => {
+                        updateEVTotal();
+                        updateCalculatedStats();
+                    });
+                }
+            });
+            
+            // Event listeners para IVs
+            ivInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', updateCalculatedStats);
+                }
+            });
+            
+            // Event listener para nivel
+            const levelElement = document.getElementById(levelInput);
+            if (levelElement) {
+                levelElement.addEventListener('input', updateCalculatedStats);
+            }
+        });
+
+        // Función para calcular estadísticas en tiempo real
+        function updateCalculatedStats() {
+            // Determinar qué Pokémon usar para los cálculos
+            let pokemonData = null;
+            
+            if (selectedPokemonForMoves) {
+                // Modal principal de movimientos
+                pokemonData = selectedPokemonForMoves;
+            } else if (currentConfigPokemon) {
+                // Modal independiente de estadísticas
+                pokemonData = allPokemon.find(p => p.id === currentConfigPokemon);
+            }
+            
+            if (!pokemonData) return;
+            
+            // Obtener valores de IVs
+            const hpIV = parseInt(document.getElementById('hpIV')?.value) || 31;
+            const attackIV = parseInt(document.getElementById('attackIV')?.value) || 31;
+            const defenseIV = parseInt(document.getElementById('defenseIV')?.value) || 31;
+            const specialAttackIV = parseInt(document.getElementById('specialAttackIV')?.value) || 31;
+            const specialDefenseIV = parseInt(document.getElementById('specialDefenseIV')?.value) || 31;
+            const speedIV = parseInt(document.getElementById('speedIV')?.value) || 31;
+            
+            // Obtener valores de EVs
+            const hpEV = parseInt(document.getElementById('hpEV')?.value) || 0;
+            const attackEV = parseInt(document.getElementById('attackEV')?.value) || 0;
+            const defenseEV = parseInt(document.getElementById('defenseEV')?.value) || 0;
+            const specialAttackEV = parseInt(document.getElementById('specialAttackEV')?.value) || 0;
+            const specialDefenseEV = parseInt(document.getElementById('specialDefenseEV')?.value) || 0;
+            const speedEV = parseInt(document.getElementById('speedEV')?.value) || 0;
+            
+            // Obtener nivel
+            const level = parseInt(document.getElementById('pokemonLevel')?.value) || 50;
+            
+            // Obtener naturaleza seleccionada
+            const natureSelect = document.getElementById('natureSelect');
+            let natureModifiers = { attack: 1, defense: 1, specialAttack: 1, specialDefense: 1, speed: 1 };
+            
+            if (natureSelect && natureSelect.value) {
+                const selectedNature = allNatures[natureSelect.value];
+                if (selectedNature) {
+                    natureModifiers = {
+                        attack: parseFloat(selectedNature.attackModifier) || 1,
+                        defense: parseFloat(selectedNature.defenseModifier) || 1,
+                        specialAttack: parseFloat(selectedNature.specialAttackModifier) || 1,
+                        specialDefense: parseFloat(selectedNature.specialDefenseModifier) || 1,
+                        speed: parseFloat(selectedNature.speedModifier) || 1
+                    };
+                }
+            }
+            
+            // Obtener estadísticas base del Pokémon
+            let baseStats = pokemonData.baseStats;
+            if (!baseStats) {
+                // Buscar en allPokemon por id si no están presentes
+                const original = allPokemon.find(p => p.id === pokemonData.id);
+                baseStats = original?.baseStats || {
+                    hp: original?.maxHealth || 100,
+                    attack: original?.baseAttack || 50,
+                    defense: original?.baseDefense || 50,
+                    specialAttack: original?.baseSpecialAttack || 50,
+                    specialDefense: original?.baseSpecialDefense || 50,
+                    speed: original?.baseSpeed || 50
+                };
+            }
+
+            const baseHP = baseStats.hp;
+            const baseAttack = baseStats.attack;
+            const baseDefense = baseStats.defense;
+            const baseSpecialAttack = baseStats.specialAttack;
+            const baseSpecialDefense = baseStats.specialDefense;
+            const baseSpeed = baseStats.speed;
+
+            // Calcular estadísticas finales usando la fórmula de Pokémon con modificadores de naturaleza
+            const calculatedStats = {
+                hp: Math.floor(((2 * baseHP + hpIV + Math.floor(hpEV / 4)) * level) / 100) + level + 10,
+                attack: Math.floor(((2 * baseAttack + attackIV + Math.floor(attackEV / 4)) * level) / 100) + 5,
+                defense: Math.floor(((2 * baseDefense + defenseIV + Math.floor(defenseEV / 4)) * level) / 100) + 5,
+                specialAttack: Math.floor(((2 * baseSpecialAttack + specialAttackIV + Math.floor(specialAttackEV / 4)) * level) / 100) + 5,
+                specialDefense: Math.floor(((2 * baseSpecialDefense + specialDefenseIV + Math.floor(specialDefenseEV / 4)) * level) / 100) + 5,
+                speed: Math.floor(((2 * baseSpeed + speedIV + Math.floor(speedEV / 4)) * level) / 100) + 5
+            };
+
+            // Aplicar modificadores de naturaleza (excepto HP)
+            calculatedStats.attack = Math.floor(calculatedStats.attack * natureModifiers.attack);
+            calculatedStats.defense = Math.floor(calculatedStats.defense * natureModifiers.defense);
+            calculatedStats.specialAttack = Math.floor(calculatedStats.specialAttack * natureModifiers.specialAttack);
+            calculatedStats.specialDefense = Math.floor(calculatedStats.specialDefense * natureModifiers.specialDefense);
+            calculatedStats.speed = Math.floor(calculatedStats.speed * natureModifiers.speed);
+            
+            // Actualizar elementos en el DOM
+            const calcElements = {
+                hp: document.getElementById('calcHP'),
+                attack: document.getElementById('calcAttack'),
+                defense: document.getElementById('calcDefense'),
+                specialAttack: document.getElementById('calcSpecialAttack'),
+                specialDefense: document.getElementById('calcSpecialDefense'),
+                speed: document.getElementById('calcSpeed')
+            };
+            
+            if (calcElements.hp) calcElements.hp.textContent = calculatedStats.hp;
+            if (calcElements.attack) calcElements.attack.textContent = calculatedStats.attack;
+            if (calcElements.defense) calcElements.defense.textContent = calculatedStats.defense;
+            if (calcElements.specialAttack) calcElements.specialAttack.textContent = calculatedStats.specialAttack;
+            if (calcElements.specialDefense) calcElements.specialDefense.textContent = calculatedStats.specialDefense;
+            if (calcElements.speed) calcElements.speed.textContent = calculatedStats.speed;
+        }
+
+        // Función para actualizar el total de EVs (mejorada)
+        function updateEVTotal() {
+            const hpEV = parseInt(document.getElementById('hpEV')?.value) || 0;
+            const attackEV = parseInt(document.getElementById('attackEV')?.value) || 0;
+            const defenseEV = parseInt(document.getElementById('defenseEV')?.value) || 0;
+            const specialAttackEV = parseInt(document.getElementById('specialAttackEV')?.value) || 0;
+            const specialDefenseEV = parseInt(document.getElementById('specialDefenseEV')?.value) || 0;
+            const speedEV = parseInt(document.getElementById('speedEV')?.value) || 0;
+            
+            const total = hpEV + attackEV + defenseEV + specialAttackEV + specialDefenseEV + speedEV;
+            const element = document.getElementById('evTotal');
+            if (element) {
+                element.textContent = `Total EVs: ${total}/510`;
+                element.style.color = total > 510 ? '#ff4444' : total === 510 ? '#4CAF50' : '#333';
+            }
+            saveAllConfig();
+        }
+
+        // Función para guardar configuración de Pokémon
+        async function savePokemonConfig() {
+            if (!currentConfigPokemon) return;
+
+            const selectedAbility = document.querySelector('.ability-item.selected');
+            const selectedItem = document.querySelector('.item-item.selected');
+            const selectedNature = document.querySelector('.nature-item.selected');
+
+            const config = {
+                selectedAbilityId: selectedAbility ? selectedAbility.querySelector('strong').textContent : null,
+                heldItemId: selectedItem ? selectedItem.querySelector('strong').textContent === 'Ninguno' ? '' : selectedItem.querySelector('strong').textContent : '',
+                natureId: selectedNature ? selectedNature.querySelector('strong').textContent : null
+            };
+
+            try {
+                const response = await fetch(`/api/pokemon/${currentConfigPokemon}/configure`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                if (response.ok) {
+                    const updatedPokemon = await response.json();
+                    
+                    // Actualizar datos en localStorage si está en un equipo
+                    if (currentTeam && teams[currentTeam]) {
+                        for (const [teamName, team] of Object.entries(teams)) {
+                            const index = team.indexOf(currentConfigPokemon);
+                            if (index !== -1) {
+                                const pokemonHash = generatePokemonTeamHash(currentConfigPokemon, teamName, index);
+                                const savedData = localStorage.getItem(pokemonHash);
+                                if (savedData) {
+                                    const currentData = JSON.parse(savedData);
+                                    const newData = { ...currentData, ...updatedPokemon };
+                                    localStorage.setItem(pokemonHash, JSON.stringify(newData));
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    closePokemonConfigModal();
+                    updatePokemonGrid();
+                    alert('Configuración guardada exitosamente');
+                } else {
+                    const error = await response.json();
+                    alert('Error al guardar configuración: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error al guardar configuración:', error);
+                alert('Error al guardar configuración');
+            }
+        }
+
+        // Función para guardar configuración de estadísticas
+        async function saveStatsConfig() {
+            if (!currentConfigPokemon) return;
+
+            const total = parseInt(document.getElementById('hpEV').value) + 
+                         parseInt(document.getElementById('attackEV').value) + 
+                         parseInt(document.getElementById('defenseEV').value) + 
+                         parseInt(document.getElementById('specialAttackEV').value) + 
+                         parseInt(document.getElementById('specialDefenseEV').value) + 
+                         parseInt(document.getElementById('speedEV').value);
+
+            if (total > 510) {
+                alert('Los EVs totales no pueden exceder 510');
+                return;
+            }
+
+            const config = {
+                ivs: {
+                    hp: parseInt(document.getElementById('hpIV').value),
+                    attack: parseInt(document.getElementById('attackIV').value),
+                    defense: parseInt(document.getElementById('defenseIV').value),
+                    specialAttack: parseInt(document.getElementById('specialAttackIV').value),
+                    specialDefense: parseInt(document.getElementById('specialDefenseIV').value),
+                    speed: parseInt(document.getElementById('speedIV').value)
+                },
+                evs: {
+                    hp: parseInt(document.getElementById('hpEV').value),
+                    attack: parseInt(document.getElementById('attackEV').value),
+                    defense: parseInt(document.getElementById('defenseEV').value),
+                    specialAttack: parseInt(document.getElementById('specialAttackEV').value),
+                    specialDefense: parseInt(document.getElementById('specialDefenseEV').value),
+                    speed: parseInt(document.getElementById('speedEV').value)
+                },
+                level: parseInt(document.getElementById('pokemonLevel').value)
+            };
+
+            try {
+                const response = await fetch(`/api/pokemon/${currentConfigPokemon}/configure`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                if (response.ok) {
+                    const updatedPokemon = await response.json();
+                    
+                    // Actualizar datos en localStorage si está en un equipo
+                    if (currentTeam && teams[currentTeam]) {
+                        for (const [teamName, team] of Object.entries(teams)) {
+                            const index = team.indexOf(currentConfigPokemon);
+                            if (index !== -1) {
+                                const pokemonHash = generatePokemonTeamHash(currentConfigPokemon, teamName, index);
+                                const savedData = localStorage.getItem(pokemonHash);
+                                if (savedData) {
+                                    const currentData = JSON.parse(savedData);
+                                    const newData = { ...currentData, ...updatedPokemon };
+                                    localStorage.setItem(pokemonHash, JSON.stringify(newData));
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    closeStatsConfigModal();
+                    updatePokemonGrid();
+                    alert('Estadísticas guardadas exitosamente');
+                } else {
+                    const error = await response.json();
+                    alert('Error al guardar estadísticas: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error al guardar estadísticas:', error);
+                alert('Error al guardar estadísticas');
+            }
+        }
+
+        // Funciones para cerrar modales
+        function closePokemonConfigModal() {
+            document.getElementById('pokemonConfigModal').classList.remove('active');
+            currentConfigPokemon = null;
+        }
+
+        function closeStatsConfigModal() {
+            document.getElementById('statsConfigModal').classList.remove('active');
+            currentConfigPokemon = null;
+        }
+
+        // Función para cambiar pestañas
+        function switchTab(tabName) {
+            // Ocultar todas las pestañas
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Desactivar todos los botones
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Mostrar la pestaña seleccionada
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Activar el botón correspondiente
+            event.target.classList.add('active');
+        }
+
+        // Función para cargar habilidades de un Pokémon
+        async function loadPokemonAbilities(pokemonId) {
+            try {
+                const response = await fetch(`/api/pokemon/${pokemonId}/abilities`);
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (error) {
+                console.error('Error al cargar habilidades:', error);
+            }
+            return [];
+        }
+
+        // Función para guardar toda la configuración
+        async function saveAllConfig() {
+            if (!selectedPokemonForMoves) {
+                alert('No hay Pokémon seleccionado para configurar');
+                return;
+            }
+
+            console.log('Iniciando guardado de configuración para:', selectedPokemonForMoves);
+
+            // Validar EVs
+            const total = parseInt(document.getElementById('hpEV').value) + 
+                         parseInt(document.getElementById('attackEV').value) + 
+                         parseInt(document.getElementById('defenseEV').value) + 
+                         parseInt(document.getElementById('specialAttackEV').value) + 
+                         parseInt(document.getElementById('specialDefenseEV').value) + 
+                         parseInt(document.getElementById('speedEV').value);
+
+            if (total > 510) {
+                alert('Los EVs totales no pueden exceder 510');
+                return;
+            }
+
+            // Validar movimientos
+            if (selectedMoves.size === 0) {
+                alert('Debes seleccionar al menos un movimiento');
+                return;
+            }
+
+            // Obtener habilidad seleccionada
+            let selectedAbilityId = null;
+            const selectedAbilityElement = document.querySelector('.ability-item.selected');
+            if (selectedAbilityElement) {
+                const abilityName = selectedAbilityElement.querySelector('strong').textContent;
+                // Buscar la habilidad por nombre en las habilidades del Pokémon
+                const abilities = selectedPokemonForMoves.abilities || [];
+                const ability = abilities.find(ab => ab.name === abilityName);
+                if (ability) {
+                    selectedAbilityId = ability.id;
+                }
+            }
+
+            // Obtener objeto seleccionado
+            let heldItemId = '';
+            const selectedItemElement = document.querySelector('.item-item.selected');
+            if (selectedItemElement) {
+                const itemName = selectedItemElement.querySelector('strong').textContent;
+                console.log('Objeto seleccionado en UI:', itemName);
+                if (itemName === 'Ninguno') {
+                    heldItemId = ''; // Cadena vacía para indicar que no hay objeto
+                    console.log('Configurando Pokémon sin objeto (heldItemId = "")');
+                } else {
+                    // Buscar el objeto por nombre en todos los objetos
+                    const allItems = window.allItems || {};
+                    const item = Object.values(allItems).find(item => item.name === itemName);
+                    if (item) {
+                        heldItemId = item.id;
+                        console.log('Configurando objeto:', itemName, 'ID:', item.id);
+                    } else {
+                        console.log('Objeto no encontrado en la base de datos:', itemName);
+                    }
+                }
+            } else {
+                console.log('No hay objeto seleccionado');
+            }
+            
+            console.log('Valor final de heldItemId:', heldItemId, 'Tipo:', typeof heldItemId);
+
+            // Obtener naturaleza seleccionada
+            let natureId = null;
+            const natureSelect = document.getElementById('natureSelect');
+            if (natureSelect && natureSelect.value) {
+                natureId = natureSelect.value;
+            }
+
+            const config = {
+                // Movimientos
+                selectedMoveIndices: Array.from(selectedMoves).map(indexStr => parseInt(indexStr)),
+                
+                // Habilidades, objetos y naturalezas
+                selectedAbilityId: selectedAbilityId,
+                heldItemId: heldItemId,
+                natureId: natureId,
+                
+                // IVs y EVs
+                ivs: {
+                    hp: parseInt(document.getElementById('hpIV').value),
+                    attack: parseInt(document.getElementById('attackIV').value),
+                    defense: parseInt(document.getElementById('defenseIV').value),
+                    specialAttack: parseInt(document.getElementById('specialAttackIV').value),
+                    specialDefense: parseInt(document.getElementById('specialDefenseIV').value),
+                    speed: parseInt(document.getElementById('speedIV').value)
+                },
+                evs: {
+                    hp: parseInt(document.getElementById('hpEV').value),
+                    attack: parseInt(document.getElementById('attackEV').value),
+                    defense: parseInt(document.getElementById('defenseEV').value),
+                    specialAttack: parseInt(document.getElementById('specialAttackEV').value),
+                    specialDefense: parseInt(document.getElementById('specialDefenseEV').value),
+                    speed: parseInt(document.getElementById('speedEV').value)
+                },
+                level: parseInt(document.getElementById('pokemonLevel').value)
+            };
+
+            console.log('Configuración a enviar:', config);
+
+            try {
+                const response = await fetch(`/api/pokemon/${selectedPokemonForMoves.id}/configure`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                console.log('Respuesta del servidor:', response.status, response.statusText);
+
+                if (response.ok) {
+                    const updatedPokemon = await response.json();
+                    console.log('Pokémon actualizado:', updatedPokemon);
+                    
+                    // Actualizar datos en localStorage
+                    const pokemonHash = generatePokemonTeamHash(
+                        selectedPokemonForMoves.id, 
+                        selectedPokemonForMoves.teamName, 
+                        selectedPokemonForMoves.slotIndex
+                    );
+                    
+                    const currentData = JSON.parse(localStorage.getItem(pokemonHash) || '{}');
+                    const newData = { ...currentData, ...updatedPokemon };
+                    
+                    // Asegurar que heldItem se actualice correctamente
+                    if (updatedPokemon.heldItem === null || updatedPokemon.heldItem === undefined) {
+                        newData.heldItem = null;
+                        console.log('Objeto removido en localStorage');
+                    }
+                    
+                    localStorage.setItem(pokemonHash, JSON.stringify(newData));
+                    
+                    // Forzar la actualización inmediata de la UI
+                    setTimeout(() => {
+                        updateTeamDisplay();
+                        updatePokemonGrid();
+                    }, 100);
+                    
+                    //closeMovesModal();
+                    console.log('Configuración guardada exitosamente');
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error del servidor:', errorData);
+                    alert('Error al guardar configuración: ' + (errorData.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('Error al guardar configuración:', error);
+                alert('Error de conexión al guardar configuración: ' + error.message);
+            }
+        }
+
+        // Actualizar las funciones de selección para trabajar con el nuevo modal
+        function selectAbility(abilityId) {
+            document.querySelectorAll('.ability-item').forEach(item => item.classList.remove('selected'));
+            event.target.closest('.ability-item').classList.add('selected');
+            console.log('Habilidad seleccionada:', event.target.closest('.ability-item').querySelector('strong').textContent);
+            saveAllConfig();
+        }
+
+        function selectItem(itemId) {
+            document.querySelectorAll('.item-item').forEach(item => item.classList.remove('selected'));
+            event.target.closest('.item-item').classList.add('selected');
+            
+            const selectedItem = event.target.closest('.item-item');
+            const itemName = selectedItem.querySelector('strong').textContent;
+            console.log('Objeto seleccionado:', itemName, 'ID:', itemId);
+            
+            // Si se selecciona "Ninguno", el itemId será una cadena vacía
+            if (itemName === 'Ninguno') {
+                console.log('Removiendo objeto del Pokémon');
+            }
+            saveAllConfig();
+        }
+
+        function selectNature(natureId) {
+            document.querySelectorAll('.nature-item').forEach(item => item.classList.remove('selected'));
+            event.target.closest('.nature-item').classList.add('selected');
+            console.log('Naturaleza seleccionada:', event.target.closest('.nature-item').querySelector('strong').textContent);
+            
+            // Actualizar el selector de naturaleza en el modal si existe
+            const natureSelect = document.getElementById('natureSelect');
+            if (natureSelect) {
+                natureSelect.value = natureId;
+                // Disparar el evento change para actualizar las estadísticas
+                natureSelect.dispatchEvent(new Event('change'));
+            }
+            
+            saveAllConfig();
+        }
+
+        // Función para actualizar la selección visual de naturaleza cuando cambia el selector
+        function updateNatureSelection() {
+            const natureSelect = document.getElementById('natureSelect');
+            if (!natureSelect || !natureSelect.value) return;
+            
+            // Remover selección previa
+            document.querySelectorAll('.nature-item').forEach(item => item.classList.remove('selected'));
+            
+            // Buscar y seleccionar el elemento correspondiente
+            const natureItems = document.querySelectorAll('.nature-item');
+            natureItems.forEach(item => {
+                const natureName = item.querySelector('strong').textContent;
+                const selectedNature = allNatures[natureSelect.value];
+                if (selectedNature && selectedNature.name === natureName) {
+                    item.classList.add('selected');
+                }
+            });
+            saveAllConfig();
+        }
     </script>
 </body>
 </html> 

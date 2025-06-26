@@ -454,6 +454,25 @@
                 opacity: 0;
             }
         }
+
+        body.dark-mode .selected-move-item .move-power {
+            background: #232323;
+            color: #b0e0ff;
+        }
+
+        .config-info {
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode .config-info {
+            background: rgba(255,255,255,0.1);
+            color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
@@ -813,6 +832,12 @@
                 const hpPercentage = (pokemon.health / pokemon.maxHealth) * 100;
                 const healthColor = hpPercentage > 50 ? '#4CAF50' : hpPercentage > 25 ? '#FFA500' : '#FF4444';
 
+                // Obtener información de configuración
+                const nature = pokemon.nature ? pokemon.nature.name : 'Aleatoria';
+                const heldItem = pokemon.heldItem ? pokemon.heldItem.name : 'Ninguno';
+                const selectedAbility = pokemon.selectedAbility ? pokemon.selectedAbility.name : 'Ninguna';
+                const level = pokemon.level || 50;
+
                 card.innerHTML = `
                     <img src="${pokemon.imageUrl}" alt="${pokemon.name}">
                     <h3>${pokemon.name}</h3>
@@ -820,6 +845,14 @@
                         <div class="health-bar-fill" style="width: ${hpPercentage}%; background-color: ${healthColor};"></div>
                     </div>
                     <p>HP: ${pokemon.health}/${pokemon.maxHealth}</p>
+                    
+                    <!-- Información de configuración -->
+                    <div style="font-size: 10px; margin-top: 5px; padding: 5px; background: rgba(0,0,0,0.1); border-radius: 3px;">
+                        <div><strong>Lv.${level}</strong></div>
+                        <div>${nature}</div>
+                        <div>${heldItem}</div>
+                        <div>${selectedAbility}</div>
+                    </div>
                 `;
 
                 // Solo permitir seleccionar Pokémon con HP > 0
@@ -1131,10 +1164,12 @@
                 if (teamId === 'team1') {
                     activePokemon1 = pokemon;
                     waitingForTeam1 = false;
+                    waitingForTeam2 = false;
                     selectedMove1 = null; // Resetear el movimiento seleccionado
                 } else {
                     activePokemon2 = pokemon;
                     waitingForTeam2 = false;
+                    waitingForTeam1 = false;
                     selectedMove2 = null; // Resetear el movimiento seleccionado
                 }
                 updateBattleDisplay();
@@ -1198,6 +1233,18 @@
             if (!waitingForTeam1 && !waitingForTeam2) {
                 turnInProgress = true;
                 await processTurn();
+            }
+        }
+
+        // Función para asegurar que la vida de los Pokémon esté al máximo al cargar equipos
+        function setTeamHealthToMax(team) {
+            if (Array.isArray(team)) {
+                team.forEach(pokemon => {
+                    // Si la vida no está definida o es menor que el máximo, la igualamos
+                    if (typeof pokemon.health === 'undefined' || pokemon.health < pokemon.maxHealth) {
+                        pokemon.health = pokemon.maxHealth;
+                    }
+                });
             }
         }
 
@@ -1279,6 +1326,8 @@
             team1Selector.addEventListener('change', function() {
                 selectedTeam1 = this.value ? allTeams[this.value] : null;
                 if (selectedTeam1 && selectedTeam1.length > 0) {
+                    // Asegurar que la vida esté al máximo al seleccionar el equipo
+                    setTeamHealthToMax(selectedTeam1);
                     // No seleccionar automáticamente, mostrar opciones
                     activePokemon1 = null;
                     console.log('Equipo 1 seleccionado:', selectedTeam1);
@@ -1290,6 +1339,8 @@
             team2Selector.addEventListener('change', function() {
                 selectedTeam2 = this.value ? allTeams[this.value] : null;
                 if (selectedTeam2 && selectedTeam2.length > 0) {
+                    // Asegurar que la vida esté al máximo al seleccionar el equipo
+                    setTeamHealthToMax(selectedTeam2);
                     // No seleccionar automáticamente, mostrar opciones
                     activePokemon2 = null;
                     console.log('Equipo 2 seleccionado:', selectedTeam2);
@@ -1335,37 +1386,90 @@
             // Actualizar Pokémon activo del Equipo 1
             if (activePokemon1) {
                 document.getElementById('team1ActivePokemon').src = activePokemon1.imageUrl;
-                document.getElementById('team1PokemonName').textContent = activePokemon1.name;
+                document.getElementById('team1PokemonName').textContent = `${activePokemon1.name} Lv.${activePokemon1.level || 50}`;
                 const healthPercentage1 = (activePokemon1.health / activePokemon1.maxHealth) * 100;
                 document.getElementById('team1HealthBar').style.width = `${healthPercentage1}%`;
                 document.getElementById('team1Health').textContent = `HP: ${activePokemon1.health}/${activePokemon1.maxHealth}`;
                 updateMoves('team1', activePokemon1);
+                
+                // Mostrar información de configuración
+                const nature1 = activePokemon1.nature ? activePokemon1.nature.name : 'Aleatoria';
+                const heldItem1 = activePokemon1.heldItem ? activePokemon1.heldItem.name : 'Ninguno';
+                const selectedAbility1 = activePokemon1.selectedAbility ? activePokemon1.selectedAbility.name : 'Ninguna';
+                
+                // Actualizar tooltip o información adicional
+                const team1Section = document.querySelector('.team-section:first-child');
+                let configInfo = team1Section.querySelector('.config-info');
+                if (!configInfo) {
+                    configInfo = document.createElement('div');
+                    configInfo.className = 'config-info';
+                    configInfo.style.cssText = 'font-size: 12px; margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 5px;';
+                    team1Section.appendChild(configInfo);
+                }
+                configInfo.innerHTML = `
+                    <div><strong>Naturaleza:</strong> ${nature1}</div>
+                    <div><strong>Objeto:</strong> ${heldItem1}</div>
+                    <div><strong>Habilidad:</strong> ${selectedAbility1}</div>
+                `;
             } else {
                 document.getElementById('team1ActivePokemon').src = '';
                 document.getElementById('team1PokemonName').textContent = 'Selecciona un Pokémon';
                 document.getElementById('team1Health').textContent = '';
                 document.getElementById('team1HealthBar').style.width = '0%';
                 document.getElementById('team1Moves').innerHTML = '';
+                
+                // Limpiar información de configuración
+                const team1Section = document.querySelector('.team-section:first-child');
+                const configInfo = team1Section.querySelector('.config-info');
+                if (configInfo) configInfo.remove();
             }
 
             // Actualizar Pokémon activo del Equipo 2
             if (activePokemon2) {
                 document.getElementById('team2ActivePokemon').src = activePokemon2.imageUrl;
-                document.getElementById('team2PokemonName').textContent = activePokemon2.name;
+                document.getElementById('team2PokemonName').textContent = `${activePokemon2.name} Lv.${activePokemon2.level || 50}`;
                 const healthPercentage2 = (activePokemon2.health / activePokemon2.maxHealth) * 100;
                 document.getElementById('team2HealthBar').style.width = `${healthPercentage2}%`;
                 document.getElementById('team2Health').textContent = `HP: ${activePokemon2.health}/${activePokemon2.maxHealth}`;
                 updateMoves('team2', activePokemon2);
+                
+                // Mostrar información de configuración
+                const nature2 = activePokemon2.nature ? activePokemon2.nature.name : 'Aleatoria';
+                const heldItem2 = activePokemon2.heldItem ? activePokemon2.heldItem.name : 'Ninguno';
+                const selectedAbility2 = activePokemon2.selectedAbility ? activePokemon2.selectedAbility.name : 'Ninguna';
+                
+                // Actualizar tooltip o información adicional
+                const team2Section = document.querySelector('.team-section:nth-child(2)');
+                let configInfo = team2Section.querySelector('.config-info');
+                if (!configInfo) {
+                    configInfo = document.createElement('div');
+                    configInfo.className = 'config-info';
+                    configInfo.style.cssText = 'font-size: 12px; margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 5px;';
+                    team2Section.appendChild(configInfo);
+                }
+                configInfo.innerHTML = `
+                    <div><strong>Naturaleza:</strong> ${nature2}</div>
+                    <div><strong>Objeto:</strong> ${heldItem2}</div>
+                    <div><strong>Habilidad:</strong> ${selectedAbility2}</div>
+                `;
             } else {
                 document.getElementById('team2ActivePokemon').src = '';
                 document.getElementById('team2PokemonName').textContent = 'Selecciona un Pokémon';
                 document.getElementById('team2Health').textContent = '';
                 document.getElementById('team2HealthBar').style.width = '0%';
                 document.getElementById('team2Moves').innerHTML = '';
+                
+                // Limpiar información de configuración
+                const team2Section = document.querySelector('.team-section:nth-child(2)');
+                const configInfo = team2Section.querySelector('.config-info');
+                if (configInfo) configInfo.remove();
             }
 
             // Habilitar/deshabilitar botones según el estado de la batalla
-            setMoveAndSwitchButtonsEnabled(!battleOver && !turnInProgress);
+            // Después del reset, permitir la selección de Pokémon si no hay batalla activa
+            const shouldEnableButtons = !battleOver && !turnInProgress && 
+                (!currentBattleId || (activePokemon1 && activePokemon2));
+            setMoveAndSwitchButtonsEnabled(shouldEnableButtons);
         }
 
         function startBattle() {
@@ -1396,6 +1500,18 @@
                 }
             }
 
+            // Asegurarse de que las variables de estado estén correctamente configuradas
+            waitingForTeam1 = true;
+            waitingForTeam2 = true;
+            turnInProgress = false;
+            battleOver = false;
+            selectedMove1 = null;
+            selectedMove2 = null;
+            lastAction1 = null;
+            lastAction2 = null;
+            actionSelected1 = false;
+            actionSelected2 = false;
+
             // Incrementar el contador de turnos y mostrar el mensaje
             currentTurn++;
             updateBattleLog(`=== Turno ${currentTurn} ===`);
@@ -1423,6 +1539,7 @@
 
         function resetBattle() {
             // Resetear variables de batalla
+            currentBattleId = null; // Resetear el ID de la batalla
             battleOver = false;
             selectedMove1 = null;
             selectedMove2 = null;
@@ -1432,6 +1549,11 @@
             actionSelected1 = false;  // Resetear la selección de acción del equipo 1
             actionSelected2 = false;  // Resetear la selección de acción del equipo 2
             currentTurn = 0; // Resetear el contador de turnos
+            lastAction1 = null; // Resetear la última acción del equipo 1
+            lastAction2 = null; // Resetear la última acción del equipo 2
+            waitingForTeam1 = true; // Resetear el estado de espera del equipo 1
+            waitingForTeam2 = true; // Resetear el estado de espera del equipo 2
+            initialSelectionPending = true; // Resetear la bandera de selección inicial
 
             // Regenerar HP de todos los Pokémon en ambos equipos
             if (selectedTeam1) {
