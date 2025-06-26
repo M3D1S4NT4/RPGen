@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.HashMap;
 
 public class Pokemon implements Entity {
     private final String id;
@@ -30,6 +31,14 @@ public class Pokemon implements Entity {
     private List<Map<String, Object>> moves;
     private List<Integer> selectedMoveIndices;
     private List<GameAction> availableActions;
+    
+    // Nuevas características
+    private List<Ability> abilities;
+    private Ability selectedAbility;
+    private HeldItem heldItem;
+    private Nature nature;
+    private Stats stats;
+    private int level = 50; // Nivel por defecto para combate
 
     public Pokemon(String id, String name, int maxHealth, int attack, int defense, 
                   List<String> types, int speed, int specialAttack, int specialDefense, String imageUrl, List<Map<String, Object>> moves) {
@@ -48,6 +57,14 @@ public class Pokemon implements Entity {
         this.selectedMoveIndices = new ArrayList<>();
         this.availableActions = new ArrayList<>();
         this.status = null;
+        
+        // Inicializar nuevas características
+        this.abilities = new ArrayList<>();
+        this.stats = new Stats(maxHealth/2, attack, defense, specialAttack, specialDefense, speed);
+        this.nature = NatureDatabase.getRandomNature();
+        this.heldItem = null;
+        this.selectedAbility = null;
+        
         initializeMoves();
     }
 
@@ -89,17 +106,17 @@ public class Pokemon implements Entity {
 
     @Override
     public int getMaxHealth() {
-        return maxHealth;
+        return calculateFinalHP();
     }
 
     @Override
     public int getAttack() {
-        return baseAttack + attackModifier;
+        return calculateFinalStat("attack");
     }
 
     @Override
     public int getDefense() {
-        return baseDefense + defenseModifier;
+        return calculateFinalStat("defense");
     }
 
     public List<String> getTypes() {
@@ -108,15 +125,15 @@ public class Pokemon implements Entity {
 
     @Override
     public int getSpeed() {
-        return baseSpeed + speedModifier;
+        return calculateFinalStat("speed");
     }
 
     public int getSpecialAttack() {
-        return baseSpecialAttack + specialAttackModifier;
+        return calculateFinalStat("special_attack");
     }
 
     public int getSpecialDefense() {
-        return baseSpecialDefense + specialDefenseModifier;
+        return calculateFinalStat("special_defense");
     }
 
     public String getImageUrl() {
@@ -135,6 +152,80 @@ public class Pokemon implements Entity {
         this.selectedMoveIndices = indices;
     }
 
+    // Nuevos getters y setters
+    public List<Ability> getAbilities() {
+        return new ArrayList<>(abilities);
+    }
+
+    public void setAbilities(List<Ability> abilities) {
+        this.abilities = new ArrayList<>(abilities);
+        if (!abilities.isEmpty() && selectedAbility == null) {
+            selectedAbility = abilities.get(0);
+        }
+    }
+
+    public Ability getSelectedAbility() {
+        return selectedAbility;
+    }
+
+    public void setSelectedAbility(Ability ability) {
+        if (abilities.contains(ability)) {
+            this.selectedAbility = ability;
+        }
+    }
+
+    public HeldItem getHeldItem() {
+        return heldItem;
+    }
+
+    public void setHeldItem(HeldItem item) {
+        this.heldItem = item;
+    }
+
+    public Nature getNature() {
+        return nature;
+    }
+
+    public void setNature(Nature nature) {
+        this.nature = nature;
+    }
+
+    public Stats getStats() {
+        return stats;
+    }
+
+    public void setStats(Stats stats) {
+        this.stats = stats;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = Math.max(1, Math.min(100, level));
+    }
+
+    // Métodos para calcular estadísticas finales
+    private int calculateFinalHP() {
+        int baseHP = stats.calculateFinalHP(level);
+        double itemModifier = heldItem != null ? heldItem.getStatModifier("hp") : 1.0;
+        return (int) (baseHP * itemModifier);
+    }
+
+    private int calculateFinalStat(String stat) {
+        double natureModifier = nature != null ? nature.getStatModifier(stat) : 1.0;
+        int baseStat = stats.calculateFinalStat(stat, level, natureModifier);
+        
+        // Aplicar modificadores de objeto
+        double itemModifier = 1.0;
+        if (heldItem != null) {
+            itemModifier = heldItem.getStatModifier(stat);
+        }
+        
+        return (int) (baseStat * itemModifier);
+    }
+
     @Override
     public void takeDamage(int damage) {
         health = Math.max(0, health - damage);
@@ -142,7 +233,7 @@ public class Pokemon implements Entity {
 
     @Override
     public void heal(int amount) {
-        health = Math.min(maxHealth, health + amount);
+        health = Math.min(getMaxHealth(), health + amount);
     }
 
     @Override
@@ -157,8 +248,12 @@ public class Pokemon implements Entity {
 
     @Override
     public String toString() {
-        return String.format("%s #%s\nHP: %d/%d\nAtaque: %d\nDefensa: %d\nVelocidad: %d\nAtaque Especial: %d\nDefensa Especial: %d\nTipos: %s",
-            name, id, health, maxHealth, getAttack(), getDefense(), getSpeed(), getSpecialAttack(), getSpecialDefense(), String.join(", ", types));
+        return String.format("%s #%s\nHP: %d/%d\nAtaque: %d\nDefensa: %d\nVelocidad: %d\nAtaque Especial: %d\nDefensa Especial: %d\nTipos: %s\nNaturaleza: %s\nObjeto: %s\nHabilidad: %s",
+            name, id, health, getMaxHealth(), getAttack(), getDefense(), getSpeed(), getSpecialAttack(), getSpecialDefense(), 
+            String.join(", ", types), 
+            nature != null ? nature.getName() : "Ninguna",
+            heldItem != null ? heldItem.getName() : "Ninguno",
+            selectedAbility != null ? selectedAbility.getName() : "Ninguna");
     }
 
     public void setHealth(int health) {
@@ -214,5 +309,34 @@ public class Pokemon implements Entity {
 
     public void setSpecialDefense(int specialDefense) {
         this.specialDefenseModifier = specialDefense - this.baseSpecialDefense;
+    }
+
+    // Método para obtener todos los datos del Pokémon como mapa
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        map.put("name", name);
+        map.put("health", health);
+        map.put("maxHealth", getMaxHealth());
+        map.put("attack", getAttack());
+        map.put("defense", getDefense());
+        map.put("speed", getSpeed());
+        map.put("specialAttack", getSpecialAttack());
+        map.put("specialDefense", getSpecialDefense());
+        map.put("types", types);
+        map.put("imageUrl", imageUrl);
+        map.put("moves", moves);
+        map.put("selectedMoveIndices", selectedMoveIndices);
+        map.put("status", status);
+        map.put("level", level);
+        
+        // Nuevas características
+        map.put("abilities", abilities.stream().map(Ability::toMap).collect(ArrayList::new, ArrayList::add, ArrayList::addAll));
+        map.put("selectedAbility", selectedAbility != null ? selectedAbility.toMap() : null);
+        map.put("heldItem", heldItem != null ? heldItem.toMap() : null);
+        map.put("nature", nature != null ? nature.toMap() : null);
+        map.put("stats", stats != null ? stats.toMap() : null);
+        
+        return map;
     }
 } 

@@ -152,6 +152,63 @@ public class PokemonDatabase {
                         .getAsJsonObject("official-artwork")
                         .get("front_default").getAsString();
 
+                    // Cargar habilidades
+                    List<Ability> abilities = new ArrayList<>();
+                    JsonArray abilitiesArray = pokemonData.getAsJsonArray("abilities");
+                    for (JsonElement abilityElement : abilitiesArray) {
+                        JsonObject abilityData = abilityElement.getAsJsonObject();
+                        JsonObject abilityInfo = abilityData.getAsJsonObject("ability");
+                        String abilityUrl = abilityInfo.get("url").getAsString();
+                        boolean isHidden = abilityData.get("is_hidden").getAsBoolean();
+                        
+                        try {
+                            requestSemaphore.acquire();
+                            try {
+                                HttpRequest abilityRequest = HttpRequest.newBuilder()
+                                    .uri(URI.create(abilityUrl))
+                                    .GET()
+                                    .build();
+                                
+                                HttpResponse<String> abilityResponse = httpClient.send(abilityRequest, HttpResponse.BodyHandlers.ofString());
+                                JsonObject abilityDetails = gson.fromJson(abilityResponse.body(), JsonObject.class);
+                                
+                                String abilityId = abilityDetails.get("id").getAsString();
+                                String abilityName = abilityDetails.get("name").getAsString();
+                                
+                                // Buscar descripción en español
+                                String description = "Sin descripción disponible";
+                                JsonArray flavorTextEntries = abilityDetails.getAsJsonArray("flavor_text_entries");
+                                for (JsonElement entry : flavorTextEntries) {
+                                    JsonObject flavorEntry = entry.getAsJsonObject();
+                                    JsonObject language = flavorEntry.getAsJsonObject("language");
+                                    if (language.get("name").getAsString().equals("es")) {
+                                        description = flavorEntry.get("flavor_text").getAsString();
+                                        break;
+                                    }
+                                }
+                                
+                                // Si no hay descripción en español, buscar en inglés
+                                if (description.equals("Sin descripción disponible")) {
+                                    for (JsonElement entry : flavorTextEntries) {
+                                        JsonObject flavorEntry = entry.getAsJsonObject();
+                                        JsonObject language = flavorEntry.getAsJsonObject("language");
+                                        if (language.get("name").getAsString().equals("en")) {
+                                            description = flavorEntry.get("flavor_text").getAsString();
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                Ability ability = new Ability(abilityId, abilityName, description, "", isHidden);
+                                abilities.add(ability);
+                            } finally {
+                                requestSemaphore.release();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                     // Cargar movimientos (todos los disponibles)
                     List<Map<String, Object>> moves = new ArrayList<>();
                     JsonArray movesArray = pokemonData.getAsJsonArray("moves");
@@ -252,6 +309,9 @@ public class PokemonDatabase {
                         moves
                     );
 
+                    // Configurar habilidades
+                    pokemon.setAbilities(abilities);
+
                     List<Integer> defaultIndices = new ArrayList<>();
                     for (int i = 0; i < Math.min(4, moves.size()); i++) {
                         defaultIndices.add(i);
@@ -286,10 +346,18 @@ public class PokemonDatabase {
 
     public static Pokemon getPokemon(String id) {
         synchronized (pokemonSet) {
-            return pokemonSet.stream()
+            System.out.println("Buscando Pokémon con ID: " + id);
+            System.out.println("Total de Pokémon cargados: " + pokemonSet.size());
+            Pokemon pokemon = pokemonSet.stream()
                 .filter(p -> p.getId().equals(id))
                 .findFirst()
                 .orElse(null);
+            if (pokemon != null) {
+                System.out.println("Pokémon encontrado: " + pokemon.getName());
+            } else {
+                System.out.println("Pokémon no encontrado con ID: " + id);
+            }
+            return pokemon;
         }
     }
 
