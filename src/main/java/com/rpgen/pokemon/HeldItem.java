@@ -10,14 +10,20 @@ public class HeldItem {
     private final String effect;
     private final Map<String, Double> statModifiers;
     private final String category;
+    private final Map<String, Object> extraEffects;
 
-    public HeldItem(String id, String name, String description, String effect, Map<String, Double> statModifiers, String category) {
+    public HeldItem(String id, String name, String description, String effect, Map<String, Double> statModifiers, String category, Map<String, Object> extraEffects) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.effect = effect;
         this.statModifiers = statModifiers != null ? new HashMap<>(statModifiers) : new HashMap<>();
         this.category = category;
+        this.extraEffects = extraEffects != null ? new HashMap<>(extraEffects) : new HashMap<>();
+    }
+
+    public HeldItem(String id, String name, String description, String effect, Map<String, Double> statModifiers, String category) {
+        this(id, name, description, effect, statModifiers, category, null);
     }
 
     public String getId() {
@@ -48,6 +54,10 @@ public class HeldItem {
         return statModifiers.getOrDefault(stat, 1.0);
     }
 
+    public Map<String, Object> getExtraEffects() {
+        return new HashMap<>(extraEffects);
+    }
+
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
@@ -56,6 +66,7 @@ public class HeldItem {
         map.put("effect", effect);
         map.put("statModifiers", statModifiers);
         map.put("category", category);
+        map.put("extraEffects", extraEffects);
         return map;
     }
 

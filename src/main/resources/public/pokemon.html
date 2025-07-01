@@ -1563,6 +1563,15 @@
         // Inicialización
         initializeTeamSlots();
         loadPokemon();
+        
+        // Cargar datos de configuración al inicio
+        loadConfigurationData().then(() => {
+            console.log('Datos de configuración cargados al inicio');
+            console.log('Número de naturalezas cargadas:', Object.keys(allNatures).length);
+            console.log('Número de objetos cargados:', Object.keys(allItems).length);
+        }).catch(error => {
+            console.error('Error al cargar datos de configuración al inicio:', error);
+        });
 
         // Cerrar detalles al hacer clic fuera
         document.addEventListener('click', (e) => {
@@ -1808,6 +1817,12 @@
                     }
                 });
             }
+            
+            // Mostrar mensaje de carga si los datos no están disponibles
+            const movesContent = document.getElementById('movesContent');
+            movesContent.innerHTML = '<div style="text-align: center; padding: 20px;">Cargando configuración...</div>';
+            const modal = document.getElementById('movesModal');
+            modal.classList.add('active');
 
             // Cargar datos de configuración
             loadConfigurationData().then(() => {
@@ -1816,6 +1831,22 @@
                     
                     // Actualizar las habilidades del Pokémon
                     selectedPokemonForMoves.abilities = abilities;
+                    
+                    // Asegurar que los objetos tengan sus efectos extra cargados
+                    if (selectedPokemonForMoves.heldItem && selectedPokemonForMoves.heldItem.id) {
+                        const allItems = window.allItems || {};
+                        const itemData = allItems[selectedPokemonForMoves.heldItem.id];
+                        if (itemData && itemData.extraEffects) {
+                            selectedPokemonForMoves.heldItem.extraEffects = itemData.extraEffects;
+                        }
+                    }
+                    
+                    // Verificar que allItems esté cargado
+                    if (!window.allItems || Object.keys(window.allItems).length === 0) {
+                        console.error('Los objetos no se han cargado correctamente');
+                        alert('Error: No se pudieron cargar los objetos. Por favor, recarga la página.');
+                        return;
+                    }
                     
                     const movesContent = document.getElementById('movesContent');
                     movesContent.innerHTML = `
@@ -1878,7 +1909,7 @@
                                     <div><strong>Ninguno</strong></div>
                                     <div class="description-text">Sin objeto equipado</div>
                                 </div>
-                                ${Object.values(allItems).map(item => `
+                                ${Object.values(window.allItems || allItems || {}).map(item => `
                                     <div class="item-item ${pokemonData.heldItem && pokemonData.heldItem.id === item.id ? 'selected' : ''}" 
                                          onclick="selectItem('${item.id}')">
                                         <div><strong>${item.name}</strong></div>
@@ -2123,6 +2154,8 @@
         // Función para cargar naturalezas y objetos
         async function loadConfigurationData() {
             try {
+                console.log('Iniciando carga de datos de configuración...');
+                
                 const [naturesResponse, itemsResponse] = await Promise.all([
                     fetch('/api/pokemon/natures'),
                     fetch('/api/pokemon/items')
@@ -2131,14 +2164,32 @@
                 if (naturesResponse.ok) {
                     allNatures = await naturesResponse.json();
                     window.allNatures = allNatures; // Hacer global
+                    console.log('Naturalezas cargadas:', Object.keys(allNatures).length);
+                } else {
+                    console.error('Error al cargar naturalezas:', naturesResponse.status);
                 }
                 
                 if (itemsResponse.ok) {
                     allItems = await itemsResponse.json();
                     window.allItems = allItems; // Hacer global
+                    console.log('Objetos cargados:', Object.keys(allItems).length);
+                } else {
+                    console.error('Error al cargar objetos:', itemsResponse.status);
                 }
+                
+                // Verificar que se cargaron correctamente
+                if (!allNatures || Object.keys(allNatures).length === 0) {
+                    console.warn('No se cargaron naturalezas');
+                }
+                
+                if (!allItems || Object.keys(allItems).length === 0) {
+                    console.warn('No se cargaron objetos');
+                }
+                
+                console.log('Carga de datos de configuración completada');
             } catch (error) {
                 console.error('Error al cargar datos de configuración:', error);
+                throw error; // Re-lanzar el error para que pueda ser manejado por el llamador
             }
         }
 
@@ -2149,8 +2200,15 @@
             if (!pokemon) return;
 
             // Cargar datos de configuración si no están cargados
-            if (Object.keys(allNatures).length === 0) {
+            if (Object.keys(allNatures).length === 0 || Object.keys(allItems).length === 0) {
                 await loadConfigurationData();
+            }
+            
+            // Verificar que los datos se cargaron correctamente
+            if (!allItems || Object.keys(allItems).length === 0) {
+                console.error('Los objetos no se han cargado correctamente');
+                alert('Error: No se pudieron cargar los objetos. Por favor, recarga la página.');
+                return;
             }
 
             // Cargar habilidades del Pokémon
@@ -2212,7 +2270,7 @@
                                 <div><strong>Ninguno</strong></div>
                                 <div style="font-size: 12px; color: #666;">Sin objeto equipado</div>
                             </div>
-                            ${Object.values(allItems).map(item => `
+                            ${Object.values(window.allItems || allItems || {}).map(item => `
                                 <div class="item-item ${currentConfig.heldItem && currentConfig.heldItem.id === item.id ? 'selected' : ''}" 
                                      onclick="selectItem('${item.id}')">
                                     <div><strong>${item.name}</strong></div>
@@ -2746,10 +2804,20 @@
                         console.log('Configurando objeto:', itemName, 'ID:', item.id);
                     } else {
                         console.log('Objeto no encontrado en la base de datos:', itemName);
+                        // Si no se encuentra por nombre, intentar usar el itemId directamente
+                        if (selectedPokemonForMoves && selectedPokemonForMoves.heldItem && selectedPokemonForMoves.heldItem.id) {
+                            heldItemId = selectedPokemonForMoves.heldItem.id;
+                            console.log('Usando ID del objeto en memoria:', heldItemId);
+                        }
                     }
                 }
             } else {
                 console.log('No hay objeto seleccionado');
+                // Si no hay elemento seleccionado pero hay objeto en memoria, mantenerlo
+                if (selectedPokemonForMoves && selectedPokemonForMoves.heldItem && selectedPokemonForMoves.heldItem.id) {
+                    heldItemId = selectedPokemonForMoves.heldItem.id;
+                    console.log('Manteniendo objeto existente:', heldItemId);
+                }
             }
             
             console.log('Valor final de heldItemId:', heldItemId, 'Tipo:', typeof heldItemId);
@@ -2819,6 +2887,23 @@
                     if (updatedPokemon.heldItem === null || updatedPokemon.heldItem === undefined) {
                         newData.heldItem = null;
                         console.log('Objeto removido en localStorage');
+                    } else if (updatedPokemon.heldItem) {
+                        // Asegurar que el objeto tenga sus efectos extra
+                        const allItems = window.allItems || {};
+                        const itemData = allItems[updatedPokemon.heldItem.id];
+                        if (itemData) {
+                            newData.heldItem = {
+                                id: itemData.id,
+                                name: itemData.name,
+                                description: itemData.description,
+                                extraEffects: itemData.extraEffects || {}
+                            };
+                            console.log('Objeto guardado en localStorage con efectos extra:', newData.heldItem);
+                        } else {
+                            console.warn('No se encontró el objeto en allItems:', updatedPokemon.heldItem.id);
+                            // Mantener el objeto como está si no se encuentra en allItems
+                            newData.heldItem = updatedPokemon.heldItem;
+                        }
                     }
                     
                     localStorage.setItem(pokemonHash, JSON.stringify(newData));
@@ -2862,6 +2947,25 @@
             if (itemName === 'Ninguno') {
                 console.log('Removiendo objeto del Pokémon');
             }
+            
+            // Actualizar inmediatamente los datos del Pokémon en memoria
+            if (selectedPokemonForMoves) {
+                if (itemName === 'Ninguno') {
+                    selectedPokemonForMoves.heldItem = null;
+                } else {
+                    // Buscar el objeto por ID en allItems
+                    const allItems = window.allItems || {};
+                    const item = allItems[itemId];
+                    if (item) {
+                        selectedPokemonForMoves.heldItem = {
+                            id: item.id,
+                            name: item.name,
+                            description: item.description
+                        };
+                    }
+                }
+            }
+            
             saveAllConfig();
         }
 
@@ -2899,6 +3003,18 @@
                 }
             });
             saveAllConfig();
+        }
+        
+        // Función para verificar si los datos de configuración están cargados
+        function isConfigurationLoaded() {
+            const hasNatures = allNatures && Object.keys(allNatures).length > 0;
+            const hasItems = allItems && Object.keys(allItems).length > 0;
+            return hasNatures && hasItems;
+        }
+        
+        // Función para mostrar mensaje de error si los datos no están cargados
+        function showConfigurationError() {
+            alert('Error: Los datos de configuración no se han cargado correctamente. Por favor, recarga la página.');
         }
     </script>
 </body>

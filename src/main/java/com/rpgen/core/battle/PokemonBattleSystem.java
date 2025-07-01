@@ -6,6 +6,7 @@ import com.rpgen.core.action.GameAction;
 import com.rpgen.core.action.CombatCommand;
 import com.rpgen.core.action.CombatCommandFactory;
 import java.util.*;
+import com.rpgen.pokemon.HeldItem;
 
 public class PokemonBattleSystem extends BaseBattleSystem {
     private Entity activePokemon1;
@@ -14,6 +15,8 @@ public class PokemonBattleSystem extends BaseBattleSystem {
     private int turnCount;
     private Random random;
     private Map<Entity, GameAction> selectedMoves;
+    // Mapa para restricción de movimiento por objeto tipo Choice
+    private final Map<Pokemon, String> lockedMoveByPokemon = new HashMap<>();
 
     public PokemonBattleSystem() {
         super();
@@ -29,7 +32,7 @@ public class PokemonBattleSystem extends BaseBattleSystem {
         this.activePokemon1 = team1.get(0);
         this.activePokemon2 = team2.get(0);
         this.turnCount = 0;
-        
+        this.lockedMoveByPokemon.clear();
         for (Entity pokemon : team1) {
             pokemonMoves.put(pokemon, pokemon.getAvailableActions());
         }
@@ -39,6 +42,27 @@ public class PokemonBattleSystem extends BaseBattleSystem {
     }
 
     public void selectMove(Entity pokemon, GameAction move) {
+        // Lógica de restricción Choice
+        if (pokemon instanceof Pokemon poke) {
+            HeldItem item = poke.getHeldItem();
+            if (item != null && Boolean.TRUE.equals(item.getExtraEffects().get("onlyOneMove"))) {
+                String lockedMove = lockedMoveByPokemon.get(poke);
+                if (lockedMove == null) {
+                    // Primer movimiento: se bloquea
+                    lockedMoveByPokemon.put(poke, move.getId());
+                } else if (!lockedMove.equals(move.getId())) {
+                    // Intento de cambiar: forzar el movimiento bloqueado
+                    GameAction forced = pokemonMoves.get(pokemon).stream()
+                        .filter(a -> a.getId().equals(lockedMove))
+                        .findFirst().orElse(move);
+                    selectedMoves.put(pokemon, forced);
+                    return;
+                }
+            } else {
+                // Si el objeto ya no es Choice, se resetea el bloqueo
+                lockedMoveByPokemon.remove(poke);
+            }
+        }
         selectedMoves.put(pokemon, move);
     }
 
@@ -53,6 +77,10 @@ public class PokemonBattleSystem extends BaseBattleSystem {
                 activePokemon2 = newPokemon;
                 notifyPokemonSwitched(newPokemon, false);
             }
+        }
+        // Al cambiar de Pokémon, se resetea el bloqueo
+        if (newPokemon instanceof Pokemon poke) {
+            lockedMoveByPokemon.remove(poke);
         }
     }
 

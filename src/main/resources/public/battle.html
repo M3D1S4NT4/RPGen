@@ -561,6 +561,10 @@
         let actionSelected1 = false;  // Nueva variable para controlar si el equipo 1 ha seleccionado una acción
         let actionSelected2 = false;  // Nueva variable para controlar si el equipo 2 ha seleccionado una acción
         let currentTurn = 0; // Contador de turnos actual
+        
+        // Variables para restricción de movimientos Choice
+        let lockedMoveTeam1 = null;
+        let lockedMoveTeam2 = null;
 
         // API para comunicación con el backend
         const api = {
@@ -797,6 +801,13 @@
                 return;
             }
 
+            // Verificar si el Pokémon tiene un objeto Choice que restringe movimientos
+            const hasChoiceItem = pokemon.heldItem && pokemon.heldItem.extraEffects && 
+                                 pokemon.heldItem.extraEffects.onlyOneMove;
+            
+            // Obtener el movimiento bloqueado para este equipo
+            const lockedMove = teamId === 'team1' ? lockedMoveTeam1 : lockedMoveTeam2;
+
             selectedMoves.forEach(move => {
                 if (!move) {
                     console.warn('Movimiento nulo encontrado en', pokemon.name);
@@ -806,6 +817,14 @@
                 const button = document.createElement('button');
                 button.className = 'move-button';
                 button.textContent = `${move.name} (${move.power})`;
+                
+                // Si tiene objeto Choice y ya hay un movimiento bloqueado, deshabilitar otros movimientos
+                if (hasChoiceItem && lockedMove && lockedMove !== move.name) {
+                    button.disabled = true;
+                    button.style.opacity = '0.5';
+                    button.title = 'Objeto Choice: Solo puedes usar ' + lockedMove;
+                }
+                
                 button.addEventListener('click', () => selectMove(teamId, move));
                 movesContainer.appendChild(button);
             });
@@ -872,10 +891,46 @@
 
             const selectedMove = teamId === 'team1' ? selectedMove1 : selectedMove2;
             const lastAction = teamId === 'team1' ? lastAction1 : lastAction2;
+            const activePokemon = teamId === 'team1' ? activePokemon1 : activePokemon2;
 
             if (selectedMove || lastAction === 'move') {
                 updateBattleLog(`El ${teamId === 'team1' ? 'Equipo 1' : 'Equipo 2'} ya ha seleccionado un movimiento en este turno`);
                 return;
+            }
+
+            // Verificar restricción de objeto Choice
+            const hasChoiceItem = activePokemon && activePokemon.heldItem && 
+                                 activePokemon.heldItem.extraEffects && 
+                                 activePokemon.heldItem.extraEffects.onlyOneMove;
+            
+            const lockedMove = teamId === 'team1' ? lockedMoveTeam1 : lockedMoveTeam2;
+            
+            if (hasChoiceItem) {
+                if (lockedMove === null) {
+                    // Primer movimiento: bloquear
+                    if (teamId === 'team1') {
+                        lockedMoveTeam1 = move.name;
+                    } else {
+                        lockedMoveTeam2 = move.name;
+                    }
+                    updateBattleLog(`${activePokemon.name} ha usado ${move.name} por primera vez. Objeto Choice activado.`);
+                } else if (lockedMove !== move.name) {
+                    // Intento de cambiar movimiento: forzar el bloqueado
+                    updateBattleLog(`${activePokemon.name} intenta cambiar de movimiento, pero el objeto Choice lo fuerza a usar ${lockedMove}.`);
+                    
+                    // Buscar el movimiento bloqueado en la lista de movimientos
+                    const selectedMoves = activePokemon.selectedMoveIndices ? 
+                        activePokemon.selectedMoveIndices.map(index => activePokemon.moves[index]).filter(m => m) :
+                        [];
+                    const forcedMove = selectedMoves.find(m => m.name === lockedMove);
+                    
+                    if (!forcedMove) {
+                        updateBattleLog('Error: No se encontró el movimiento bloqueado');
+                        return;
+                    }
+                    
+                    move = forcedMove;
+                }
             }
 
             if (teamId === 'team1') {
@@ -1131,6 +1186,13 @@
         async function switchPokemon(pokemon, teamId) {
             if (turnInProgress || battleOver) return;
 
+            // Resetear el bloqueo de movimientos al cambiar de Pokémon
+            if (teamId === 'team1') {
+                lockedMoveTeam1 = null;
+            } else {
+                lockedMoveTeam2 = null;
+            }
+
             // Si no hay batalla activa, simplemente actualizamos el Pokémon activo
             if (!currentBattleId) {
                 if (teamId === 'team1') {
@@ -1271,6 +1333,14 @@
                                 const parsedData = JSON.parse(pokemonData);
                                 // Asignar un identificador único aunque sean iguales
                                 parsedData.uniqueId = `${parsedData.id}_${teamName}_${idx}_${Date.now()}_${uniqueCounter++}`;
+                                
+                                // Asegurar que los objetos tengan sus efectos extra
+                                if (parsedData.heldItem && parsedData.heldItem.id) {
+                                    // Cargar los efectos extra del objeto desde la base de datos
+                                    // Esto se hará cuando se carguen los objetos en el frontend
+                                    console.log('Pokémon con objeto:', parsedData.name, 'Objeto:', parsedData.heldItem.name);
+                                }
+                                
                                 return parsedData;
                             } catch (e) {
                                 console.error(`Error al parsear datos del Pokémon ${pokemonHash}:`, e);
@@ -1293,6 +1363,9 @@
                         throw new Error('No se encontraron equipos válidos');
                     }
                     
+                    // Cargar efectos extra de objetos después de cargar los equipos
+                    loadItemEffects();
+                    
                     updateTeamSelectors();
 
                 } catch (error) {
@@ -1303,6 +1376,31 @@
                 console.log('No hay equipos guardados');
                 alert('No hay equipos guardados. Por favor, crea equipos en la página de Pokédex.');
                 window.location.href = 'pokemon.html';
+            }
+        }
+        
+        // Función para cargar efectos extra de objetos
+        async function loadItemEffects() {
+            try {
+                const response = await fetch('/api/pokemon/items');
+                if (response.ok) {
+                    const items = await response.json();
+                    
+                    // Actualizar efectos extra en todos los Pokémon de todos los equipos
+                    for (const [teamName, team] of Object.entries(allTeams)) {
+                        team.forEach(pokemon => {
+                            if (pokemon.heldItem && pokemon.heldItem.id) {
+                                const itemData = items[pokemon.heldItem.id];
+                                if (itemData && itemData.extraEffects) {
+                                    pokemon.heldItem.extraEffects = itemData.extraEffects;
+                                    console.log(`Efectos extra cargados para ${pokemon.name}:`, itemData.extraEffects);
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error al cargar efectos de objetos:', error);
             }
         }
 
@@ -1554,6 +1652,10 @@
             waitingForTeam1 = true; // Resetear el estado de espera del equipo 1
             waitingForTeam2 = true; // Resetear el estado de espera del equipo 2
             initialSelectionPending = true; // Resetear la bandera de selección inicial
+            
+            // Resetear bloqueos de movimientos Choice
+            lockedMoveTeam1 = null;
+            lockedMoveTeam2 = null;
 
             // Regenerar HP de todos los Pokémon en ambos equipos
             if (selectedTeam1) {
