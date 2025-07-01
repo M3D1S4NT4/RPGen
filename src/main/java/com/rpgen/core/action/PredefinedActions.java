@@ -94,11 +94,9 @@ public class PredefinedActions {
                 return;
             }
             
-            source.setDefense(source.getDefense() * 2);
-            remainingTurns--;
-            
-            if (remainingTurns <= 0) {
-                source.setDefense(source.getDefense() / 2);
+            // Activar escudo: ignorar el siguiente ataque recibido
+            if (source instanceof com.rpgen.core.entity.BaseEntity) {
+                ((com.rpgen.core.entity.BaseEntity)source).setShielded(true);
             }
         }
 

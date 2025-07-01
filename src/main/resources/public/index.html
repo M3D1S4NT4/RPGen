@@ -269,6 +269,54 @@
             cursor: pointer;
             font-size: 24px;
         }
+        /* Animación de ataque */
+        .character-card.attacking {
+            animation: attack 0.5s linear;
+        }
+        .character-card.taking-damage {
+            animation: take-damage 0.5s linear;
+        }
+        @keyframes attack {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(20px); }
+            50% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes take-damage {
+            0% { background-color: #fff; }
+            50% { background-color: #ffcccc; }
+            100% { background-color: #fff; }
+        }
+        /* Animación de victoria */
+        .winner-announcement {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+        .winner-announcement.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            display: block !important;
+        }
+        .winner-announcement h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #4CAF50;
+        }
+        .winner-announcement p {
+            font-size: 1.5rem;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -310,14 +358,14 @@
                     <div id="team1" class="character-list"></div>
                 </div>
                 <div>
-                    <h3>Equipo 2</h3>z
+                    <h3>Equipo 2</h3>
                     <div id="team2" class="character-list"></div>
                 </div>
             </div>
             <div id="actionButtons" class="action-buttons">
                 <button class="action-button basic-button" onclick="selectAction('basic')">Ataque Básico</button>
                 <button class="action-button strong-button" onclick="selectAction('strong')">Ataque Fuerte</button>
-                <!--button class="action-button shield-button" onclick="selectAction('shield')">Escudo</button-->
+                <button class="action-button shield-button" onclick="selectAction('shield')">Escudo</button>
             </div>
             <div id="battleLog" class="battle-log">
                 <p>Registro de batalla...</p>
@@ -338,6 +386,11 @@
                 <button type="submit">Guardar Cambios</button>
             </form>
         </div>
+    </div>
+
+    <div id="winnerAnnouncement" class="winner-announcement" style="display:none;">
+        <h2>¡Batalla Finalizada!</h2>
+        <p id="winnerText"></p>
     </div>
 
     <script>
@@ -403,23 +456,11 @@
         let currentTeam = 1;
         let editingCharacterId = null;
 
-        // Función para cargar equipos de Pokémon
-        function loadPokemonTeams() {
-            const battleTeams = localStorage.getItem('battleTeams');
-            if (battleTeams) {
-                const teams = JSON.parse(battleTeams);
-                selectedTeam1 = teams.team1;
-                selectedTeam2 = teams.team2;
-                updateTeams();
-                updateBattleLog('Equipos de Pokémon cargados');
-            }
-        }
-
         // Funciones de renderizado
         function renderCharacter(character, includeTeamButtons = true, teamNumber = null) {
             const isSelected = selectedCharacter && selectedCharacter.id === character.id;
             const isTarget = selectedTarget && selectedTarget.id === character.id;
-            const cardClass = `character-card ${isSelected ? 'selected' : ''} ${isTarget ? 'target' : ''}`;
+            const cardClass = `character-card${teamNumber ? ' team-card' : ''} ${isSelected ? 'selected' : ''} ${isTarget ? 'target' : ''}`;
             const healthPercentage = (character.health / character.maxHealth) * 100;
             const healthColor = healthPercentage > 50 ? '#4CAF50' : healthPercentage > 25 ? '#FFA500' : '#FF4444';
             
@@ -429,6 +470,7 @@
                     <button onclick="addToTeam1('${character.id}')">Añadir a Equipo 1</button>
                     <button onclick="addToTeam2('${character.id}')">Añadir a Equipo 2</button>
                     <button class="edit-button" onclick="openEditModal('${character.id}')">Editar</button>
+                    <button class="remove-button" onclick="deleteCharacter('${character.id}', '${character.name}')">Eliminar</button>
                 `;
             } else {
                 teamButtons = `
@@ -437,23 +479,8 @@
                 `;
             }
 
-            // Si es un Pokémon, mostrar información adicional
-            let additionalInfo = '';
-            if (character.types) {
-                const typeBadges = character.types.map(type => 
-                    `<span class="type-badge type-${type.toLowerCase()}">${type}</span>`
-                ).join('');
-                additionalInfo = `
-                    <div class="pokemon-types">${typeBadges}</div>
-                    <p>Velocidad: ${character.speed}</p>
-                    <p>Ataque Especial: ${character.specialAttack}</p>
-                    <p>Defensa Especial: ${character.specialDefense}</p>
-                `;
-            }
-
             return `
                 <div class="${cardClass}" data-id="${character.id}">
-                    ${character.imageUrl ? `<img src="${character.imageUrl}" alt="${character.name}" style="width: 100px; height: 100px; object-fit: contain;">` : ''}
                     <h3>${character.name}</h3>
                     <div style="background-color: #ddd; width: 100%; height: 20px; border-radius: 10px; margin: 5px 0;">
                         <div style="width: ${healthPercentage}%; height: 100%; background-color: ${healthColor}; border-radius: 10px; transition: width 0.3s ease-in-out;"></div>
@@ -461,7 +488,6 @@
                     <p>Salud: ${character.health}/${character.maxHealth}</p>
                     <p>Ataque: ${character.attack}</p>
                     <p>Defensa: ${character.defense}</p>
-                    ${additionalInfo}
                     ${teamButtons}
                 </div>
             `;
@@ -668,7 +694,7 @@
                 const result = await api.performAction(selectedCharacter.id, selectedTarget.id, actionType);
                 if (result.status === 'success') {
                     updateBattleLog(`${selectedCharacter.name} usa ${actionType} contra ${selectedTarget.name}`);
-                    
+                    await animateAttack(selectedCharacter.id, selectedTarget.id);
                     // Procesar el turno automáticamente después de cada acción
                     const turnResult = await api.processTurn();
                     if (turnResult.actions) {
@@ -676,24 +702,24 @@
                             updateBattleLog(action);
                         });
                     }
-                    
-                    // Actualizar el estado de la batalla y los equipos
-                    await updateTeams(); // Actualizar equipos con la información más reciente
-                    
-                    // Deseleccionar personajes y actualizar el estado
+                    await updateTeams();
                     selectedCharacter = null;
                     selectedTarget = null;
                     currentTeam = currentTeam === 1 ? 2 : 1;
                     updateBattleStatus(`Turno del Equipo ${currentTeam}`);
-                    
-                    // Actualizar la visualización para quitar los colores de selección
                     document.getElementById('team1').innerHTML = selectedTeam1.map(c => renderCharacter(c, false, 1)).join('');
                     document.getElementById('team2').innerHTML = selectedTeam2.map(c => renderCharacter(c, false, 2)).join('');
-                    
                     if (turnResult.isBattleOver) {
                         updateBattleLog('¡La batalla ha terminado!');
                         document.getElementById('actionButtons').style.display = 'none';
                         document.getElementById('processTurn').disabled = true;
+                        // Mostrar anuncio de victoria
+                        let winner = 'Empate';
+                        const team1Alive = selectedTeam1.some(c => c.health > 0);
+                        const team2Alive = selectedTeam2.some(c => c.health > 0);
+                        if (team1Alive && !team2Alive) winner = 'Equipo 1';
+                        else if (team2Alive && !team1Alive) winner = 'Equipo 2';
+                        showWinner(winner);
                     }
                 } else {
                     alert(result.message || 'Error al ejecutar la acción');
@@ -833,8 +859,53 @@
         async function init() {
             characters = await api.getCharacters();
             updateCharacterList();
-            //loadPokemonTeams(); // Cargar equipos de Pokémon si existen
             updateBattleLog('Sistema de combate iniciado');
+        }
+
+        // Función para eliminar un personaje
+        window.deleteCharacter = async function(id, name) {
+            if (!confirm(`¿Seguro que quieres eliminar a ${name}?`)) return;
+            try {
+                const response = await fetch(`/api/characters/${id}`, { method: 'DELETE' });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    updateBattleLog(`Personaje ${name} eliminado`);
+                    await updateCharacterList();
+                    await updateTeams();
+                } else {
+                    alert(result.error || 'Error al eliminar el personaje');
+                }
+            } catch (error) {
+                alert('Error al eliminar el personaje');
+            }
+        }
+
+        // Animación de ataque SOLO en el área de combate (tarjetas con clase 'team-card')
+        function animateAttack(sourceId, targetId) {
+            return new Promise(resolve => {
+                const sourceCard = document.querySelector(`.team-card[data-id='${sourceId}']`);
+                const targetCard = document.querySelector(`.team-card[data-id='${targetId}']`);
+                if (sourceCard) sourceCard.classList.add('attacking');
+                if (targetCard) targetCard.classList.add('taking-damage');
+                setTimeout(() => {
+                    if (sourceCard) sourceCard.classList.remove('attacking');
+                    if (targetCard) targetCard.classList.remove('taking-damage');
+                    resolve();
+                }, 1000);
+            });
+        }
+
+        // Mostrar anuncio de victoria
+        function showWinner(winner) {
+            const announcement = document.getElementById('winnerAnnouncement');
+            const winnerText = document.getElementById('winnerText');
+            winnerText.textContent = `${winner} ha ganado la batalla!`;
+            announcement.classList.add('show');
+            announcement.style.display = 'block';
+            setTimeout(() => {
+                announcement.classList.remove('show');
+                announcement.style.display = 'none';
+            }, 4000);
         }
 
         init();

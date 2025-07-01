@@ -13,6 +13,7 @@ public abstract class BaseEntity implements Entity {
     protected final int speed;
     protected List<GameAction> availableActions;
     protected int defenseBonus;
+    protected boolean shielded = false;
 
     protected BaseEntity(String id, String name, int maxHealth, int attack, int defense, int speed) {
         this.id = id;
@@ -68,6 +69,10 @@ public abstract class BaseEntity implements Entity {
 
     @Override
     public void takeDamage(int damage) {
+        if (shielded) {
+            shielded = false;
+            return;
+        }
         if (damage < 0) {
             throw new IllegalArgumentException("El daño no puede ser negativo");
         }
@@ -104,5 +109,13 @@ public abstract class BaseEntity implements Entity {
     @Override
     public void setAvailableActions(List<GameAction> actions) {
         this.availableActions = new ArrayList<>(actions);
+    }
+
+    public void setShielded(boolean value) {
+        this.shielded = value;
+    }
+
+    public boolean isShielded() {
+        return shielded;
     }
 } 
