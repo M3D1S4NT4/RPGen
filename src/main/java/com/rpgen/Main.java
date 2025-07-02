@@ -4,6 +4,7 @@ import com.rpgen.web.BattleServer;
 import com.rpgen.pokemon.PokemonServer;
 import com.rpgen.web.PokemonBattleServer;
 import com.rpgen.web.PokemonConfigServer;
+import com.rpgen.chrono.ChronoBattleServer;
 import spark.Spark;
 
 public class Main {
@@ -33,6 +34,10 @@ public class Main {
         PokemonServer pokemonServer = new PokemonServer();
         pokemonServer.init();
         System.out.println("Servidor de Pokémon iniciado");
+        
+        ChronoBattleServer chronoServer = new ChronoBattleServer();
+        chronoServer.init();
+        System.out.println("Servidor de batalla de Chrono iniciado");
         
         // Configurar manejo de errores
         Spark.exception(Exception.class, (exception, request, response) -> {
