@@ -1,5 +1,6 @@
-{
-  "enemies_12000_bc": [
+[
+  {
+    "enemies_12000_bc": [
     {
       "name": "Bantam Imp",
       "level": 30,
@@ -715,3 +716,4 @@
     }
   ]
 }
+]

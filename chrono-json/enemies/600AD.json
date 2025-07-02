@@ -1,5 +1,6 @@
-{
-  "enemies_600_ad": [
+[
+  {
+    "enemies_600_ad": [
     {
       "name": "",
       "level": 1,
@@ -1588,4 +1589,5 @@
       "notes_and_attacks": "Appears with Top, High Physical defense, Physical damage to 1 character only if top is defeated, Physical damge to all characters only if top is defeated"
     }
   ]
-}
+} 
+]

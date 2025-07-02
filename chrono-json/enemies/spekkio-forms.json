@@ -1,5 +1,6 @@
-{
-  "spekkio_forms": [
+[
+  {
+    "spekkio_forms": [
     {
       "name": "Spekkio",
       "character_level_range": "1-9",
@@ -116,3 +117,4 @@
     }
   ]
 }
+]

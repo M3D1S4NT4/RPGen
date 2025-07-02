@@ -1,5 +1,6 @@
-{
-  "weapons": {
+[
+  {
+    "weapons": {
     "Crono (Katanas)": [
       { "name": "Mop", "attack": 1, "special": null },
       { "name": "Wooden Sword", "attack": 3, "special": null },
@@ -95,8 +96,9 @@
     ],
     "Unequippable": [
       "Broken Blade", 
-      "Broken Hilt", 
-      "Masamune (Unequippable)"
-    ]
+        "Broken Hilt", 
+        "Masamune (Unequippable)"
+      ]
+    }
   }
-}
+]

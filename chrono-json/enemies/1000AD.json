@@ -1,5 +1,6 @@
-{
-  "enemies_1000_ad": [
+[
+  {
+    "enemies_1000_ad": [
     {
       "name": "Avian Chaos",
       "level": 6,
@@ -669,3 +670,4 @@
     }
   ]
 }
+]

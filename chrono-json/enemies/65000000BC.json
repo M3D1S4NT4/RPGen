@@ -1,5 +1,6 @@
-{
-  "enemies_65000000_bc": [
+[
+  {
+    "enemies_65000000_bc": [
     {
       "name": "Amphibite",
       "level": 16,
@@ -623,3 +624,4 @@
     }
   ]
 }
+]

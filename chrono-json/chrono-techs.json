@@ -1,7 +1,9 @@
-{
-  "techs": {
+[
+  {
+    "techs": {
     "singleTechs": {
       "Crono": [
+        { "name": "Attack", "MP": 0, "TP": 0, "element": null, "target": "One enemy", "description": "Ataque físico básico." },
         { "name": "Cyclone",       "MP": 2,  "TP": 5,   "element": null,  "target": "Circle of enemies", "description": "Whirl about enemy, striking others nearby." },
         { "name": "Wind Slash",    "MP": 2,  "TP": 90,  "element": "Light", "target": "Line of enemies",   "description": "Hit all enemies in a line with a wave of wind." },
         { "name": "Lightning",    "MP": 2,  "TP": null,"element": "Light", "target": "One enemy",       "description": "Attack an enemy with lightning." },
@@ -12,6 +14,7 @@
         { "name": "Luminaire",    "MP": 20, "TP": 1000,"element": "Light", "target": "All enemies",    "description": "Attack all enemies with holy light." }
       ],
       "Marle": [
+        { "name": "Attack", "MP": 0, "TP": 0, "element": null, "target": "One enemy", "description": "Ataque físico básico." },
         { "name": "Aura",       "MP": 1,  "TP": 10,  "element": null,  "target": "One ally",    "description": "Restore a small amount of HP to one ally." },
         { "name": "Allure (Provoke)", "MP": 1, "TP": 50, "element": null, "target": "One enemy",  "description": "Confuse a target enemy." },
         { "name": "Ice",        "MP": 2,  "TP": null,"element": "Water","target": "One enemy",   "description": "Attack an enemy with ice." },
@@ -22,6 +25,7 @@
         { "name": "Arise (Life2)", "MP": 15, "TP": 900, "element": null, "target": "One ally", "description": "Revive a fallen ally and fully heal them." }
       ],
       "Lucca": [
+        { "name": "Attack", "MP": 0, "TP": 0, "element": null, "target": "One enemy", "description": "Ataque físico básico." },
         { "name": "Flamethrower (Flame Toss)", "MP": 1,  "TP": 10,  "element": "Fire",  "target": "Line of enemies", "description": "Burn enemies along a direct line in front." },
         { "name": "Hypnowave (Hypno Wave)",    "MP": 1,  "TP": 60,  "element": null,   "target": "All enemies",    "description": "Put all enemies to sleep." },
         { "name": "Fire",        "MP": 2,  "TP": null,"element": "Fire", "target": "One enemy",   "description": "Attack one enemy with fire." },
@@ -32,6 +36,7 @@
         { "name": "Flare",       "MP": 20, "TP": 900, "element": "Fire", "target": "All enemies", "description": "Attack all enemies with an intense fire attack." }
       ],
       "Frog": [
+        { "name": "Attack", "MP": 0, "TP": 0, "element": null, "target": "One enemy", "description": "Ataque físico básico." },
         { "name": "Slurp",       "MP": 1,  "TP": 10,  "element": null,  "target": "One ally",    "description": "Restore a small amount of HP to one ally (using Frog's tongue)." },
         { "name": "Slurp Slash (Slurp Cut)", "MP": 2, "TP": 15, "element": null, "target": "One enemy", "description": "Pull an enemy with tongue and then slash it." },
         { "name": "Water",       "MP": 2,  "TP": null,"element": "Water","target": "One enemy",   "description": "Attack an enemy with a water spell." },
@@ -42,6 +47,7 @@
         { "name": "Frog Squash", "MP": 15, "TP": 1000,"element": null,  "target": "All enemies", "description": "Hit all enemies -- damage increases dramatically when Frog's HP is low." }
       ],
       "Robo": [
+        { "name": "Attack", "MP": 0, "TP": 0, "element": null, "target": "One enemy", "description": "Ataque físico básico." },
         { "name": "Rocket Punch", "MP": 1,  "TP": null,"element": null,  "target": "One enemy",   "description": "Launch Robo's fist at one enemy to deal damage." },
         { "name": "Cure Beam",   "MP": 2,  "TP": null,"element": null,  "target": "One ally",    "description": "Restore a small amount of HP to one ally (Robo's heal beam)." },
         { "name": "Laser Spin",  "MP": 3,  "TP": 5,   "element": "Shadow", "target": "All enemies", "description": "Attack all enemies with a 360° laser spin (Shadow elemental)." },
@@ -52,6 +58,7 @@
         { "name": "Electrocute (Shock)", "MP": 17, "TP": 1000,"element": "Light","target": "All enemies", "description": "Zap all enemies with a powerful electrical surge." }
       ],
       "Ayla": [
+        { "name": "Attack", "MP": 0, "TP": 0, "element": null, "target": "One enemy", "description": "Ataque físico básico." },
         { "name": "Kiss",           "MP": 1,  "TP": 10,   "element": null,  "target": "One ally",    "description": "Lightly heal one ally and cure their status ailments." },
         { "name": "Roundillo Kick (Rollo Kick)", "MP": 2, "TP": 60, "element": null, "target": "One enemy", "description": "Perform a jumping roll-kick on one enemy." },
         { "name": "Cat Attack",    "MP": 3,  "TP": 100,  "element": null,  "target": "One enemy",   "description": "Savage an enemy with a claw and bite combo." },
@@ -62,6 +69,7 @@
         { "name": "Triple Kick",   "MP": 20, "TP": 1000, "element": null,  "target": "One enemy",   "description": "Deliver a combo of 3 powerful kicks to one enemy." }
       ],
       "Magus": [
+        { "name": "Attack", "MP": 0, "TP": 0, "element": null, "target": "One enemy", "description": "Ataque físico básico." },
         { "name": "Lightning II",  "MP": 8,  "TP": null,"element": "Light","target": "All enemies", "description": "Attack all enemies with a lightning spell." },
         { "name": "Ice II",        "MP": 8,  "TP": null,"element": "Water","target": "All enemies", "description": "Attack all enemies with an ice spell." },
         { "name": "Fire II",       "MP": 8,  "TP": null,"element": "Fire", "target": "All enemies", "description": "Attack all enemies with a fire spell." },
@@ -620,6 +628,7 @@
         "target": "All enemies",
         "description": "Invoca a Masa y Mune (espíritus de la espada Masamune) para golpear a todos los enemigos con una poderosa energía, combinando el poder de Frog, Robo y Marle (requiere equipar \"Golden Gemstone\")."
       }
-    ]
+      ]
+    }
   }
-}
+]

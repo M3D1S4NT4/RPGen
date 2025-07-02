@@ -1,5 +1,6 @@
-{
-  "enemies_black_omen": [
+[
+  {
+    "enemies_black_omen": [
     {
       "name": "Alien",
       "level": 46,
@@ -669,3 +670,4 @@
     }
   ]
 }
+]

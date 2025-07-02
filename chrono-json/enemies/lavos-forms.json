@@ -1,5 +1,6 @@
-{
-  "lavos_forms": [
+[
+  {
+    "lavos_forms": [
     {
       "name": "Lavos (1)",
       "level": "Varies",
@@ -172,3 +173,4 @@
     }
   ]
 }
+]
