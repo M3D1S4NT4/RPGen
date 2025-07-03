@@ -207,30 +207,46 @@
             padding: 8px;
             border-radius: 5px;
             border: 1px solid #ccc;
-        }
-
-        .start-battle {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            color: #222;
             font-weight: bold;
+            box-shadow: 0 2px 8px #0003;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .team-selector select option {
+            background: #fff;
+            color: #222;
+        }
+        body.dark-mode .team-selector select {
+            background: linear-gradient(90deg, #232b23 0%, #38f9d7 100%);
+            color: #fff;
+            border-color: #555;
+        }
+        body.dark-mode .team-selector select option {
+            background: #232b23;
+            color: #fff;
         }
 
-        .reset-button {
-            background-color: #FF9800;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .main-battle-btn {
+            font-size: 1.2em;
+            padding: 0.9em 2.2em;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            color: #222;
             font-weight: bold;
+            border: none;
+            margin: 0 0.5em;
+            box-shadow: 0 2px 8px #0003;
+            transition: background 0.2s, transform 0.1s;
+            cursor: pointer;
         }
-
-        .reset-button:hover {
-            background-color: #F57C00;
+        .main-battle-btn:hover {
+            background: linear-gradient(90deg, #38f9d7 0%, #43e97b 100%);
+            transform: scale(1.05);
+        }
+        body.dark-mode .main-battle-btn {
+            background: linear-gradient(90deg, #232b23 0%, #38f9d7 100%);
+            color: #fff;
         }
 
         .pokemon-stats-tooltip {
@@ -360,31 +376,6 @@
             100% { opacity: 1; transform: translateX(0); }
         }
 
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .theme-toggle:hover {
-            background-color: #45a049;
-        }
-
-        body.dark-mode .theme-toggle {
-            background-color: #666;
-        }
-
-        body.dark-mode .theme-toggle:hover {
-            background-color: #777;
-        }
-
         body.dark-mode .pokemon-card {
             background: #232323;
             color: #e0e0e0;
@@ -473,11 +464,74 @@
             background: rgba(255,255,255,0.1);
             color: #f0f0f0;
         }
+
+        .main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #222;
+            color: #fff;
+            z-index: 10000;
+            box-shadow: 0 2px 8px #0002;
+        }
+        .main-header nav {
+            display: flex;
+            justify-content: center;
+            gap: 2em;
+            padding: 1em 0;
+        }
+        .main-header a, .main-header .theme-toggle {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: color 0.2s, background 0.2s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0 0.5em;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .main-header a:hover, .main-header .theme-toggle:hover {
+            color: #4CAF50;
+            background: none;
+        }
+        body.dark-mode .main-header a, body.dark-mode .main-header .theme-toggle {
+            color: #f0f0f0;
+        }
+        body.dark-mode .main-header a:hover, body.dark-mode .main-header .theme-toggle:hover {
+            color: #6fcf97;
+        }
+        body {
+            padding-top: 70px !important;
+        }
+        body.dark-mode .main-header {
+            background: #181818;
+            color: #f0f0f0;
+        }
+        body.dark-mode .main-header a {
+            color: #f0f0f0;
+        }
+        body.dark-mode .main-header a:hover {
+            color: #6fcf97;
+        }
     </style>
 </head>
 <body>
+    <header class="main-header">
+        <nav>
+            <a href="index.html">Inicio</a>
+            <a href="pokemon.html">Pokédex</a>
+            <a href="battle.html">Combate Pokémon</a>
+            <a href="chrono-team.html">Selección de Equipos Chrono</a>
+            <a href="chrono-battle.html">Combate Chrono Trigger</a>
+            <button class="theme-toggle" onclick="toggleDarkMode()">Cambiar Tema</button>
+        </nav>
+    </header>
     <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
-        <button class="theme-toggle" onclick="toggleDarkMode()">Cambiar Tema</button>
         <button onclick="window.location.href='pokemon.html'" style="background-color: #2196F3;">Ir a Pokédex</button>
     </div>
     <div class="container">
@@ -493,8 +547,8 @@
             <select id="team2Selector">
                 <option value="">Selecciona Equipo 2</option>
             </select>
-            <button class="start-battle" onclick="startBattle()">Iniciar Batalla</button>
-            <button id="resetBattle" class="reset-button" onclick="resetBattle()">Resetear Batalla</button>
+            <button class="main-battle-btn" onclick="startBattle()">Iniciar Batalla</button>
+            <button id="resetBattle" class="main-battle-btn" onclick="resetBattle()">Resetear Batalla</button>
         </div>
         <div class="battle-arena">
             <div class="team-section">

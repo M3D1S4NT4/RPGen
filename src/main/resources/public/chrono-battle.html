@@ -4,95 +4,103 @@
     <meta charset="UTF-8">
     <title>Combate - Chrono Trigger</title>
     <style>
-        body { background: #181818; color: #fff; font-family: Arial, sans-serif; margin: 2em; }
-        h1 { color: #fff; }
+        body { background: #f0f0f0 !important; color: #222; font-family: Arial, sans-serif; margin: 2em; padding-top: 70px !important; }
+        body.dark-mode { background: #181818 !important; color: #fff !important; }
+        body.dark-mode .battle-container { background: #181818 !important; }
+        body.dark-mode .team-panel { background: #232323 !important; color: #f0f0f0 !important; }
+        body.dark-mode .entity-card { background: #2d2d2d !important; color: #f0f0f0 !important; }
+        body.dark-mode h1,
+        body.dark-mode h2,
+        body.dark-mode h3,
+        body.dark-mode label,
+        body.dark-mode .stat-label {
+            color: #f0f0f0 !important;
+        }
+        h1 { color: #222; }
         .battle-container {
             display: flex;
+            flex-direction: row;
             gap: 2em;
-            justify-content: flex-start;
+            justify-content: center;
             align-items: flex-start;
         }
-        .left-panel {
+        .team-panel {
+            flex: 0 0 320px;
+            max-width: 340px;
+            min-width: 260px;
+        }
+        .central-panel {
+            flex: 2 1 0%;
             display: flex;
             flex-direction: column;
-            gap: 1em;
-            min-width: 340px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #0006;
+            min-height: 500px;
+            max-width: 900px;
+            margin: 0 1em;
+            overflow: hidden;
         }
-        .control-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 0.7em;
-            margin-bottom: 1em;
-        }
-        .main-action-btn {
-            width: 100%;
-            margin: 0;
+        body.dark-mode .central-panel {
+            background: #232323;
         }
         .actions-col {
+            flex: 0 0 220px;
             display: flex;
             flex-direction: column;
             gap: 1.5em;
-            min-width: 220px;
-            max-width: 260px;
-            margin-top: 0;
-            background: #232b23;
-            border-radius: 10px;
-            padding: 2em 1em;
-            box-shadow: 0 1px 4px #0004;
+            background: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 2em 1em 2em 2em;
             align-items: stretch;
-            height: fit-content;
+            justify-content: flex-start;
+            min-width: 220px;
+            max-width: 320px;
         }
-        .actions-col button {
+        .battle-history-panel {
+            flex: 1 1 0%;
+            background: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 2em 2em 2em 1em;
+            min-width: 320px;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            height: auto;
+        }
+        body.dark-mode .battle-history-panel {
+            background: none;
+        }
+        .actions-col button, .actions-panel button, .main-action-btn {
             font-size: 1.3em;
             padding: 1.2em 0;
             border-radius: 10px;
-            background: #4caf50;
-            color: #fff;
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            color: #222;
             font-weight: bold;
             border: none;
             margin: 0.5em 0;
+            box-shadow: 0 2px 8px #0003;
             transition: background 0.2s, transform 0.1s;
             cursor: pointer;
         }
-        .actions-col button:hover {
-            background: #43a047;
-            transform: scale(1.03);
+        .actions-panel button:hover, .actions-col button:hover, .main-action-btn:hover {
+            background: linear-gradient(90deg, #38f9d7 0%, #43e97b 100%);
+            transform: scale(1.05);
         }
-        .battle-history-panel {
-            min-width: 320px;
-            max-width: 400px;
-            background: #181818;
+        body.dark-mode .actions-panel button, body.dark-mode .actions-col button, body.dark-mode .main-action-btn {
+            background: linear-gradient(90deg, #232b23 0%, #38f9d7 100%);
             color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px #0006;
-            padding: 1em;
-            margin: 0 1em;
-            height: 500px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
         }
-        .battle-history-panel h3 {
-            margin-top: 0;
-            margin-bottom: 0.7em;
-            color: #4caf50;
-            font-size: 1.2em;
-            text-align: center;
-        }
-        #battle-history-content {
-            flex: 1;
-            overflow-y: auto;
-            font-size: 1em;
-            line-height: 1.5em;
-        }
-        .battle-messages {
-            display: none;
-        }
-        .team-panel { background: #222; border-radius: 12px; box-shadow: 0 2px 8px #0006; padding: 1em; width: 340px; min-height: 400px; display: flex; flex-direction: column; }
-        .team-panel h2 { margin-top: 0; color: #fff; }
+        .central-panel > *:first-child { border-bottom: 1.5px solid #3333; }
+        body.dark-mode .central-panel > *:first-child { border-bottom: 1.5px solid #444; }
+        .team-panel { background: #fff; color: #222; border-radius: 12px; box-shadow: 0 2px 8px #0006; padding: 1em; width: 340px; min-height: 400px; display: flex; flex-direction: column; }
+        .team-panel h2 { margin-top: 0; color: #222; }
         .entity-list { display: flex; flex-direction: column; gap: 1em; margin: 0; padding: 0; list-style: none; flex: 1; }
-        .entity-card { background: #232b23; border-radius: 10px; box-shadow: 0 1px 4px #0004; padding: 1em; display: flex; align-items: center; gap: 1em; position: relative; overflow: hidden; min-height: 60px; transition: box-shadow 0.2s, background 0.2s, min-height 0.3s, max-height 0.3s; }
-        .entity-card.expanded { background: #2e3c2e; min-height: 250px; }
+        .entity-card { background: #f9f9f9; color: #222; border-radius: 10px; box-shadow: 0 1px 4px #0004; padding: 1em; display: flex; align-items: center; gap: 1em; position: relative; overflow: hidden; min-height: 60px; transition: box-shadow 0.2s, background 0.2s, min-height 0.3s, max-height 0.3s; }
+        .entity-card.expanded { background: #e8f5e9; min-height: 250px; }
         .entity-card .stats { opacity: 0; max-height: 0; transition: opacity 0.2s, max-height 0.3s; overflow: hidden; }
         .entity-card.expanded .stats { opacity: 1; max-height: 200px; margin-top: 0.5em; }
         .entity-card .img { width: 48px; height: 48px; border-radius: 6px; background: #111; object-fit: cover; }
@@ -100,12 +108,11 @@
         .entity-card .name { font-weight: bold; font-size: 1.1em; }
         .entity-card .hp { color: #4caf50; font-weight: bold; }
         .entity-card .mp { color: #2196f3; font-weight: bold; }
-        .entity-card .stat-row { font-size: 0.95em; color: #ccc; }
-        .actions-panel { background: #232b23; border-radius: 10px; padding: 1em; display: flex; gap: 1em; justify-content: center; box-shadow: 0 1px 4px #0004; }
-        .actions-panel button { padding: 0.7em 1.5em; border-radius: 8px; border: none; background: #4caf50; color: #fff; font-weight: bold; font-size: 1em; cursor: pointer; transition: background 0.2s; }
+        .entity-card .stat-row { font-size: 0.95em; color: #333; }
+        .actions-panel { background: #fff; color: #222; border-radius: 10px; padding: 1em; display: flex; gap: 1em; justify-content: center; box-shadow: 0 1px 4px #0004; }
+        .actions-panel button { padding: 0.7em 1.5em; border-radius: 8px; border: none; background: #4CAF50; color: white; font-weight: bold; font-size: 1em; cursor: pointer; transition: background 0.2s; }
         .actions-panel button:disabled { background: #888; cursor: not-allowed; }
-        .entity-card.selected { border: 2px solid #4caf50; box-shadow: 0 0 8px #4caf50; }
-        .entity-card.can-act { background: #2e3c2e; }
+        .entity-card.selected, .entity-card.can-act { background: #e8f5e9; }
         .entity-card.defeated {
             opacity: 0.5;
             filter: grayscale(0.7);
@@ -189,34 +196,26 @@
             }
         }
         .tech-item {
-            background: #232b23;
+            background: #fff;
             border-radius: 8px;
             border: 1.5px solid #4caf50;
             padding: 1em;
             margin-bottom: 0.7em;
             box-shadow: 0 1px 4px #0004;
-            color: #fff;
+            color: #222;
             font-size: 1em;
-            transition: background 0.2s, border 0.2s, transform 0.1s;
-            display: flex;
-            flex-direction: column;
-            gap: 0.3em;
         }
-        .tech-item.selected {
-            background: #4caf50;
-            color: #181818;
-            border: 2px solid #2196f3;
-            transform: scale(1.03);
+        body.dark-mode .tech-item {
+            background: #232b23 !important;
+            color: #f0f0f0 !important;
         }
         .techs-panel h4 {
             margin-top: 1em;
             margin-bottom: 0.5em;
         }
         .techs-panel {
-            background: #232b23;
-            border-radius: 10px;
-            padding: 1em;
-            margin-top: 1em;
+            background: #fff;
+            color: #222;
         }
         #techs-list, #items-list {
             display: grid;
@@ -229,34 +228,191 @@
             .actions-col { max-width: 100%; min-width: 0; }
             .left-panel { min-width: 0; }
         }
+        .main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #222;
+            color: #fff;
+            z-index: 10000;
+            box-shadow: 0 2px 8px #0002;
+        }
+        .main-header nav {
+            display: flex;
+            justify-content: center;
+            gap: 2em;
+            padding: 1em 0;
+        }
+        .main-header a, .main-header .theme-toggle {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: color 0.2s, background 0.2s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0 0.5em;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .main-header a:hover, .main-header .theme-toggle:hover {
+            color: #4CAF50;
+            background: none;
+        }
+        body.dark-mode .main-header a, body.dark-mode .main-header .theme-toggle {
+            color: #f0f0f0;
+        }
+        body.dark-mode .main-header a:hover, body.dark-mode .main-header .theme-toggle:hover {
+            color: #6fcf97;
+        }
+        body.dark-mode .actions-col, body.dark-mode .actions-panel { background: #232323; color: #f0f0f0; }
+        body.dark-mode .battle-history-panel { background: #232323; color: #f0f0f0; }
+        body.dark-mode button { background-color: #666; color: #fff; }
+        body.dark-mode button:hover { background-color: #777; }
+        .battle-panel {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            min-width: 420px;
+            max-width: 700px;
+        }
+        .battle-messages {
+            background: #fff;
+            border-radius: 10px;
+            min-height: 100px;
+            padding: 1.2em;
+            margin-top: 1.2em;
+            font-size: 1.15em;
+            box-shadow: 0 1px 4px #0004;
+            max-height: 180px;
+            overflow-y: auto;
+            color: #222;
+            display: block;
+        }
+        .main-battle-btn {
+            font-size: 1.2em;
+            padding: 0.9em 2.2em;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            color: #222;
+            font-weight: bold;
+            border: none;
+            margin: 0 0.5em;
+            box-shadow: 0 2px 8px #0003;
+            transition: background 0.2s, transform 0.1s;
+            cursor: pointer;
+        }
+        .main-battle-btn:hover {
+            background: linear-gradient(90deg, #38f9d7 0%, #43e97b 100%);
+            transform: scale(1.05);
+        }
+        .entity-card.selected {
+            border: 2.5px solid #4caf50 !important;
+            box-shadow: 0 0 12px #4caf50 !important;
+            z-index: 2;
+        }
+        .entity-card.selected .name {
+            color: #4caf50 !important;
+        }
+        .techs-panel h3,
+        .techs-panel h4, .green-text {
+            color: #4caf50 !important;
+        }
+        body.dark-mode .techs-panel {
+            background: #232b23 !important;
+            color: #fff !important;
+        }
+        .entity-card, .entity-card .stat-row, .entity-card .name {
+            color: #222 !important;
+        }
+        .entity-card .stat-row {
+            color: #333 !important;
+        }
+        body.dark-mode .entity-card, body.dark-mode .entity-card .stat-row, body.dark-mode .entity-card .name {
+            color: #f0f0f0 !important;
+        }
+        .battle-messages {
+            background: #fff;
+            color: #222;
+        }
+        body.dark-mode .battle-messages {
+            background: #222 !important;
+            color: #fff !important;
+        }
+        .techs-panel {
+            background: #fff !important;
+            color: #222;
+        }
+        body.dark-mode .techs-panel {
+            background: #232b23 !important;
+            color: #fff !important;
+        }
+        .tech-item.selected {
+            background: #4caf50 !important;
+            color: #fff !important;
+            border: 2px solid #2196f3;
+            transform: scale(1.03);
+        }
+        .entity-card.can-act {
+            border: 2.5px solid #2196f3 !important;
+            box-shadow: 0 0 12px #2196f3 !important;
+        }
+        .entity-card.selected.can-act {
+            border: 2.5px solid #43e97b !important;
+            box-shadow: 0 0 16px #43e97b, 0 0 8px #2196f3 !important;
+        }
     </style>
 </head>
 <body>
+    <header class="main-header">
+        <nav>
+            <a href="index.html">Inicio</a>
+            <a href="pokemon.html">Pokédex</a>
+            <a href="battle.html">Combate Pokémon</a>
+            <a href="chrono-team.html">Selección de Equipos Chrono</a>
+            <a href="chrono-battle.html">Combate Chrono Trigger</a>
+            <button class="theme-toggle" onclick="toggleDarkMode()">Cambiar Tema</button>
+        </nav>
+    </header>
     <h1>Combate</h1>
     <div id="winnerAnnouncement" class="winner-announcement">
         <h2>¡Batalla Finalizada!</h2>
         <p id="winnerText"></p>
     </div>
+    <div style="margin-bottom:1em; text-align:center;">
+        <button class="main-battle-btn" onclick="startBattle()">Comenzar combate</button>
+        <button class="main-battle-btn" onclick="resetBattle()">Resetear combate</button>
+    </div>
     <div class="battle-container">
-        <div class="left-panel">
-            <div class="control-buttons">
-                <button id="startBattleBtn" class="main-action-btn" onclick="startBattle()">Comenzar combate</button>
-                <button id="resetBattleBtn" class="main-action-btn" onclick="resetBattle()">Resetear combate</button>
-                <button id="goToTeamBtn" class="main-action-btn" onclick="window.location.href='chrono-team.html'">Volver a selección de equipos</button>
-            </div>
-            <div class="team-panel" id="allies-panel">
-                <h2>Aliados</h2>
-                <ul class="entity-list" id="allies-list"></ul>
-            </div>
+        <div class="team-panel" id="allies-panel">
+            <h2>Aliados</h2>
+            <ul class="entity-list" id="allies-list"></ul>
         </div>
-        <div class="actions-panel actions-col" id="actions-panel">
-            <button onclick="sendAction('attack')">Atacar</button>
-            <button onclick="showTechs()">Técnica</button>
-            <button onclick="showItems()">Objeto</button>
-        </div>
-        <div class="battle-history-panel" id="message-history-panel">
-            <h3>Historial de batalla</h3>
-            <div id="battle-history-content"></div>
+        <div class="battle-panel">
+            <div class="actions-panel" id="actions-panel">
+                <button class="main-battle-btn" onclick="sendAction('attack')">Atacar</button>
+                <button class="main-battle-btn" onclick="showTechs()">Técnica</button>
+                <button class="main-battle-btn" onclick="showItems()">Objeto</button>
+            </div>
+            <div class="battle-messages" id="battle-messages">
+                ¡El combate ha comenzado!
+            </div>
+            <div class="techs-panel" id="techs-panel" style="display:none; background:#232b23; border-radius:10px; padding:1em; margin-top:1em;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0;">Técnicas disponibles</h3>
+                    <button class="main-battle-btn" onclick="hideTechs()">Cancelar</button>
+                </div>
+                <div id="techs-list" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.5em; margin-top:1.5em;"></div>
+            </div>
+            <div class="techs-panel" id="items-panel" style="display:none; background:#232b23; border-radius:10px; padding:1em; margin-top:1em;">
+                <h3>Objetos disponibles</h3>
+                <button class="main-battle-btn" onclick="hideItems()" style="margin-top:1em;">Cancelar</button>
+                <div id="items-list" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.5em;"></div>
+            </div>
         </div>
         <div class="team-panel" id="enemies-panel">
             <h2>Enemigos</h2>
@@ -827,16 +983,15 @@
     function renderBattle(state) {
         updateEntitiesState(state.allies || [], 'allies-list');
         updateEntitiesState(state.enemies || [], 'enemies-list');
-        // Acumular historial
-        if (state.messages && Array.isArray(state.messages)) {
-            fullMessageHistory = fullMessageHistory.concat(state.messages.filter(m => !fullMessageHistory.includes(m)));
+        const messages = document.getElementById('battle-messages');
+        messages.innerHTML = (state.messages || []).map(m => `<div>${m}</div>`).join('') || '¡El combate ha comenzado!';
+        // Habilitar/deshabilitar acciones según el turno y selección
+        const actions = document.querySelectorAll('.actions-panel button');
+        let canAct = false;
+        if (Array.isArray(state.allies) && selectedAllyIdx !== null && state.allies[selectedAllyIdx]) {
+            canAct = !!state.allies[selectedAllyIdx].canAct;
         }
-        // Mostrar historial completo en el panel
-        const historyPanel = document.getElementById('battle-history-content');
-        if (historyPanel) {
-            historyPanel.innerHTML = fullMessageHistory.map(m => `<div>${m}</div>`).join('');
-            historyPanel.scrollTop = historyPanel.scrollHeight;
-        }
+        actions.forEach(btn => btn.disabled = !canAct);
     }
 
     function fetchBattleState() {
@@ -1024,9 +1179,9 @@
             techsList.appendChild(document.createElement('br'));
             
             singleTechs.forEach(tech => {
-                console.log('[DEBUG] Técnica individual a mostrar:', tech);
                 const techDiv = document.createElement('div');
                 techDiv.className = 'tech-item';
+                if (selectedTech && selectedTech.name === tech.name) techDiv.classList.add('selected');
                 const poder = tech.TP ?? tech.tp ?? tech.power ?? '';
                 techDiv.innerHTML = `
                     <div><strong>${tech.name}</strong></div>
@@ -1034,7 +1189,11 @@
                     <div>MP: ${tech.cost ?? tech.MP ?? ''}</div>
                     <div>Tipo: ${tech.type || tech.element || 'Físico'}</div>
                 `;
-                techDiv.onclick = () => selectTech(tech);
+                techDiv.onclick = (event) => {
+                    document.querySelectorAll('.tech-item').forEach(item => item.classList.remove('selected'));
+                    techDiv.classList.add('selected');
+                    selectTech(tech, event);
+                };
                 techsList.appendChild(techDiv);
             });
         }
@@ -1046,9 +1205,9 @@
             techsList.appendChild(document.createElement('br'));
             
             doubleTechs.forEach(tech => {
-                console.log('[DEBUG] Técnica doble a mostrar:', tech);
                 const techDiv = document.createElement('div');
                 techDiv.className = 'tech-item';
+                if (selectedTech && selectedTech.name === tech.name) techDiv.classList.add('selected');
                 const poder = tech.TP ?? tech.tp ?? tech.power ?? '';
                 techDiv.innerHTML = `
                     <div><strong>${tech.name}</strong></div>
@@ -1057,7 +1216,11 @@
                     <div>Tipo: ${tech.type || tech.element || 'Físico'}</div>
                     <div>Requiere: ${tech.requiredCharacters ? tech.requiredCharacters.join(', ') : (tech.characters ? tech.characters.join(', ') : '')}</div>
                 `;
-                techDiv.onclick = () => selectTech(tech);
+                techDiv.onclick = (event) => {
+                    document.querySelectorAll('.tech-item').forEach(item => item.classList.remove('selected'));
+                    techDiv.classList.add('selected');
+                    selectTech(tech, event);
+                };
                 techsList.appendChild(techDiv);
             });
         }
@@ -1069,9 +1232,9 @@
             techsList.appendChild(document.createElement('br'));
             
             tripleTechs.forEach(tech => {
-                console.log('[DEBUG] Técnica triple a mostrar:', tech);
                 const techDiv = document.createElement('div');
                 techDiv.className = 'tech-item';
+                if (selectedTech && selectedTech.name === tech.name) techDiv.classList.add('selected');
                 const poder = tech.TP ?? tech.tp ?? tech.power ?? '';
                 techDiv.innerHTML = `
                     <div><strong>${tech.name}</strong></div>
@@ -1080,18 +1243,21 @@
                     <div>Tipo: ${tech.type || tech.element || 'Físico'}</div>
                     <div>Requiere: ${tech.requiredCharacters ? tech.requiredCharacters.join(', ') : (tech.characters ? tech.characters.join(', ') : '')}</div>
                 `;
-                techDiv.onclick = () => selectTech(tech);
+                techDiv.onclick = (event) => {
+                    document.querySelectorAll('.tech-item').forEach(item => item.classList.remove('selected'));
+                    techDiv.classList.add('selected');
+                    selectTech(tech, event);
+                };
                 techsList.appendChild(techDiv);
             });
         }
     }
 
-    function selectTech(tech) {
+    function selectTech(tech, event) {
         selectedTech = tech;
         // Resaltar técnica seleccionada
         document.querySelectorAll('.tech-item').forEach(item => item.classList.remove('selected'));
-        event.target.closest('.tech-item').classList.add('selected');
-        
+        if (event && event.target.closest('.tech-item')) event.target.closest('.tech-item').classList.add('selected');
         // Si hay un enemigo seleccionado, ejecutar la técnica
         if (selectedEnemyIdx !== null) {
             executeTech(tech);
@@ -1226,6 +1392,7 @@
         availableItems.forEach(item => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'tech-item';
+            if (selectedItem && selectedItem.name === item.name) itemDiv.classList.add('selected');
             // Analizar el efecto para mostrarlo de forma clara
             let efecto = '';
             const eff = item.effect ? item.effect.toLowerCase() : '';
@@ -1272,16 +1439,20 @@
                 <div><strong>${item.name}</strong></div>
                 <div>Efecto: ${efecto}</div>
             `;
-            itemDiv.onclick = () => selectItem(item);
+            itemDiv.onclick = (event) => {
+                document.querySelectorAll('#items-list .tech-item').forEach(itemDiv2 => itemDiv2.classList.remove('selected'));
+                itemDiv.classList.add('selected');
+                selectItem(item, event);
+            };
             itemsList.appendChild(itemDiv);
         });
     }
 
-    function selectItem(item) {
+    function selectItem(item, event) {
         selectedItem = item;
         // Resaltar objeto seleccionado
         document.querySelectorAll('#items-list .tech-item').forEach(itemDiv => itemDiv.classList.remove('selected'));
-        event.target.closest('.tech-item').classList.add('selected');
+        if (event && event.target.closest('.tech-item')) event.target.closest('.tech-item').classList.add('selected');
         // Usar el objeto directamente sobre el personaje seleccionado
         executeItem();
     }
@@ -1322,6 +1493,18 @@
             }
         });
     }
+    
+    // Función para alternar el modo oscuro
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+    // Al cargar la página, aplica el modo oscuro si está guardado
+    document.addEventListener('DOMContentLoaded', function() {
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    });
     </script>
 </body>
 </html> 

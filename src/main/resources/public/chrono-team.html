@@ -4,30 +4,196 @@
     <meta charset="UTF-8">
     <title>Selección de Equipos - Chrono Trigger</title>
     <style>
-        body { background: #181818; color: #fff; font-family: Arial, sans-serif; margin: 2em; }
-        h1 { color: #fff; }
-        .team-select { display: flex; gap: 2em; height: 80vh; align-items: stretch; }
-        .team-list { background: #222; border-radius: 12px; box-shadow: 0 2px 8px #0006; padding: 1em; width: 340px; display: flex; flex-direction: column; height: 100%; }
-        .team-list h2 { margin-top: 0; color: #fff; }
+        body { background: #f0f0f0; color: #222; font-family: Arial, sans-serif; margin: 2em; padding-top: 70px !important; }
+        body.dark-mode .team-select {
+            background: #181818 !important;
+        }
+        body.dark-mode {
+            background: #181818 !important;
+            color: #fff !important;
+        }
+        body {
+            background: #f0f0f0 !important;
+        }
+        h1 { color: #222; }
+        .team-select { display: flex; gap: 2em; height: 80vh; align-items: stretch; margin-top: 50px; }
+        .team-list { background: #fff; color: #222; border-radius: 12px; box-shadow: 0 2px 8px #0006; padding: 1em; width: 340px; display: flex; flex-direction: column; height: 100%; }
+        .team-list h2 { margin-top: 0; color: #222; }
         .card-list { display: flex; flex-direction: column; gap: 1em; margin: 0; padding: 0; list-style: none; flex: 1; overflow-y: auto; min-height: 0; max-height: 100%; }
-        .card { background: #232b23; border-radius: 10px; box-shadow: 0 1px 4px #0004; padding: 1em; cursor: pointer; transition: box-shadow 0.2s, background 0.2s, min-height 0.3s, max-height 0.3s; position: relative; overflow: hidden; min-height: 60px; }
-        .card.selected { border: 2px solid #4caf50; background: #2e3c2e; }
-        .card.expanded { background: #2e3c2e; min-height: 250px; }
+        .card { background: #f9f9f9; color: #222; border-radius: 10px; box-shadow: 0 1px 4px #0004; padding: 1em; cursor: pointer; transition: box-shadow 0.2s, background 0.2s, min-height 0.3s, max-height 0.3s; position: relative; overflow: hidden; min-height: 100px; }
+        .card.selected, .card.expanded { background: #e8f5e9; }
         .card .name { font-weight: bold; font-size: 1.1em; }
-        .card .stats { opacity: 0; max-height: 0; transition: opacity 0.2s, max-height 0.3s; overflow: hidden; }
-        .card.expanded .stats { opacity: 1; max-height: 200px; margin-top: 0.5em; }
-        .card .stat-row { display: flex; gap: 1em; font-size: 0.95em; }
+        .card .stats {
+            opacity: 0;
+            max-height: 0;
+            transition: opacity 0.2s, max-height 0.3s;
+            overflow: hidden;
+        }
+        .card.expanded .stats {
+            opacity: 1 !important;
+            min-height: 210px !important;
+            margin-top: 0.5em !important;
+            pointer-events: auto !important;
+        }
+        .card.expanded {
+            opacity: 1 !important;
+            min-height: 200px !important;
+            margin-top: 0.5em !important;
+            pointer-events: auto !important;
+        }
+        .card .stat-row { display: flex; gap: 1em; font-size: 0.95em; color: #222; }
         .card .stat-label { color: #aaa; min-width: 80px; }
-        .dropdown-epoca { margin-bottom: 1em; width: 100%; padding: 0.5em; border-radius: 6px; border: none; background: #222; color: #fff; font-size: 1em; }
         .equipment-section { margin-bottom: 1em; }
-        .equipment-section label { display: block; margin-bottom: 0.5em; color: #ccc; }
-        .equipment-select { width: 100%; padding: 0.5em; border-radius: 6px; border: none; background: #222; color: #fff; font-size: 1em; }
-        button { margin-top: 1em; padding: 0.7em 1.5em; border-radius: 8px; border: none; background: #4caf50; color: #fff; font-weight: bold; font-size: 1em; cursor: pointer; transition: background 0.2s; }
+        .equipment-section label { display: block; margin-bottom: 0.5em; color: #222; }
+        body.dark-mode .equipment-section label { color: #e0e0e0 !important; }
+        .equipment-select, .dropdown-epoca {
+            background: #fff;
+            color: #222;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            width: 100%;
+            min-height: 2.5em;
+            padding: 0.5em 1em;
+            border-radius: 8px;
+            margin-bottom: 0.5em;
+        }
+        body.dark-mode .equipment-select, body.dark-mode .dropdown-epoca {
+            background: #232323;
+            color: #f0f0f0;
+            border: 1px solid #555;
+        }
+        button { background-color: #4CAF50; color: white; margin-top: 1em; padding: 0.7em 1.5em; border-radius: 8px; border: none; font-weight: bold; font-size: 1em; cursor: pointer; transition: background 0.2s; }
         button:disabled { background: #888; cursor: not-allowed; }
+        .main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #222;
+            color: #fff;
+            z-index: 10000;
+            box-shadow: 0 2px 8px #0002;
+        }
+        .main-header nav {
+            display: flex;
+            justify-content: center;
+            gap: 2em;
+            padding: 1em 0;
+        }
+        .main-header a, .main-header .theme-toggle {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: color 0.2s, background 0.2s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0 0.5em;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .main-header a:hover, .main-header .theme-toggle:hover {
+            color: #4CAF50;
+            background: none;
+        }
+        body.dark-mode .main-header a, body.dark-mode .main-header .theme-toggle {
+            color: #f0f0f0;
+        }
+        body.dark-mode .main-header a:hover, body.dark-mode .main-header .theme-toggle:hover {
+            color: #6fcf97;
+        }
+        .theme-toggle {
+            margin-top: 0;
+        }
+        body.dark-mode .team-list { background: #232323; color: #f0f0f0; }
+        body.dark-mode .card { background: #2d2d2d; color: #f0f0f0; }
+        body.dark-mode .card.selected, body.dark-mode .card.expanded { background: #294d29; }
+        body.dark-mode .equipment-select, body.dark-mode .dropdown-epoca { background: #232323; color: #f0f0f0; border: 1px solid #555; }
+        body.dark-mode button { background-color: #666; color: #fff; }
+        body.dark-mode button:hover { background-color: #777; }
+        body.dark-mode {
+            background: #181818 !important;
+            color: #fff !important;
+        }
+        body.dark-mode .team-select,
+        body.dark-mode .team-list,
+        body.dark-mode .card,
+        body.dark-mode h1,
+        body.dark-mode h2,
+        body.dark-mode h3,
+        body.dark-mode label,
+        body.dark-mode .stat-label {
+            color: #f0f0f0 !important;
+        }
+        .equipo-hover-block { display: none; }
+        .card.expanded .equipo-hover-block { display: block; }
+        /* Asegura que el bloque de equipo siempre sea visible */
+        .equipo-lista { display: block !important; color: #2ecc40; }
+        .card .stat-row, #selected-character-name .stat-row { display: flex; gap: 1em; font-size: 0.95em; color: #2ecc40; }
+        .card .stat-label, #selected-character-name .stat-label { color: #185c1b; min-width: 80px; }
+        body.dark-mode .equipo-lista { color: #7fff7f !important; }
+        body.dark-mode .card .stat-row, body.dark-mode #selected-character-name .stat-row { color: #7fff7f !important; }
+        body.dark-mode .card .stat-label, body.dark-mode #selected-character-name .stat-label { color: #baffc9 !important; }
+        .main-battle-btn {
+            font-size: 1.2em;
+            padding: 0.9em 2.2em;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            color: #222;
+            font-weight: bold;
+            border: none;
+            margin: 0 0.5em;
+            box-shadow: 0 2px 8px #0003;
+            transition: background 0.2s, transform 0.1s;
+            cursor: pointer;
+        }
+        .main-battle-btn:hover {
+            background: linear-gradient(90deg, #38f9d7 0%, #43e97b 100%);
+            transform: scale(1.05);
+        }
+        body.dark-mode .main-battle-btn {
+            background: linear-gradient(90deg, #232b23 0%, #38f9d7 100%);
+            color: #fff;
+        }
+        .dropdown-epoca {
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            color: #222;
+            font-weight: bold;
+            box-shadow: 0 2px 8px #0003;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .dropdown-epoca option {
+            background: #fff;
+            color: #222;
+        }
+        body.dark-mode .dropdown-epoca {
+            background: linear-gradient(90deg, #232b23 0%, #38f9d7 100%);
+            color: #fff;
+            border-color: #555;
+        }
+        body.dark-mode .dropdown-epoca option {
+            background: #232b23;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
+    <header class="main-header">
+        <nav>
+            <a href="index.html">Inicio</a>
+            <a href="pokemon.html">Pokédex</a>
+            <a href="battle.html">Combate Pokémon</a>
+            <a href="chrono-team.html">Selección de Equipos Chrono</a>
+            <a href="chrono-battle.html">Combate Chrono Trigger</a>
+            <button class="theme-toggle" onclick="toggleDarkMode()">Cambiar Tema</button>
+        </nav>
+    </header>
     <h1>Selecciona tu equipo y los enemigos</h1>
+    <div style="margin-bottom:1em; text-align:center;">
+        <button id="start-battle" class="main-battle-btn">Iniciar Batalla</button>
+    </div>
     <div class="team-select" style="height: 80vh; align-items: stretch;">
         <div class="team-list" id="characters-list" style="flex:1; display:flex; flex-direction:column; height:100%;">
             <h2>Personajes disponibles</h2>
@@ -81,7 +247,6 @@
             <ul id="enemies" class="card-list"></ul>
         </div>
     </div>
-    <button id="start-battle">Iniciar Batalla</button>
 
     <script>
     let selectedAllies = [];
@@ -226,7 +391,7 @@
             const imgUrl = getCharacterImage(item.character);
             li.innerHTML = (imgUrl ? `<img src="${imgUrl}" alt="${item.character}" style="width:48px;height:48px;vertical-align:middle;margin-right:0.5em;border-radius:6px;float:left;">` : '') + `<span class="name">${item.character}</span>`;
             // Nivel selector
-            let level = characterLevels[idx] || 1;
+            let level = characterLevels[idx] || 99;
             let stats = item.statsByLevel ? item.statsByLevel.find(s => s.level === level) : null;
             if (!stats && item.statsByLevel) stats = item.statsByLevel[0];
             li.innerHTML += `<div style='margin-top:0.5em;'>Nivel: <input type='number' min='1' max='99' class='level-input' data-idx='${idx}' value='${level}' style='width:60px;'> </div>`;
@@ -241,18 +406,26 @@
                 ${stats && stats.MagicDefense !== undefined ? `<div class="stat-row"><span class="stat-label">Def. Mágica:</span> ${stats.MagicDefense}</div>` : ''}
                 ${stats && stats.Speed !== undefined ? `<div class="stat-row"><span class="stat-label">Velocidad:</span> ${stats.Speed}</div>` : ''}
             </div>`;
-            // Mostrar equipamiento seleccionado
-            if (characterEquipment[idx]) {
-                li.innerHTML += `<div style='font-size:11px; margin-top:0.5em; color:#b0e0b0;'>
-                    <div>Arma: ${characterEquipment[idx].weapon || 'Ninguna'}</div>
-                    <div>Armadura: ${characterEquipment[idx].armor || 'Ninguna'}</div>
-                    <div>Casco: ${characterEquipment[idx].helmet || 'Ninguno'}</div>
-                    <div>Accesorio: ${characterEquipment[idx].accessory || 'Ninguno'}</div>
-                </div>`;
-            }
-            // Hover para expandir
-            li.onmouseenter = () => li.classList.add('expanded');
-            li.onmouseleave = () => li.classList.remove('expanded');
+            // Mostrar objetos equipados debajo de las stats
+            const eq = characterEquipment[idx] || {};
+            const weaponObj = findEquipmentObj('weapon', eq.weapon);
+            const armorObj = findEquipmentObj('armor', eq.armor);
+            const helmetObj = findEquipmentObj('helmet', eq.helmet);
+            const accessoryObj = findEquipmentObj('accessory', eq.accessory);
+            let equipHtml = '<div class="equipo-lista" style="font-size:12px; margin-top:0.5em; color:#4c8c4c;">';
+            if (weaponObj) equipHtml += `<div><b>Arma:</b> ${weaponObj.name}${weaponObj.special ? ` <span style='color:#b0e0b0;'>(${weaponObj.special})</span>` : ''}</div>`;
+            if (armorObj) equipHtml += `<div><b>Armadura:</b> ${armorObj.Name}${armorObj.Effect ? ` <span style='color:#b0e0b0;'>(${armorObj.Effect})</span>` : ''}</div>`;
+            if (helmetObj) equipHtml += `<div><b>Casco:</b> ${helmetObj.Name}${helmetObj.Effect ? ` <span style='color:#b0e0b0;'>(${helmetObj.Effect})</span>` : ''}</div>`;
+            if (accessoryObj) equipHtml += `<div><b>Accesorio:</b> ${accessoryObj.Name}${accessoryObj.Effect ? ` <span style='color:#b0e0b0;'>(${accessoryObj.Effect})</span>` : ''}</div>`;
+            equipHtml += '</div>';
+            li.innerHTML += equipHtml;
+
+            li.onmouseenter = () => {
+                li.classList.add('expanded');
+            };
+            li.onmouseleave = () => {
+                li.classList.remove('expanded');
+            };
             // Selección con límite
             li.onclick = (e) => {
                 if (e.target.classList.contains('level-input')) return;
@@ -691,7 +864,7 @@
         const accessoryObj = findEquipmentObj('accessory', eq.accessory);
         // Aplica bonus a las stats
         let baseStats = {};
-        let level = characterLevels[showIdx] || 1;
+        let level = characterLevels[showIdx] || 99;
         if (character.statsByLevel && character.statsByLevel.length > 0) {
             let stats = character.statsByLevel.find(s => s.level === level);
             if (!stats) stats = character.statsByLevel[0];
@@ -785,6 +958,18 @@
         console.log(`Equipado ${equipmentType}: ${value} para personaje ${characterIndex}`);
     }
 
+    // Función para alternar el modo oscuro
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+
+    // Al cargar la página, aplica el modo oscuro si está guardado
+    document.addEventListener('DOMContentLoaded', function() {
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    });
     // Cargar datos de equipo al inicio
     loadEquipmentData();
     </script>
