@@ -264,13 +264,13 @@ public class ItemDatabase {
     
     public static Map<String, Object> getAllItemsAsMap() {
         Map<String, Object> result = new HashMap<>();
-        System.out.println("Obteniendo todos los objetos...");
-        System.out.println("Número de objetos: " + items.size());
+        //System.out.println("Obteniendo todos los objetos...");
+        //System.out.println("Número de objetos: " + items.size());
         for (HeldItem item : items.values()) {
-            System.out.println("Añadiendo objeto: " + item.getId() + " - " + item.getName());
+            //System.out.println("Añadiendo objeto: " + item.getId() + " - " + item.getName());
             result.put(item.getId(), item.toMap());
         }
-        System.out.println("Total de objetos en resultado: " + result.size());
+        //System.out.println("Total de objetos en resultado: " + result.size());
         return result;
     }
     

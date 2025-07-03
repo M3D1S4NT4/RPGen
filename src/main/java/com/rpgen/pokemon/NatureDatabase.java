@@ -58,13 +58,13 @@ public class NatureDatabase {
     
     public static Map<String, Object> getAllNaturesAsMap() {
         Map<String, Object> result = new HashMap<>();
-        System.out.println("Obteniendo todas las naturalezas...");
-        System.out.println("Número de naturalezas: " + natures.size());
+        //System.out.println("Obteniendo todas las naturalezas...");
+        //System.out.println("Número de naturalezas: " + natures.size());
         for (Nature nature : natures.values()) {
-            System.out.println("Añadiendo naturaleza: " + nature.getId() + " - " + nature.getName());
+            //System.out.println("Añadiendo naturaleza: " + nature.getId() + " - " + nature.getName());
             result.put(nature.getId(), nature.toMap());
         }
-        System.out.println("Total de naturalezas en resultado: " + result.size());
+        //System.out.println("Total de naturalezas en resultado: " + result.size());
         return result;
     }
 } 
