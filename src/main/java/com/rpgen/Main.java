@@ -1,10 +1,11 @@
 package com.rpgen;
 
-import com.rpgen.web.BattleServer;
-import com.rpgen.pokemon.PokemonServer;
-import com.rpgen.web.PokemonBattleServer;
-import com.rpgen.web.PokemonConfigServer;
-import com.rpgen.chrono.ChronoBattleServer;
+import com.rpgen.pokemon.web.PokemonBattleServer;
+import com.rpgen.pokemon.web.PokemonConfigServer;
+import com.rpgen.pokemon.web.PokemonServer;
+import com.rpgen.chrono.web.ChronoBattleServer;
+import com.rpgen.core.web.BattleServer;
+
 import spark.Spark;
 
 public class Main {

@@ -2443,7 +2443,10 @@
                 levelElement.removeEventListener('input', updateCalculatedStats);
                 
                 // Agregar nuevo event listener
-                levelElement.addEventListener('input', updateCalculatedStats);
+                levelElement.addEventListener('input', () => {
+                    updateCalculatedStats();
+                    saveAllConfig();
+                });
             }
             
             // Event listener para selector de naturaleza
@@ -2524,6 +2527,7 @@
             
             // Obtener nivel
             const level = parseInt(document.getElementById('pokemonLevel')?.value) || 50;
+            
             
             // Obtener naturaleza seleccionada
             const natureSelect = document.getElementById('natureSelect');

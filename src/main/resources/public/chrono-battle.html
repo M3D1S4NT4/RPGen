@@ -99,7 +99,9 @@
         .team-panel { background: #fff; color: #222; border-radius: 12px; box-shadow: 0 2px 8px #0006; padding: 1em; width: 340px; min-height: 400px; display: flex; flex-direction: column; }
         .team-panel h2 { margin-top: 0; color: #222; }
         .entity-list { display: flex; flex-direction: column; gap: 1em; margin: 0; padding: 0; list-style: none; flex: 1; }
-        .entity-card { background: #f9f9f9; color: #222; border-radius: 10px; box-shadow: 0 1px 4px #0004; padding: 1em; display: flex; align-items: center; gap: 1em; position: relative; overflow: hidden; min-height: 60px; transition: box-shadow 0.2s, background 0.2s, min-height 0.3s, max-height 0.3s; }
+        .entity-card {
+            background: #f9f9f9; color: #222; border-radius: 10px; box-shadow: 0 1px 4px #0004; padding: 1em; display: flex; align-items: center; gap: 1em; position: relative; overflow: hidden; min-height: 60px; transition: box-shadow 0.2s, background 0.2s, min-height 0.3s, max-height 0.3s;
+        }
         .entity-card.expanded { background: #e8f5e9; min-height: 250px; }
         .entity-card .stats { opacity: 0; max-height: 0; transition: opacity 0.2s, max-height 0.3s; overflow: hidden; }
         .entity-card.expanded .stats { opacity: 1; max-height: 200px; margin-top: 0.5em; }
@@ -358,12 +360,61 @@
             transform: scale(1.03);
         }
         .entity-card.can-act {
-            border: 2.5px solid #2196f3 !important;
+            /*border: 2.5px solid #2196f3 !important;*/
             box-shadow: 0 0 12px #2196f3 !important;
         }
         .entity-card.selected.can-act {
             border: 2.5px solid #43e97b !important;
             box-shadow: 0 0 16px #43e97b, 0 0 8px #2196f3 !important;
+        }
+        .atb-circle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .atb-border-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .atb-border {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            viewBox: "0 0 300 80";
+        }
+        /* --- NUEVO: Barra vertical ATB --- */
+        .atb-bar-vertical {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 8px;
+            height: 100%;
+            background: #222a;
+            border-radius: 6px 0 0 6px;
+            overflow: hidden;
+            z-index: 2;
+        }
+        .atb-bar-fill {
+            width: 100%;
+            background: #2196f3;
+            height: 0%;
+            transition: height 0.2s;
+            border-radius: 6px 0 0 6px;
+        }
+        body.dark-mode .atb-bar-vertical {
+            background: #444a;
+        }
+        body.dark-mode .atb-bar-fill {
+            background: #38f9d7;
         }
     </style>
 </head>
@@ -855,8 +906,12 @@
                 if (entity.helmet) equipHtml += `<div>Casco: <b>${entity.helmet}</b></div>`;
                 if (entity.accessory) equipHtml += `<div>Accesorio: <b>${entity.accessory}</b></div>`;
             }
-            li.innerHTML = `<img class="img" src="${imgUrl || ''}" alt="${entity.name}" onerror="this.style.display='none'">` +
-                `<div class="info">
+            li.innerHTML = `
+                <div class="atb-bar-vertical"><div class="atb-bar-fill"></div></div>
+                <div style="position:relative;display:inline-block;width:48px;height:48px;vertical-align:top;">
+                    <img class="img" src="${imgUrl || ''}" alt="${entity.name}" onerror="this.style.display='none'">
+                </div>
+                <div class="info">
                     <div class="name">${entity.name}${nivel ? ` <span style='font-size:0.9em;color:#b0e0b0;'>(Nv. ${nivel})</span>` : ''}</div>
                     ${equipHtml}
                     ${(() => {
@@ -912,6 +967,16 @@
             // Añadir hover para expandir stats
             li.onmouseenter = () => li.classList.add('expanded');
             li.onmouseleave = () => li.classList.remove('expanded');
+            // --- NUEVO: Actualizar barra ATB vertical ---
+            const atbBar = li.querySelector('.atb-bar-fill');
+            if (atbBar && entity.atb !== undefined && entity.atbMax !== undefined) {
+                const percent = Math.max(0, Math.min(1, entity.atb / entity.atbMax));
+                atbBar.style.height = (percent * 100) + '%';
+                atbBar.style.opacity = percent > 0 ? 1 : 0.5;
+            } else if (atbBar) {
+                atbBar.style.height = '0%';
+                atbBar.style.opacity = 0.5;
+            }
             ul.appendChild(li);
         });
     }
@@ -976,6 +1041,25 @@
             card.onmouseenter = () => card.classList.add('expanded');
             card.onmouseleave = () => card.classList.remove('expanded');
             visibleIdx++;
+            // Actualizar el círculo ATB
+            const atbRect = card.querySelector('.atb-border rect');
+            if (atbRect && entity.atb !== undefined && entity.atbMax !== undefined) {
+                const w = 296, h = 76;
+                const perim = 2 * (w + h);
+                atbRect.style.strokeDasharray = perim;
+                atbRect.style.strokeDashoffset = perim * (1 - entity.atb/entity.atbMax);
+                atbRect.style.opacity = entity.atb > 0 ? 1 : 0;
+            }
+            // --- NUEVO: Actualizar barra ATB vertical ---
+            const atbBar = card.querySelector('.atb-bar-fill');
+            if (atbBar && entity.atb !== undefined && entity.atbMax !== undefined) {
+                const percent = Math.max(0, Math.min(1, entity.atb / entity.atbMax));
+                atbBar.style.height = (percent * 100) + '%';
+                atbBar.style.opacity = percent > 0 ? 1 : 0.5;
+            } else if (atbBar) {
+                atbBar.style.height = '0%';
+                atbBar.style.opacity = 0.5;
+            }
         });
     }
 
