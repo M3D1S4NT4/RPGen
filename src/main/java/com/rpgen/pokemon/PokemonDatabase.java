@@ -346,14 +346,14 @@ public class PokemonDatabase {
 
     public static Pokemon getPokemon(String id) {
         synchronized (pokemonSet) {
-            System.out.println("Buscando Pokémon con ID: " + id);
-            System.out.println("Total de Pokémon cargados: " + pokemonSet.size());
+            //System.out.println("Buscando Pokémon con ID: " + id);
+            //System.out.println("Total de Pokémon cargados: " + pokemonSet.size());
             Pokemon pokemon = pokemonSet.stream()
                 .filter(p -> p.getId().equals(id))
                 .findFirst()
                 .orElse(null);
             if (pokemon != null) {
-                System.out.println("Pokémon encontrado: " + pokemon.getName());
+                //System.out.println("Pokémon encontrado: " + pokemon.getName());
             } else {
                 System.out.println("Pokémon no encontrado con ID: " + id);
             }

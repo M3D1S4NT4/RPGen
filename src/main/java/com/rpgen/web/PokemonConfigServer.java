@@ -47,8 +47,8 @@ public class PokemonConfigServer {
             response.type("application/json");
             String pokemonId = request.params(":id");
             
-            System.out.println("Configurando Pokémon con ID: " + pokemonId);
-            System.out.println("Body de la solicitud: " + request.body());
+            //System.out.println("Configurando Pokémon con ID: " + pokemonId);
+            //System.out.println("Body de la solicitud: " + request.body());
             
             Pokemon pokemon = PokemonDatabase.getPokemon(pokemonId);
             
@@ -60,7 +60,7 @@ public class PokemonConfigServer {
 
             try {
                 Map<String, Object> config = gson.fromJson(request.body(), Map.class);
-                System.out.println("Configuración recibida: " + config);
+                //System.out.println("Configuración recibida: " + config);
                 
                 // Configurar movimientos seleccionados
                 if (config.containsKey("selectedMoveIndices")) {
@@ -72,7 +72,7 @@ public class PokemonConfigServer {
                         }
                     }
                     pokemon.setSelectedMoveIndices(selectedMoveIndices);
-                    System.out.println("Movimientos configurados: " + selectedMoveIndices);
+                    //System.out.println("Movimientos configurados: " + selectedMoveIndices);
                 }
                 
                 // Configurar habilidad
@@ -83,7 +83,7 @@ public class PokemonConfigServer {
                             .filter(ability -> ability.getId().equals(abilityId))
                             .findFirst()
                             .ifPresent(pokemon::setSelectedAbility);
-                        System.out.println("Habilidad configurada: " + abilityId);
+                        //System.out.println("Habilidad configurada: " + abilityId);
                     }
                 }
 
@@ -93,10 +93,10 @@ public class PokemonConfigServer {
                     if (itemId != null && !itemId.isEmpty()) {
                         HeldItem item = ItemDatabase.getItem(itemId);
                         pokemon.setHeldItem(item);
-                        System.out.println("Objeto configurado: " + itemId);
+                        //System.out.println("Objeto configurado: " + itemId);
                     } else {
                         pokemon.setHeldItem(null);
-                        System.out.println("Objeto removido");
+                        //System.out.println("Objeto removido");
                     }
                 }
 
@@ -107,7 +107,7 @@ public class PokemonConfigServer {
                         Nature nature = NatureDatabase.getNature(natureId);
                         if (nature != null) {
                             pokemon.setNature(nature);
-                            System.out.println("Naturaleza configurada: " + natureId);
+                            //System.out.println("Naturaleza configurada: " + natureId);
                         }
                     }
                 }
@@ -132,7 +132,7 @@ public class PokemonConfigServer {
                         currentStats.getSpecialAttackEV(), currentStats.getSpecialDefenseEV(), currentStats.getSpeedEV()
                     );
                     pokemon.setStats(newStats);
-                    System.out.println("IVs configurados");
+                    //System.out.println("IVs configurados");
                 }
 
                 // Configurar EVs
@@ -157,7 +157,7 @@ public class PokemonConfigServer {
                     
                     if (newStats.isValidEVs()) {
                         pokemon.setStats(newStats);
-                        System.out.println("EVs configurados");
+                        //System.out.println("EVs configurados");
                     } else {
                         response.status(400);
                         return gson.toJson(Map.of("error", "Los EVs totales no pueden exceder 510"));
@@ -168,11 +168,11 @@ public class PokemonConfigServer {
                 if (config.containsKey("level")) {
                     int level = ((Number) config.get("level")).intValue();
                     pokemon.setLevel(level);
-                    System.out.println("Nivel configurado: " + level);
+                    //System.out.println("Nivel configurado: " + level);
                 }
 
                 Map<String, Object> result = pokemon.toMap();
-                System.out.println("Configuración completada exitosamente");
+                //System.out.println("Configuración completada exitosamente");
                 return gson.toJson(result);
             } catch (Exception e) {
                 System.err.println("Error al configurar el Pokémon: " + e.getMessage());

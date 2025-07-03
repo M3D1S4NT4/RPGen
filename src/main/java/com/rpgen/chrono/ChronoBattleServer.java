@@ -317,7 +317,7 @@ public class ChronoBattleServer {
             ChronoEntity target = findEntityByName(targetName, currentAllies, currentEnemies);
             ChronoMove move = findMoveByName(moveName);
             if (actor == null || target == null || move == null) {
-                System.out.println("[ERROR] actor encontrado: " + (actor != null) + ", target encontrado: " + (target != null) + ", move encontrado: " + (move != null));
+                //System.out.println("[ERROR] actor encontrado: " + (actor != null) + ", target encontrado: " + (target != null) + ", move encontrado: " + (move != null));
                 res.status(400);
                 return gson.toJson(Map.of("error", "Actor, movimiento o objetivo no válido"));
             }
@@ -475,11 +475,11 @@ public class ChronoBattleServer {
             }
             String effect = ((String)itemObj.getOrDefault("effect", "")).toLowerCase();
             int level = target.getLevel();
-            System.out.println("[LOG][ITEM] El nivel del objetivo (" + target.getCharacter() + ") es: " + level);
+            //System.out.println("[LOG][ITEM] El nivel del objetivo (" + target.getCharacter() + ") es: " + level);
             // Buscar los stats del nivel correcto
             String msg = user.getCharacter() + " usa el objeto " + itemName + " en " + target.getCharacter() + ". ";
             boolean revived = false;
-            System.out.println("[ITEM] Efecto: " + effect + ", usuario: " + user.getCharacter() + " (nivel " + user.getLevel() + ") target: " + target.getCharacter() + " (nivel " + target.getLevel() + ")");
+            //System.out.println("[ITEM] Efecto: " + effect + ", usuario: " + user.getCharacter() + " (nivel " + user.getLevel() + ") target: " + target.getCharacter() + " (nivel " + target.getLevel() + ")");
             if (effect.contains("restores all hp/mp for all")) {
                 for (ChronoEntity ally : currentAllies) {
                     ChronoEntity.StatByLevel stats = ally.getStatsForCurrentLevel();
@@ -489,7 +489,7 @@ public class ChronoBattleServer {
                     int oldMp = ally.getMp();
                     ally.setHp(allyMaxHp);
                     ally.setMp(allyMaxMp);
-                    System.out.println("[ITEM][GLOBAL] " + ally.getCharacter() + " (nivel " + ally.getLevel() + ") HP: " + oldHp + " -> " + allyMaxHp + ", MP: " + oldMp + " -> " + allyMaxMp);
+                    //System.out.println("[ITEM][GLOBAL] " + ally.getCharacter() + " (nivel " + ally.getLevel() + ") HP: " + oldHp + " -> " + allyMaxHp + ", MP: " + oldMp + " -> " + allyMaxMp);
                 }
                 msg += "¡Todo el equipo recupera todo el HP y MP!";
             } else if (effect.contains("restores all hp/mp")) {
@@ -521,7 +521,7 @@ public class ChronoBattleServer {
                     int oldHp = ally.getHp();
                     int newHp = Math.min(ally.getHp() + 200, allyMaxHp);
                     ally.setHp(newHp);
-                    System.out.println("[ITEM][GLOBAL] " + ally.getCharacter() + " (nivel " + ally.getLevel() + ") HP: " + oldHp + " -> " + newHp);
+                    //System.out.println("[ITEM][GLOBAL] " + ally.getCharacter() + " (nivel " + ally.getLevel() + ") HP: " + oldHp + " -> " + newHp);
                 }
                 msg += "¡Todo el equipo recupera 200 HP!";
             } else if (effect.contains("restores 200 hp")) {

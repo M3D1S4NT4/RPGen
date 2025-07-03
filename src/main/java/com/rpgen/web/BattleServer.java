@@ -66,13 +66,6 @@ public class BattleServer {
     }
 
     public void init() {
-        // Inicializar el sistema de batalla
-        // battleSystem = new BaseBattleSystem();
-        
-        // Configurar el servidor
-        // port(4567); // ELIMINADA: solo debe estar en Main.java
-        //staticFileLocation("src/main/resources/public");
-
         // Rutas de la API
         get("/api/characters", (req, res) -> {
             res.type("application/json");
@@ -190,7 +183,7 @@ public class BattleServer {
                 String sourceId = (String) data.get("sourceId");
                 String targetId = (String) data.get("targetId");
                 String actionType = (String) data.get("actionType");
-                System.out.println("[ACTION] sourceId=" + sourceId + ", targetId=" + targetId + ", actionType=" + actionType);
+                //System.out.println("[ACTION] sourceId=" + sourceId + ", targetId=" + targetId + ", actionType=" + actionType);
                 if (sourceId == null || targetId == null || actionType == null) {
                     res.status(400);
                     return gson.toJson(Map.of(

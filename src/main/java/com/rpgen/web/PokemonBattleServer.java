@@ -44,7 +44,7 @@ public class PokemonBattleServer {
         post("/api/pokemon-battle/start", (req, res) -> {
             try {
                 System.out.println("Recibida solicitud para iniciar batalla");
-                System.out.println("Body de la solicitud: " + req.body());
+                //System.out.println("Body de la solicitud: " + req.body());
                 
                 Map<String, Object> data = gson.fromJson(req.body(), Map.class);
                 List<Map<String, Object>> team1 = (List<Map<String, Object>>) data.get("team1");
@@ -62,8 +62,8 @@ public class PokemonBattleServer {
                 activeBattles.put(battleId, battle);
 
                 System.out.println("Batalla iniciada con ID: " + battleId);
-                System.out.println("Equipo 1: " + team1.size() + " Pokémon");
-                System.out.println("Equipo 2: " + team2.size() + " Pokémon");
+                //System.out.println("Equipo 1: " + team1.size() + " Pokémon");
+                //System.out.println("Equipo 2: " + team2.size() + " Pokémon");
                 
                 return gson.toJson(Map.of(
                     "status", "success",
@@ -233,28 +233,20 @@ public class PokemonBattleServer {
             
             if (team1Defeated || team2Defeated) {
                 battleOver = true;
-                System.out.println("¡La batalla ha terminado!");
-                if (team1Defeated && team2Defeated) {
-                    System.out.println("¡Empate!");
-                } else if (team1Defeated) {
-                    System.out.println("¡El Equipo 2 ha ganado!");
-                } else {
-                    System.out.println("¡El Equipo 1 ha ganado!");
-                }
             }
         }
 
         public Map<String, Object> addAction(Map<String, Object> source, Map<String, Object> target, Map<String, Object> action) {
-            System.out.println("Servidor: addAction para instancia de PokemonBattle (hashCode): " + System.identityHashCode(this));
+            //System.out.println("Servidor: addAction para instancia de PokemonBattle (hashCode): " + System.identityHashCode(this));
             if (battleOver) {
-                System.out.println("No se pueden realizar más acciones, la batalla ha terminado");
+                //System.out.println("No se pueden realizar más acciones, la batalla ha terminado");
                 return Map.of("error", "La batalla ha terminado");
             }
 
             // Verificar si el Pokémon atacante está vivo
             Map<String, Object> sourceInTeam = findPokemonInTeams(source);
             if (sourceInTeam == null || ((Number) sourceInTeam.getOrDefault("health", 0)).intValue() <= 0) {
-                System.out.println("El Pokémon atacante está debilitado y no puede atacar");
+                //System.out.println("El Pokémon atacante está debilitado y no puede atacar");
                 return Map.of("error", "El Pokémon atacante está debilitado y no puede atacar");
             }
 
@@ -268,10 +260,10 @@ public class PokemonBattleServer {
             String sourceName = (String) source.get("name");
             if (team1.stream().anyMatch(p -> p.get("id").equals(source.get("id")))) {
                 team1ActionSelected = true;
-                System.out.println("Servidor: addAction - Equipo 1 acción seleccionada para " + sourceName + " (ahora team1ActionSelected=true).");
+                //System.out.println("Servidor: addAction - Equipo 1 acción seleccionada para " + sourceName + " (ahora team1ActionSelected=true).");
             } else {
                 team2ActionSelected = true;
-                System.out.println("Servidor: addAction - Equipo 2 acción seleccionada para " + sourceName + " (ahora team2ActionSelected=true).");
+                //System.out.println("Servidor: addAction - Equipo 2 acción seleccionada para " + sourceName + " (ahora team2ActionSelected=true).");
             }
 
             return Map.of("message", "Acción añadida correctamente",
@@ -281,7 +273,7 @@ public class PokemonBattleServer {
 
         public Map<String, Object> switchPokemon(Map<String, Object> newPokemon, boolean isTeam1) {
             if (battleOver) {
-                System.out.println("No se pueden realizar más acciones, la batalla ha terminado");
+                //.println("No se pueden realizar más acciones, la batalla ha terminado");
                 return Map.of("error", "La batalla ha terminado");
             }
 
@@ -462,11 +454,11 @@ public class PokemonBattleServer {
         }
 
         public Map<String, Object> processTurn() {
-            System.out.println("Servidor: Procesando turno para instancia de PokemonBattle (hashCode): " + System.identityHashCode(this));
+            //System.out.println("Servidor: Procesando turno para instancia de PokemonBattle (hashCode): " + System.identityHashCode(this));
             Map<String, Object> response = new HashMap<>();
             try {
                 if (battleOver) {
-                    System.out.println("No se pueden realizar más acciones, la batalla ha terminado");
+                    //System.out.println("No se pueden realizar más acciones, la batalla ha terminado");
                     return Map.of(
                         "error", "La batalla ha terminado",
                         "battleOver", true,
@@ -474,16 +466,16 @@ public class PokemonBattleServer {
                     );
                 }
 
-                System.out.println("Servidor: Verificando flags de acción seleccionada. Equipo 1: " + team1ActionSelected + ", Equipo 2: " + team2ActionSelected);
+                //System.out.println("Servidor: Verificando flags de acción seleccionada. Equipo 1: " + team1ActionSelected + ", Equipo 2: " + team2ActionSelected);
                 if (!team1ActionSelected || !team2ActionSelected) {
-                    System.out.println("Servidor: !ENTRANDO EN BLOQUE DE ERROR! Equipo 1: " + team1ActionSelected + ", Equipo 2: " + team2ActionSelected);
+                    //System.out.println("Servidor: !ENTRANDO EN BLOQUE DE ERROR! Equipo 1: " + team1ActionSelected + ", Equipo 2: " + team2ActionSelected);
                     return Map.of(
                         "error", "Ambos equipos deben seleccionar una acción antes de procesar el turno",
                         "battleOver", false
                     );
                 }
 
-                System.out.println("Procesando turno con " + pendingActions.size() + " acciones pendientes");
+                //System.out.println("Procesando turno con " + pendingActions.size() + " acciones pendientes");
                 
                 // Ordenar las acciones por velocidad del Pokémon
                 pendingActions.sort((a, b) -> {
@@ -511,7 +503,7 @@ public class PokemonBattleServer {
                     // Verificar si el Pokémon atacante sigue vivo
                     Map<String, Object> sourceInTeam = findPokemonInTeams(source);
                     if (sourceInTeam == null || ((Number) sourceInTeam.getOrDefault("health", 0)).intValue() <= 0) {
-                        System.out.println("El Pokémon atacante " + sourceInTeam.get("name") + " está debilitado");
+                        //System.out.println("El Pokémon atacante " + sourceInTeam.get("name") + " está debilitado");
                         continue;
                     }
 
@@ -533,16 +525,16 @@ public class PokemonBattleServer {
 
                     int targetHealth = ((Number) targetInTeam.getOrDefault("health", 0)).intValue();
                     if (targetHealth <= 0) {
-                        System.out.println("El Pokémon objetivo " + targetInTeam.get("name") + " ya está debilitado");
+                        //System.out.println("El Pokémon objetivo " + targetInTeam.get("name") + " ya está debilitado");
                         continue;
                     }
 
-                    System.out.println("Procesando acción: " + source.get("name") + " -> " + targetInTeam.get("name") + " usando " + move.get("name"));
+                    //System.out.println("Procesando acción: " + source.get("name") + " -> " + targetInTeam.get("name") + " usando " + move.get("name"));
 
                     // Verificar precisión
                     int accuracy = ((Number) move.getOrDefault("accuracy", 100)).intValue();
                     if (random.nextInt(100) >= accuracy) {
-                        System.out.println("El movimiento falló por precisión");
+                        //System.out.println("El movimiento falló por precisión");
                         continue;
                     }
 
@@ -580,10 +572,10 @@ public class PokemonBattleServer {
                     int maxHealth = ((Number) targetInTeam.getOrDefault("maxHealth", 0)).intValue();
                     targetInTeam.put("health", Math.max(0, currentHealth - finalDamage));
 
-                    System.out.println(String.format(
+                    /*System.out.println(String.format(
                         "Ataque: %s -> %s, Daño: %d (Base: %d, Efectividad: %.2f)",
                         source.get("name"), targetInTeam.get("name"), finalDamage, baseDamage, typeEffectiveness
-                    ));
+                    ));*/
 
                     // Añadir la acción procesada a la lista
                     processedActions.add(Map.of(
@@ -596,7 +588,7 @@ public class PokemonBattleServer {
 
                     // Verificar si el Pokémon objetivo ha sido debilitado
                     if (targetInTeam.get("health").equals(0)) {
-                        System.out.println(targetInTeam.get("name") + " ha sido debilitado");
+                        //System.out.println(targetInTeam.get("name") + " ha sido debilitado");
                         checkBattleEnd();
                         if (battleOver) {
                             return Map.of("battleOver", true, "message", "La batalla ha terminado");
@@ -614,7 +606,7 @@ public class PokemonBattleServer {
                 // Resetear las banderas de acción seleccionada
                 team1ActionSelected = false;
                 team2ActionSelected = false;
-                System.out.println("Servidor: Banderas de acción seleccionada reseteadas. Equipo 1: " + team1ActionSelected + ", Equipo 2: " + team2ActionSelected);
+                //System.out.println("Servidor: Banderas de acción seleccionada reseteadas. Equipo 1: " + team1ActionSelected + ", Equipo 2: " + team2ActionSelected);
                 
                 return response;
             } catch (Exception e) {
