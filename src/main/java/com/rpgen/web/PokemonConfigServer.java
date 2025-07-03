@@ -2,6 +2,7 @@ package com.rpgen.web;
 
 import com.rpgen.pokemon.*;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import spark.Spark;
 import java.util.*;
 
@@ -59,7 +60,10 @@ public class PokemonConfigServer {
             }
 
             try {
-                Map<String, Object> config = gson.fromJson(request.body(), Map.class);
+                Map<String, Object> config = gson.fromJson(
+                    request.body(),
+                    new TypeToken<Map<String, Object>>(){}.getType()
+                );
                 //System.out.println("Configuración recibida: " + config);
                 
                 // Configurar movimientos seleccionados
@@ -114,7 +118,10 @@ public class PokemonConfigServer {
 
                 // Configurar IVs
                 if (config.containsKey("ivs")) {
-                    Map<String, Object> ivs = (Map<String, Object>) config.get("ivs");
+                    Map<String, Object> ivs = gson.fromJson(
+                        gson.toJson(config.get("ivs")),
+                        new com.google.gson.reflect.TypeToken<Map<String, Object>>(){}.getType()
+                    );
                     Stats currentStats = pokemon.getStats();
                     
                     int hpIV = ((Number) ivs.getOrDefault("hp", 31)).intValue();
@@ -137,7 +144,10 @@ public class PokemonConfigServer {
 
                 // Configurar EVs
                 if (config.containsKey("evs")) {
-                    Map<String, Object> evs = (Map<String, Object>) config.get("evs");
+                    Map<String, Object> evs = gson.fromJson(
+                        gson.toJson(config.get("evs")),
+                        new com.google.gson.reflect.TypeToken<Map<String, Object>>(){}.getType()
+                    );
                     Stats currentStats = pokemon.getStats();
                     
                     int hpEV = ((Number) evs.getOrDefault("hp", 0)).intValue();

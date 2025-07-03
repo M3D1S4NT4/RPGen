@@ -7,13 +7,10 @@ import com.rpgen.core.battle.BattleSystem;
 import com.rpgen.core.battle.BaseBattleSystem;
 import com.rpgen.core.entity.Entity;
 import com.rpgen.core.entity.Character;
-import com.rpgen.core.action.BasicAttack;
-import com.rpgen.core.action.PredefinedActions;
 import com.rpgen.core.action.CombatCommand;
 import com.rpgen.core.action.CombatCommandFactory;
-import com.google.gson.reflect.TypeToken;
-import com.rpgen.core.battle.BattleListener;
 import com.rpgen.core.action.GameAction;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,7 +71,7 @@ public class BattleServer {
 
         post("/api/characters", (req, res) -> {
             res.type("application/json");
-            Map<String, Object> data = gson.fromJson(req.body(), Map.class);
+            Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
             Character character = new Character(
                 (String) data.get("name"),
                 ((Double) data.get("maxHealth")).intValue(),
@@ -98,7 +95,7 @@ public class BattleServer {
                 ));
             }
 
-            Map<String, Object> data = gson.fromJson(req.body(), Map.class);
+            Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
             
             // Crear un nuevo personaje con los datos actualizados
             Character updatedCharacter = new Character(
@@ -134,9 +131,11 @@ public class BattleServer {
         post("/api/battle/start", (req, res) -> {
             res.type("application/json");
             try {
-                Map<String, Object> data = gson.fromJson(req.body(), Map.class);
-                List<String> team1Ids = (List<String>) data.get("team1");
-                List<String> team2Ids = (List<String>) data.get("team2");
+                Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
+                List<?> team1Raw = (List<?>) data.get("team1");
+                List<String> team1Ids = team1Raw.stream().map(Object::toString).collect(Collectors.toList());
+                List<?> team2Raw = (List<?>) data.get("team2");
+                List<String> team2Ids = team2Raw.stream().map(Object::toString).collect(Collectors.toList());
 
                 if (team1Ids == null || team2Ids == null) {
                     res.status(400);
@@ -179,7 +178,7 @@ public class BattleServer {
         post("/api/battle/action", (req, res) -> {
             res.type("application/json");
             try {
-                Map<String, Object> data = gson.fromJson(req.body(), Map.class);
+                Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
                 String sourceId = (String) data.get("sourceId");
                 String targetId = (String) data.get("targetId");
                 String actionType = (String) data.get("actionType");

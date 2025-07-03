@@ -1,8 +1,6 @@
 package com.rpgen.core.entity;
 
 import java.util.UUID;
-import com.rpgen.core.action.GameAction;
-import java.util.List;
 
 public class Character extends BaseEntity {
     public Character(String name, int maxHealth, int attack, int defense) {

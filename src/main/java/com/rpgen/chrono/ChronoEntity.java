@@ -2,8 +2,6 @@ package com.rpgen.chrono;
 
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-
 public class ChronoEntity {
     // Campos del JSON
     private String character;

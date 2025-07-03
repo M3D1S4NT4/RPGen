@@ -3,8 +3,6 @@ package com.rpgen.core.battle;
 import com.rpgen.core.entity.Entity;
 import com.rpgen.pokemon.Pokemon;
 import com.rpgen.core.action.GameAction;
-import com.rpgen.core.action.CombatCommand;
-import com.rpgen.core.action.CombatCommandFactory;
 import java.util.*;
 import com.rpgen.pokemon.HeldItem;
 

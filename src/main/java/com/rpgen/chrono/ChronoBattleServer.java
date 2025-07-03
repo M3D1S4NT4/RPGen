@@ -474,19 +474,15 @@ public class ChronoBattleServer {
                 return gson.toJson(Map.of("error", "Objeto no encontrado"));
             }
             String effect = ((String)itemObj.getOrDefault("effect", "")).toLowerCase();
-            int level = target.getLevel();
             //System.out.println("[LOG][ITEM] El nivel del objetivo (" + target.getCharacter() + ") es: " + level);
             // Buscar los stats del nivel correcto
             String msg = user.getCharacter() + " usa el objeto " + itemName + " en " + target.getCharacter() + ". ";
-            boolean revived = false;
             //System.out.println("[ITEM] Efecto: " + effect + ", usuario: " + user.getCharacter() + " (nivel " + user.getLevel() + ") target: " + target.getCharacter() + " (nivel " + target.getLevel() + ")");
             if (effect.contains("restores all hp/mp for all")) {
                 for (ChronoEntity ally : currentAllies) {
                     ChronoEntity.StatByLevel stats = ally.getStatsForCurrentLevel();
                     int allyMaxHp = stats != null ? stats.getHP() : 9999;
                     int allyMaxMp = stats != null ? stats.getMP() : 999;
-                    int oldHp = ally.getHp();
-                    int oldMp = ally.getMp();
                     ally.setHp(allyMaxHp);
                     ally.setMp(allyMaxMp);
                     //System.out.println("[ITEM][GLOBAL] " + ally.getCharacter() + " (nivel " + ally.getLevel() + ") HP: " + oldHp + " -> " + allyMaxHp + ", MP: " + oldMp + " -> " + allyMaxMp);
@@ -518,7 +514,6 @@ public class ChronoBattleServer {
                 for (ChronoEntity ally : currentAllies) {
                     ChronoEntity.StatByLevel stats = ally.getStatsForCurrentLevel();
                     int allyMaxHp = stats != null ? stats.getHP() : 9999;
-                    int oldHp = ally.getHp();
                     int newHp = Math.min(ally.getHp() + 200, allyMaxHp);
                     ally.setHp(newHp);
                     //System.out.println("[ITEM][GLOBAL] " + ally.getCharacter() + " (nivel " + ally.getLevel() + ") HP: " + oldHp + " -> " + newHp);
@@ -549,14 +544,6 @@ public class ChronoBattleServer {
                 int maxHp = stats != null ? stats.getHP() : 9999;
                 target.setHp(Math.min(target.getHp() + 50, maxHp));
                 msg += "Recupera 50 HP.";
-            } else if (effect.contains("revives ally")) {
-                if (target.getHp() <= 0) {
-                    target.setHp(50);
-                    revived = true;
-                    msg += "¡Revive con 50 HP!";
-                } else {
-                    msg += "No tiene efecto (el objetivo ya está vivo).";
-                }
             } else if (effect.contains("restores status")) {
                 target.setStatus(null);
                 msg += "Cura estados alterados.";

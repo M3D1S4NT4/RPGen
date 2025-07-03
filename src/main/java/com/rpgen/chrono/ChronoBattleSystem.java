@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Map;
 
 public class ChronoBattleSystem {
     private List<ChronoEntity> allies;
@@ -55,7 +54,6 @@ public class ChronoBattleSystem {
                 updateATB();
             }
         }, 0, ATB_TICK_MS);
-        // TODO: Notificar inicio de batalla a los listeners
     }
 
     public void stopBattle() {
@@ -63,7 +61,6 @@ public class ChronoBattleSystem {
         if (atbTimer != null) {
             atbTimer.cancel();
         }
-        // TODO: Notificar fin de batalla a los listeners
     }
 
     private void updateATB() {
@@ -71,12 +68,7 @@ public class ChronoBattleSystem {
         // Avanzar el ATB de cada entidad
         for (ChronoEntity entity : getAllEntities()) {
             entity.advanceATB();
-            // NO resetees el ATB aquí, deja que el usuario actúe
-            // if (entity.isATBFull() && entity.canAct()) {
-            //     entity.resetATB();
-            // }
         }
-        // TODO: Verificar condiciones de fin de batalla
     }
 
     private List<ChronoEntity> getAllEntities() {

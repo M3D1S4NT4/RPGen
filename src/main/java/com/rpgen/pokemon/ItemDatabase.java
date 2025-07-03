@@ -168,8 +168,14 @@ public class ItemDatabase {
             if (MANUAL_EFFECTS.containsKey(id)) {
                 Map<String, Object> manual = MANUAL_EFFECTS.get(id);
                 if (manual.containsKey("statModifiers")) {
-                    Map<String, Double> mods = (Map<String, Double>) manual.get("statModifiers");
-                    statModifiers.putAll(mods);
+                    Object modsObj = manual.get("statModifiers");
+                    if (modsObj instanceof Map<?, ?> modsMap) {
+                        for (Map.Entry<?, ?> entry : modsMap.entrySet()) {
+                            if (entry.getKey() instanceof String key && entry.getValue() instanceof Number value) {
+                                statModifiers.put(key, value.doubleValue());
+                            }
+                        }
+                    }
                 }
                 for (Map.Entry<String, Object> entry : manual.entrySet()) {
                     if (!entry.getKey().equals("statModifiers")) {

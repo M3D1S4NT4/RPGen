@@ -3,12 +3,12 @@ package com.rpgen.web;
 import static spark.Spark.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.rpgen.pokemon.Pokemon;
 import java.util.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 public class PokemonBattleServer {
     private final Gson gson;
@@ -46,9 +46,15 @@ public class PokemonBattleServer {
                 System.out.println("Recibida solicitud para iniciar batalla");
                 //System.out.println("Body de la solicitud: " + req.body());
                 
-                Map<String, Object> data = gson.fromJson(req.body(), Map.class);
-                List<Map<String, Object>> team1 = (List<Map<String, Object>>) data.get("team1");
-                List<Map<String, Object>> team2 = (List<Map<String, Object>>) data.get("team2");
+                Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
+                List<Map<String, Object>> team1 = gson.fromJson(
+                    gson.toJson(data.get("team1")),
+                    new TypeToken<List<Map<String, Object>>>(){}.getType()
+                );
+                List<Map<String, Object>> team2 = gson.fromJson(
+                    gson.toJson(data.get("team2")),
+                    new TypeToken<List<Map<String, Object>>>(){}.getType()
+                );
 
                 if (team1 == null || team2 == null) {
                     res.status(400);
@@ -93,10 +99,19 @@ public class PokemonBattleServer {
                     ));
                 }
 
-                Map<String, Object> data = gson.fromJson(req.body(), Map.class);
-                Map<String, Object> source = (Map<String, Object>) data.get("source");
-                Map<String, Object> target = (Map<String, Object>) data.get("target");
-                Map<String, Object> action = (Map<String, Object>) data.get("action");
+                Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
+                Map<String, Object> source = gson.fromJson(
+                    gson.toJson(data.get("source")),
+                    new TypeToken<Map<String, Object>>(){}.getType()
+                );
+                Map<String, Object> target = gson.fromJson(
+                    gson.toJson(data.get("target")),
+                    new TypeToken<Map<String, Object>>(){}.getType()
+                );
+                Map<String, Object> action = gson.fromJson(
+                    gson.toJson(data.get("action")),
+                    new TypeToken<Map<String, Object>>(){}.getType()
+                );
 
                 Map<String, Object> result = battle.addAction(source, target, action);
 
@@ -122,8 +137,11 @@ public class PokemonBattleServer {
                     ));
                 }
 
-                Map<String, Object> data = gson.fromJson(req.body(), Map.class);
-                Map<String, Object> newPokemon = (Map<String, Object>) data.get("newPokemon");
+                Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
+                Map<String, Object> newPokemon = gson.fromJson(
+                    gson.toJson(data.get("newPokemon")),
+                    new TypeToken<Map<String, Object>>(){}.getType()
+                );
                 boolean isTeam1 = (boolean) data.get("isTeam1");
 
                 Map<String, Object> result = battle.switchPokemon(newPokemon, isTeam1);
@@ -257,7 +275,6 @@ public class PokemonBattleServer {
             ));
             
             // Marcar que el equipo correspondiente ha seleccionado una acción
-            String sourceName = (String) source.get("name");
             if (team1.stream().anyMatch(p -> p.get("id").equals(source.get("id")))) {
                 team1ActionSelected = true;
                 //System.out.println("Servidor: addAction - Equipo 1 acción seleccionada para " + sourceName + " (ahora team1ActionSelected=true).");
@@ -453,6 +470,7 @@ public class PokemonBattleServer {
             return effectiveness;
         }
 
+        @SuppressWarnings("unchecked")
         public Map<String, Object> processTurn() {
             //System.out.println("Servidor: Procesando turno para instancia de PokemonBattle (hashCode): " + System.identityHashCode(this));
             Map<String, Object> response = new HashMap<>();
@@ -569,7 +587,6 @@ public class PokemonBattleServer {
 
                     // Aplicar el daño
                     int currentHealth = ((Number) targetInTeam.getOrDefault("health", 0)).intValue();
-                    int maxHealth = ((Number) targetInTeam.getOrDefault("maxHealth", 0)).intValue();
                     targetInTeam.put("health", Math.max(0, currentHealth - finalDamage));
 
                     /*System.out.println(String.format(
