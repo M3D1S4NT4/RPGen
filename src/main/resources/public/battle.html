@@ -531,9 +531,6 @@
             <button class="theme-toggle" onclick="toggleDarkMode()">Cambiar Tema</button>
         </nav>
     </header>
-    <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
-        <button onclick="window.location.href='pokemon.html'" style="background-color: #2196F3;">Ir a Pokédex</button>
-    </div>
     <div class="container">
         <!-- Añadir el div para el anuncio del ganador -->
         <div id="winnerAnnouncement" class="winner-announcement">
@@ -1356,10 +1353,8 @@
         function setTeamHealthToMax(team) {
             if (Array.isArray(team)) {
                 team.forEach(pokemon => {
-                    // Si la vida no está definida o es menor que el máximo, la igualamos
-                    if (typeof pokemon.health === 'undefined' || pokemon.health < pokemon.maxHealth) {
-                        pokemon.health = pokemon.maxHealth;
-                    }
+                    // Siempre igualar la vida al máximo al cargar el equipo
+                    pokemon.health = pokemon.maxHealth;
                 });
             }
         }

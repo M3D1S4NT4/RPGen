@@ -10,6 +10,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.rpgen.pokemon.battle.PokemonBattleEngine;
+import com.rpgen.pokemon.entity.Pokemon;
+import com.rpgen.pokemon.entity.PokemonMove;
 
 public class PokemonBattleServer {
     private final Gson gson;
@@ -48,13 +50,13 @@ public class PokemonBattleServer {
                 //System.out.println("Body de la solicitud: " + req.body());
                 
                 Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
-                List<Map<String, Object>> team1 = gson.fromJson(
+                List<Pokemon> team1 = gson.fromJson(
                     gson.toJson(data.get("team1")),
-                    new TypeToken<List<Map<String, Object>>>(){}.getType()
+                    new com.google.gson.reflect.TypeToken<List<Pokemon>>(){}.getType()
                 );
-                List<Map<String, Object>> team2 = gson.fromJson(
+                List<Pokemon> team2 = gson.fromJson(
                     gson.toJson(data.get("team2")),
-                    new TypeToken<List<Map<String, Object>>>(){}.getType()
+                    new com.google.gson.reflect.TypeToken<List<Pokemon>>(){}.getType()
                 );
 
                 if (team1 == null || team2 == null) {
@@ -102,17 +104,17 @@ public class PokemonBattleServer {
                 }
 
                 Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
-                Map<String, Object> source = gson.fromJson(
+                Pokemon source = gson.fromJson(
                     gson.toJson(data.get("source")),
-                    new TypeToken<Map<String, Object>>(){}.getType()
+                    Pokemon.class
                 );
-                Map<String, Object> target = gson.fromJson(
+                Pokemon target = gson.fromJson(
                     gson.toJson(data.get("target")),
-                    new TypeToken<Map<String, Object>>(){}.getType()
+                    Pokemon.class
                 );
-                Map<String, Object> action = gson.fromJson(
+                PokemonMove action = gson.fromJson(
                     gson.toJson(data.get("action")),
-                    new TypeToken<Map<String, Object>>(){}.getType()
+                    com.rpgen.pokemon.entity.PokemonMove.class
                 );
 
                 battle.addAction(source, target, action);
@@ -142,15 +144,23 @@ public class PokemonBattleServer {
                 }
 
                 Map<String, Object> data = gson.fromJson(req.body(), new TypeToken<Map<String, Object>>(){}.getType());
-                Map<String, Object> newPokemon = gson.fromJson(
+                Pokemon newPokemon = gson.fromJson(
                     gson.toJson(data.get("newPokemon")),
-                    new TypeToken<Map<String, Object>>(){}.getType()
+                    Pokemon.class
                 );
                 boolean isTeam1 = (boolean) data.get("isTeam1");
-
-                Map<String, Object> result = battle.switchPokemon(newPokemon, isTeam1);
+                Pokemon result = battle.switchPokemon(newPokemon, isTeam1);
                 res.type("application/json");
-                return gson.toJson(result);
+                if (result != null) {
+                    return gson.toJson(Map.of(
+                        "message", "Pokémon cambiado",
+                        "newActivePokemon", result
+                    ));
+                } else {
+                    return gson.toJson(Map.of(
+                        "error", "No se pudo cambiar el Pokémon"
+                    ));
+                }
             } catch (Exception e) {
                 res.status(500);
                 return gson.toJson(Map.of(

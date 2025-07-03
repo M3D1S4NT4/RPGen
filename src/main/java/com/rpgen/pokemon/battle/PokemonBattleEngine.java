@@ -3,19 +3,32 @@ package com.rpgen.pokemon.battle;
 import com.rpgen.core.battle.BattleEngine;
 import com.rpgen.core.battle.BattleListener;
 import java.util.*;
+import com.rpgen.pokemon.entity.Pokemon;
+import com.rpgen.pokemon.entity.PokemonMove;
+import com.rpgen.core.action.GameAction;
 
-public class PokemonBattleEngine implements BattleEngine<Map<String, Object>, Map<String, Object>> {
-    private List<Map<String, Object>> team1;
-    private List<Map<String, Object>> team2;
-    private List<Map<String, Object>> pendingActions;
+
+public class PokemonBattleEngine extends BattleEngine<Pokemon, PokemonMove> {
+    private List<Pokemon> team1;
+    private List<Pokemon> team2;
+    private List<PendingAction> pendingActions;
     private Random random;
     private boolean team1ActionSelected;
     private boolean team2ActionSelected;
     private boolean battleOver;
-    private Map<String, Object> team1ActivePokemon;
-    private Map<String, Object> team2ActivePokemon;
+    private Pokemon team1ActivePokemon;
+    private Pokemon team2ActivePokemon;
     private final Map<String, String> lockedMoveByPokemonId = new HashMap<>();
-    private final Map<String, Map<String, Object>> selectedMoves = new HashMap<>();
+    private final Map<String, PokemonMove> selectedMoves = new HashMap<>();
+
+    private static class PendingAction {
+        Pokemon source;
+        Pokemon target;
+        PokemonMove action;
+        PendingAction(Pokemon s, Pokemon t, PokemonMove a) {
+            source = s; target = t; action = a;
+        }
+    }
 
     public PokemonBattleEngine() {
         this.pendingActions = new ArrayList<>();
@@ -26,7 +39,7 @@ public class PokemonBattleEngine implements BattleEngine<Map<String, Object>, Ma
     }
 
     @Override
-    public void initialize(List<Map<String, Object>> team1, List<Map<String, Object>> team2) {
+    public void initialize(List<Pokemon> team1, List<Pokemon> team2) {
         this.team1 = new ArrayList<>(team1);
         this.team2 = new ArrayList<>(team2);
         this.pendingActions = new ArrayList<>();
@@ -38,18 +51,14 @@ public class PokemonBattleEngine implements BattleEngine<Map<String, Object>, Ma
     }
 
     @Override
-    public void addAction(Map<String, Object> source, Map<String, Object> target, Map<String, Object> action) {
+    public void addAction(Pokemon source, Pokemon target, PokemonMove action) {
         if (battleOver) return;
-        Map<String, Object> sourceInTeam = findPokemonInTeams(source);
-        if (sourceInTeam == null || ((Number) sourceInTeam.getOrDefault("health", 0)).intValue() <= 0) {
+        Pokemon sourceInTeam = findPokemonInTeams(source);
+        if (sourceInTeam == null || !sourceInTeam.isAlive()) {
             return;
         }
-        pendingActions.add(Map.of(
-            "source", source,
-            "target", target,
-            "action", action
-        ));
-        if (team1.stream().anyMatch(p -> p.get("id").equals(source.get("id")))) {
+        pendingActions.add(new PendingAction(source, target, action));
+        if (team1.stream().anyMatch(p -> p.getId().equals(source.getId()))) {
             team1ActionSelected = true;
         } else {
             team2ActionSelected = true;
@@ -60,15 +69,14 @@ public class PokemonBattleEngine implements BattleEngine<Map<String, Object>, Ma
     public void processTurn() {
         if (battleOver) return;
         if (team1ActivePokemon == null || team2ActivePokemon == null) return;
-        Map<String, Object> move1 = selectedMoves.getOrDefault(team1ActivePokemon.get("id"), null);
-        Map<String, Object> move2 = selectedMoves.getOrDefault(team2ActivePokemon.get("id"), null);
+        PokemonMove move1 = selectedMoves.getOrDefault(team1ActivePokemon.getId(), null);
+        PokemonMove move2 = selectedMoves.getOrDefault(team2ActivePokemon.getId(), null);
         if (move1 == null || move2 == null) {
-            // Si no hay movimientos seleccionados, simplemente no procesar el turno especial
             selectedMoves.clear();
             return;
         }
-        int speed1 = ((Number) team1ActivePokemon.getOrDefault("speed", 0)).intValue();
-        int speed2 = ((Number) team2ActivePokemon.getOrDefault("speed", 0)).intValue();
+        int speed1 = team1ActivePokemon.getSpeed();
+        int speed2 = team2ActivePokemon.getSpeed();
         boolean firstIsTeam1 = speed1 >= speed2;
         if (firstIsTeam1) {
             processAttack(team1ActivePokemon, team2ActivePokemon, move1);
@@ -87,21 +95,20 @@ public class PokemonBattleEngine implements BattleEngine<Map<String, Object>, Ma
     }
 
     @Override
-    public List<Map<String, Object>> getTeam1() {
+    public List<Pokemon> getTeam1() {
         return team1;
     }
 
     @Override
-    public List<Map<String, Object>> getTeam2() {
+    public List<Pokemon> getTeam2() {
         return team2;
     }
 
-    private boolean isTeamDefeated(List<Map<String, Object>> team) {
-        return team.stream().allMatch(pokemon -> 
-            ((Number) pokemon.getOrDefault("health", 0)).intValue() <= 0);
+    private boolean isTeamDefeated(List<Pokemon> team) {
+        return team.stream().allMatch(pokemon -> !pokemon.isAlive());
     }
 
-    private void checkBattleEnd() {
+    public void checkBattleEnd() {
         boolean team1Defeated = isTeamDefeated(team1);
         boolean team2Defeated = isTeamDefeated(team2);
         if (team1Defeated || team2Defeated) {
@@ -109,18 +116,96 @@ public class PokemonBattleEngine implements BattleEngine<Map<String, Object>, Ma
         }
     }
 
-    private Map<String, Object> findPokemonInTeams(Map<String, Object> pokemon) {
-        for (Map<String, Object> p : team1) {
-            if (p.get("id").equals(pokemon.get("id"))) {
+    private Pokemon findPokemonInTeams(Pokemon pokemon) {
+        for (Pokemon p : team1) {
+            if (p.getId().equals(pokemon.getId())) {
                 return p;
             }
         }
-        for (Map<String, Object> p : team2) {
-            if (p.get("id").equals(pokemon.get("id"))) {
+        for (Pokemon p : team2) {
+            if (p.getId().equals(pokemon.getId())) {
                 return p;
             }
         }
         return null;
+    }
+
+    public void selectMove(Pokemon pokemon, PokemonMove move) {
+        if (pokemon == null || move == null) return;
+        String pokeId = pokemon.getId();
+        if (pokeId == null) return;
+        boolean isChoice = false;
+        if (pokemon.getHeldItem() != null) {
+            Object onlyOneMove = pokemon.getHeldItem().getExtraEffects().get("onlyOneMove");
+            isChoice = Boolean.TRUE.equals(onlyOneMove);
+        }
+        String lockedMove = lockedMoveByPokemonId.get(pokeId);
+        String moveId = move.getId();
+        if (isChoice) {
+            if (lockedMove == null) {
+                lockedMoveByPokemonId.put(pokeId, moveId);
+            } else if (!lockedMove.equals(moveId)) {
+                List<GameAction> moves = pokemon.getAvailableActions();
+                PokemonMove forced = (PokemonMove) moves.stream()
+                        .filter(a -> lockedMove.equals(a.getId()))
+                        .findFirst().orElse(move);
+                selectedMoves.put(pokeId, forced);
+                return;
+            }
+        } else {
+            lockedMoveByPokemonId.remove(pokeId);
+        }
+        selectedMoves.put(pokeId, move);
+    }
+
+    public Pokemon switchPokemon(Pokemon newPokemon, boolean isTeam1) {
+        if (battleOver) {
+            return null;
+        }
+        List<Pokemon> team = isTeam1 ? team1 : team2;
+        for (int i = 0; i < team.size(); i++) {
+            if (team.get(i).getId().equals(newPokemon.getId())) {
+                if (!team.get(i).isAlive()) {
+                    return null;
+                }
+                team.set(i, newPokemon);
+                if (isTeam1) {
+                    team1ActivePokemon = newPokemon;
+                    team1ActionSelected = true;
+                } else {
+                    team2ActivePokemon = newPokemon;
+                    team2ActionSelected = true;
+                }
+                lockedMoveByPokemonId.remove(newPokemon.getId());
+                return newPokemon;
+            }
+        }
+        return null;
+    }
+
+    public Pokemon getActivePokemon(boolean isTeam1) {
+        return isTeam1 ? team1ActivePokemon : team2ActivePokemon;
+    }
+
+    private void processAttack(Pokemon attacker, Pokemon defender, PokemonMove move) {
+        if (attacker == null || defender == null || move == null) return;
+        if (!attacker.isAlive() || !defender.isAlive()) return;
+        String attackType = move.getProperties().getOrDefault("type", "normal").toString();
+        List<String> defenderTypes = defender.getTypes();
+        double typeEffectiveness = calculateTypeEffectiveness(attackType, defenderTypes);
+        int baseDamage = calculateBaseDamage(attacker, defender, move);
+        double damage = baseDamage * typeEffectiveness;
+        damage *= (0.85 + (random.nextDouble() * 0.15));
+        int finalDamage = (int) Math.round(damage);
+        defender.takeDamage(finalDamage);
+    }
+
+    private int calculateBaseDamage(Pokemon attacker, Pokemon defender, PokemonMove move) {
+        String category = move.getProperties().getOrDefault("category", "physical").toString();
+        int power = (int) move.getProperties().getOrDefault("power", 0);
+        int attackStat = category.equals("special") ? attacker.getSpecialAttack() : attacker.getAttack();
+        int defenseStat = category.equals("special") ? defender.getSpecialDefense() : defender.getDefense();
+        return (int) ((((2 * 50 / 5 + 2) * attackStat * power / defenseStat) / 50) + 2);
     }
 
     public double calculateTypeEffectiveness(String attackType, List<String> defenderTypes) {
@@ -216,89 +301,6 @@ public class PokemonBattleEngine implements BattleEngine<Map<String, Object>, Ma
         return effectiveness;
     }
 
-    public void selectMove(Map<String, Object> pokemon, Map<String, Object> move) {
-        if (pokemon == null || move == null) return;
-        String pokeId = (String) pokemon.get("id");
-        if (pokeId == null) return;
-        Map<String, Object> heldItem = (Map<String, Object>) pokemon.get("heldItem");
-        boolean isChoice = heldItem != null && Boolean.TRUE.equals(heldItem.getOrDefault("onlyOneMove", false));
-        String lockedMove = lockedMoveByPokemonId.get(pokeId);
-        String moveId = (String) move.get("id");
-        if (isChoice) {
-            if (lockedMove == null) {
-                lockedMoveByPokemonId.put(pokeId, moveId);
-            } else if (!lockedMove.equals(moveId)) {
-                List<Map<String, Object>> moves = (List<Map<String, Object>>) pokemon.get("moves");
-                Map<String, Object> forced = moves.stream()
-                        .filter(a -> lockedMove.equals(a.get("id")))
-                        .findFirst().orElse(move);
-                selectedMoves.put(pokeId, forced);
-                return;
-            }
-        } else {
-            lockedMoveByPokemonId.remove(pokeId);
-        }
-        selectedMoves.put(pokeId, move);
-    }
-
-    public Map<String, Object> switchPokemon(Map<String, Object> newPokemon, boolean isTeam1) {
-        if (battleOver) {
-            return Map.of("error", "La batalla ha terminado");
-        }
-        List<Map<String, Object>> team = isTeam1 ? team1 : team2;
-        for (int i = 0; i < team.size(); i++) {
-            if (team.get(i).get("id").equals(newPokemon.get("id"))) {
-                if (((Number) team.get(i).getOrDefault("health", 0)).intValue() <= 0) {
-                    return Map.of("error", "No puedes cambiar a un Pokémon debilitado");
-                }
-                team.set(i, newPokemon);
-                if (isTeam1) {
-                    team1ActivePokemon = newPokemon;
-                    team1ActionSelected = true;
-                } else {
-                    team2ActivePokemon = newPokemon;
-                    team2ActionSelected = true;
-                }
-                // Resetear bloqueo Choice
-                lockedMoveByPokemonId.remove(newPokemon.get("id"));
-                return Map.of(
-                    "message", "Pokémon cambiado",
-                    "newActivePokemon", newPokemon,
-                    "team1ActionSelected", team1ActionSelected,
-                    "team2ActionSelected", team2ActionSelected
-                );
-            }
-        }
-        return Map.of("error", "No se encontró el Pokémon en el equipo");
-    }
-
-    public Map<String, Object> getActivePokemon(boolean isTeam1) {
-        return isTeam1 ? team1ActivePokemon : team2ActivePokemon;
-    }
-
-    private void processAttack(Map<String, Object> attacker, Map<String, Object> defender, Map<String, Object> move) {
-        if (attacker == null || defender == null || move == null) return;
-        if (((Number) attacker.getOrDefault("health", 0)).intValue() <= 0 || ((Number) defender.getOrDefault("health", 0)).intValue() <= 0) return;
-        String attackType = (String) move.get("type");
-        if (attackType == null) return;
-        List<String> defenderTypes = (List<String>) defender.getOrDefault("types", List.of("normal"));
-        double typeEffectiveness = calculateTypeEffectiveness(attackType, defenderTypes);
-        int baseDamage = calculateBaseDamage(attacker, defender, move);
-        double damage = baseDamage * typeEffectiveness;
-        damage *= (0.85 + (random.nextDouble() * 0.15));
-        int finalDamage = (int) Math.round(damage);
-        int currentHealth = ((Number) defender.getOrDefault("health", 0)).intValue();
-        defender.put("health", Math.max(0, currentHealth - finalDamage));
-    }
-
-    private int calculateBaseDamage(Map<String, Object> attacker, Map<String, Object> defender, Map<String, Object> move) {
-        String category = (String) move.getOrDefault("category", "physical");
-        int power = ((Number) move.getOrDefault("power", 0)).intValue();
-        int attackStat = category.equals("special") ? ((Number) attacker.getOrDefault("specialAttack", 50)).intValue() : ((Number) attacker.getOrDefault("attack", 50)).intValue();
-        int defenseStat = category.equals("special") ? ((Number) defender.getOrDefault("specialDefense", 50)).intValue() : ((Number) defender.getOrDefault("defense", 50)).intValue();
-        return (int) ((((2 * 50 / 5 + 2) * attackStat * power / defenseStat) / 50) + 2);
-    }
-
     @Override
     public void registerBattleListener(BattleListener listener) {
         // Implementación vacía o lógica según tu necesidad
@@ -310,8 +312,8 @@ public class PokemonBattleEngine implements BattleEngine<Map<String, Object>, Ma
     }
 
     @Override
-    public List<Map<String, Object>> getActiveEntities() {
-        List<Map<String, Object>> actives = new ArrayList<>();
+    public List<Pokemon> getActiveEntities() {
+        List<Pokemon> actives = new ArrayList<>();
         if (team1ActivePokemon != null) actives.add(team1ActivePokemon);
         if (team2ActivePokemon != null) actives.add(team2ActivePokemon);
         return actives;

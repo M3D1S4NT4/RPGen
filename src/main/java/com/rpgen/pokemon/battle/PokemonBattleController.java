@@ -2,6 +2,7 @@ package com.rpgen.pokemon.battle;
 
 import com.rpgen.core.entity.Entity;
 import com.rpgen.pokemon.entity.Pokemon;
+import com.rpgen.pokemon.entity.PokemonMove;
 import com.rpgen.core.action.GameAction;
 
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +24,8 @@ public class PokemonBattleController {
     public ResponseEntity<?> startBattle(@RequestBody BattleRequest request) {
         try {
             battleSystem = new PokemonBattleEngine();
-            List<Map<String, Object>> team1 = new ArrayList<>();
-            for (Entity e : request.getTeam1()) team1.add(entityToMap(e));
-            List<Map<String, Object>> team2 = new ArrayList<>();
-            for (Entity e : request.getTeam2()) team2.add(entityToMap(e));
+            List<Pokemon> team1 = request.getTeam1();
+            List<Pokemon> team2 = request.getTeam2();
             battleSystem.initialize(team1, team2);
             String battleId = UUID.randomUUID().toString();
             activeBattles.put(battleId, battleSystem);
@@ -45,10 +44,7 @@ public class PokemonBattleController {
             if (battle == null) {
                 return ResponseEntity.notFound().build();
             }
-            Map<String, Object> source = entityToMap(request.getSource());
-            Map<String, Object> target = entityToMap(request.getTarget());
-            Map<String, Object> action = gameActionToMap(request.getAction());
-            battle.addAction(source, target, action);
+            battle.addAction(request.getSource(), request.getTarget(), (PokemonMove) request.getAction());
             return ResponseEntity.ok(new ActionResponse("Acción registrada"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
@@ -64,8 +60,7 @@ public class PokemonBattleController {
             if (battle == null) {
                 return ResponseEntity.notFound().build();
             }
-            Map<String, Object> newPokemon = entityToMap(request.getNewPokemon());
-            battle.switchPokemon(newPokemon, request.isTeam1());
+            battle.switchPokemon(request.getNewPokemon(), request.isTeam1());
             return ResponseEntity.ok(new SwitchResponse("Pokémon cambiado"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
@@ -89,11 +84,11 @@ public class PokemonBattleController {
 
     // Clases de request/response
     private static class BattleRequest {
-        private List<Entity> team1;
-        private List<Entity> team2;
+        private List<Pokemon> team1;
+        private List<Pokemon> team2;
 
-        public List<Entity> getTeam1() { return team1; }
-        public List<Entity> getTeam2() { return team2; }
+        public List<Pokemon> getTeam1() { return team1; }
+        public List<Pokemon> getTeam2() { return team2; }
     }
 
     private static class BattleResponse {
@@ -154,34 +149,5 @@ public class PokemonBattleController {
         public ErrorResponse(String error) {
             this.error = error;
         }
-    }
-
-    // Métodos utilitarios para convertir objetos a Map<String, Object>
-    private static Map<String, Object> entityToMap(Object obj) {
-        if (obj == null) return null;
-        Map<String, Object> map = new HashMap<>();
-        for (Method m : obj.getClass().getMethods()) {
-            if (m.getParameterCount() == 0 && m.getName().startsWith("get") && !m.getName().equals("getClass")) {
-                try {
-                    Object value = m.invoke(obj);
-                    String key = Character.toLowerCase(m.getName().charAt(3)) + m.getName().substring(4);
-                    map.put(key, value);
-                } catch (Exception ignored) {}
-            }
-            if (m.getParameterCount() == 0 && m.getName().startsWith("is")) {
-                try {
-                    Object value = m.invoke(obj);
-                    String key = Character.toLowerCase(m.getName().charAt(2)) + m.getName().substring(3);
-                    map.put(key, value);
-                } catch (Exception ignored) {}
-            }
-        }
-        return map;
-    }
-    private static Map<String, Object> gameActionToMap(GameAction action) {
-        if (action == null) return null;
-        Map<String, Object> map = entityToMap(action);
-        // Si GameAction tiene propiedades adicionales, agrégalas aquí
-        return map;
     }
 } 
