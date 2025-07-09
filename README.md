@@ -1,160 +1,136 @@
-# RPGen - Generador de Combates Pokémon
+# RPGen-Core: Un Motor de Combate por Turnos Genérico
 
-Un sistema completo para crear equipos de Pokémon y realizar combates estratégicos con todas las mecánicas del juego original.
+**RPGen-Core** es un framework robusto y extensible para crear sistemas de combate por turnos, desarrollado en **Java** con **Spark Framework**. Proporciona la lógica fundamental para gestionar entidades, acciones y el flujo de una batalla, permitiendo a los desarrolladores centrarse en las mecánicas específicas de su juego.
 
-## Características Principales
+Este repositorio contiene el **núcleo** del sistema. Para ver ejemplos de cómo se puede extender, visita nuestros casos de uso.
 
-### 🎮 Sistema de Combate Completo
-- **Combates por turnos** con mecánicas realistas de Pokémon
-- **Cálculo de daño** basado en tipos, estadísticas y efectividad
-- **Animaciones** de ataque y daño
-- **Sistema de velocidad** que determina el orden de ataque
-- **Cambio de Pokémon** durante el combate
-- **Registro de batalla** detallado
+## ✨ Características Principales
 
-### 📊 Estadísticas Avanzadas
-- **IVs (Individual Values)**: Valores de 0-31 para cada estadística
-- **EVs (Effort Values)**: Puntos de esfuerzo de 0-252 por estadística (máximo 510 total)
-- **Naturalezas**: 25 naturalezas diferentes que modifican estadísticas (+10%/-10%)
-- **Cálculo automático** de estadísticas finales basado en nivel, IVs, EVs y naturaleza
+  - **Motor de Batalla Flexible**: Un sistema `BattleEngine` que gestiona el orden de los turnos, la ejecución de acciones y las condiciones de victoria/derrota.
+  - **Sistema de Entidades**: Define `Entity` como la base para cualquier personaje o criatura, con atributos esenciales como vida, ataque y defensa.
+  - **Acciones y Comandos**: Utiliza el patrón de diseño *Command* para encapsular las acciones (`GameAction`) que las entidades pueden realizar, como ataques o habilidades especiales.
+  - **API RESTful**: Expone una API sencilla para gestionar personajes y controlar las batallas desde cualquier cliente web.
+  - **Interfaz Web de Ejemplo**: Incluye una página `index.html` simple para probar la funcionalidad básica del motor de combate.
+  - **Persistencia de Datos**: Guarda y carga el estado de los personajes en un archivo `characters.json`.
 
-### 🎯 Habilidades y Objetos
-- **Habilidades**: Todas las habilidades disponibles para cada Pokémon (incluyendo habilidades ocultas)
-- **Objetos equipados**: Más de 20 objetos diferentes con efectos únicos
-- **Modificadores de estadísticas** aplicados automáticamente
-- **Efectos especiales** como restauración de HP, aumento de poder, etc.
+-----
 
-### 🏆 Gestión de Equipos
-- **Crear múltiples equipos** con nombres personalizados
-- **Selección de movimientos** (hasta 4 por Pokémon)
-- **Configuración completa** de cada Pokémon individualmente
-- **Guardado automático** en localStorage
-- **Importar/exportar** equipos
+## 🛠️ Cómo Funciona
 
-### 🎨 Interfaz Moderna
-- **Modo oscuro/claro** con persistencia de preferencias
-- **Diseño responsivo** que funciona en diferentes dispositivos
-- **Información detallada** en tooltips y modales
-- **Animaciones suaves** y transiciones
-- **Iconos intuitivos** para todas las acciones
+El sistema se divide en varios componentes clave:
 
-## Tecnologías Utilizadas
+  - **`BattleServer`**: Es el corazón de la aplicación web. Utiliza Spark para levantar un servidor y exponer los endpoints de la API. Se encarga de recibir las peticiones del cliente, traducirlas a operaciones del motor de batalla y devolver los resultados.
+  - **`BattleEngine`**: Es una clase abstracta que contiene la lógica principal del combate por turnos. Gestiona dos equipos de entidades, una cola de comandos para el turno actual y notifica a los *listeners* sobre los eventos de la batalla.
+  - **`Entity` y `BaseEntity`**: `Entity` es una interfaz que define las propiedades y métodos básicos de un combatiente. `BaseEntity` es una implementación abstracta que proporciona la funcionalidad común, como recibir daño (`takeDamage`), curarse (`heal`) y verificar si la entidad sigue viva (`isAlive`).
+  - **`GameAction` y `PredefinedActions`**: La interfaz `GameAction` define una acción que una entidad puede ejecutar. La clase `PredefinedActions` ofrece ejemplos de acciones listas para usar como `BasicAttackAction`, `StrongAttackAction` y `ShieldAction`, que pueden servir como base para acciones más complejas.
 
-### Backend
-- **Java 17** con Spring Boot
-- **PokéAPI** para datos de Pokémon
-- **HTTP Client** para peticiones asíncronas
-- **Gson** para parsing de JSON
+-----
 
-### Frontend
-- **HTML5** con CSS3 moderno
-- **JavaScript ES6+** con async/await
-- **Font Awesome** para iconos
-- **Grid y Flexbox** para layouts
-
-## Instalación y Uso
+## 🚀 Instalación y Uso
 
 ### Requisitos
-- Java 17 o superior
-- Maven 3.6+
 
-### Ejecución
-1. Clona el repositorio
-2. Ejecuta `mvn spring-boot:run`
-3. Abre `http://localhost:8080` en tu navegador
+  - Java 17 o superior
+  - Maven 3.6+
 
-### Uso del Sistema
+### Ejecutar el Núcleo
 
-#### 1. Crear Equipos
-- Navega a la página principal
-- Busca Pokémon por nombre o tipo
-- Haz clic en un Pokémon para añadirlo a tu equipo
-- Configura movimientos, habilidades, objetos y estadísticas
-- Guarda tu equipo con un nombre personalizado
+Para probar la aplicación base, sigue estos pasos:
 
-#### 2. Configurar Pokémon
-- **Habilidades**: Selecciona entre las habilidades disponibles del Pokémon
-- **Objetos**: Equipa objetos que modifican estadísticas o proporcionan efectos especiales
-- **Naturalezas**: Elige una naturaleza que aumente y disminuya estadísticas específicas
-- **IVs/EVs**: Ajusta los valores individuales y de esfuerzo para optimizar estadísticas
+1.  Clona el repositorio.
+2.  Desde la raíz del proyecto, ejecuta el siguiente comando para iniciar el servidor:
+    ```bash
+    mvn spring-boot:run
+    ```
+3.  Abre `http://localhost:4567` en tu navegador para ver la interfaz de ejemplo.
 
-#### 3. Iniciar Combate
-- Ve a la página de combate
-- Selecciona dos equipos diferentes
-- Elige los Pokémon iniciales
-- Realiza acciones por turnos (ataques o cambios)
-- Observa el resultado del combate
+### Instalar como Dependencia
 
-## Mecánicas del Juego
+Para usar **RPGen-Core** en tu propio proyecto, necesitas instalarlo en tu repositorio local de Maven:
 
-### Cálculo de Estadísticas
-```
-HP = ((2 * Base + IV + EV/4) * Nivel) / 100 + Nivel + 10
-Otras Stats = (((2 * Base + IV + EV/4) * Nivel) / 100 + 5) * Naturaleza * Objeto
+```bash
+mvn install
 ```
 
-### Cálculo de Daño
-```
-Daño = ((2 * Nivel / 5 + 2) * Poder * Ataque / Defensa) / 50 + 2
-Daño Final = Daño * Efectividad * Variación * Objetos
-```
+Una vez instalado, puedes añadirlo como dependencia en el `pom.xml` de tu proyecto.
 
-### Efectividad de Tipos
-- **Super efectivo**: x2 daño
-- **Normal**: x1 daño
-- **No muy efectivo**: x0.5 daño
-- **Sin efecto**: x0 daño
+-----
 
-## Estructura del Proyecto
+## 🧩 Cómo Extender RPGen-Core
 
-```
-src/main/java/com/rpgen/
-├── controller/          # Controladores REST
-├── core/               # Lógica del juego
-│   ├── action/         # Movimientos y acciones
-│   ├── battle/         # Sistema de combate
-│   └── entity/         # Entidades base
-├── pokemon/            # Clases específicas de Pokémon
-└── web/                # Servidores web
+Este núcleo está diseñado para ser la base de sistemas de combate más complejos. Aquí te explicamos cómo puedes extenderlo para crear tu propio juego:
 
-src/main/resources/public/
-├── index.html          # Página principal
-├── pokemon.html        # Gestión de equipos
-└── battle.html         # Combate
-```
+1.  **Crea tu proyecto Maven**: Inicia un nuevo proyecto en Java con Maven.
 
-## Características Técnicas
+2.  **Añade RPGen-Core como dependencia**: En tu archivo `pom.xml`, añade la dependencia que instalaste en el paso anterior.
 
-### Optimización
-- **Carga progresiva** de Pokémon desde la API
-- **Caché local** de datos para mejor rendimiento
-- **Peticiones asíncronas** para no bloquear la interfaz
-- **Límites de concurrencia** para evitar sobrecarga de la API
+    ```xml
+    <dependency>
+        <groupId>com.rpgen</groupId>
+        <artifactId>rpgen-core</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
+    ```
 
-### Persistencia
-- **localStorage** para equipos y configuraciones
-- **Hashes únicos** para identificar Pokémon en equipos
-- **Sincronización automática** entre páginas
+3.  **Crea tus propias Entidades**: Define las entidades de tu juego extendiendo `BaseEntity`. Aquí puedes añadir atributos y lógicas específicas.
 
-### Escalabilidad
-- **Arquitectura modular** fácil de extender
-- **APIs RESTful** para futuras integraciones
-- **Separación clara** entre lógica de negocio y presentación
+    *Ejemplo: una entidad `Pokemon`.*
 
-## Contribuir
+    ```java
+    public class Pokemon extends BaseEntity {
+        private String type;
+        // Constructores, getters, setters y otros métodos...
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+        public Pokemon(String name, int maxHealth, int attack, int defense, String type) {
+            super(UUID.randomUUID().toString(), name, maxHealth, attack, defense, 0);
+            this.type = type;
+        }
+    }
+    ```
 
-## Licencia
+4.  **Define Acciones Personalizadas**: Implementa la interfaz `GameAction` para crear las habilidades y movimientos únicos de tu juego.
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+    *Ejemplo: un ataque tipo `Agua`.*
 
-## Agradecimientos
+    ```java
+    public class WaterGun extends AbstractGameAction {
+        public WaterGun(String id) {
+            super(id, "Water Gun", 0, "Lanza un chorro de agua.");
+        }
 
-- **PokéAPI** por proporcionar los datos de Pokémon
-- **Font Awesome** por los iconos
-- **Spring Boot** por el framework de backend
+        @Override
+        public void execute(Entity source, Entity target) {
+            // Lógica de daño personalizada, considerando tipos, etc.
+            int damage = source.getAttack() * 2; // Ejemplo simple
+            target.takeDamage(damage);
+        }
+    }
+    ```
+
+5.  **Configura tu propio Servidor**: Crea una clase principal que inicialice un `BattleServer` (o una versión extendida del mismo) para gestionar la lógica de tu juego, asociando las nuevas entidades y acciones a los endpoints de la API.
+
+-----
+
+## 🎲 Casos de Uso (Extensiones)
+
+Para ver cómo se puede aplicar **RPGen-Core** en la práctica, hemos desarrollado dos extensiones completas como ejemplo:
+
+  - **[RPGen-pokemon](https://github.com/M3D1S4NT4/RPGen-pokemon)**: Una implementación completa del sistema de combate de Pokémon, con sus tipos, habilidades y mecánicas únicas.
+  - **[RPGen-chrono](https://github.com/M3D1S4NT4/RPGen-chrono)**: Una adaptación del sistema de combate del clásico JRPG *Chrono Trigger*.
+
+-----
+
+## 💻 Tecnologías Utilizadas
+
+### Backend
+
+  - **Java 17**
+  - **Spark Framework**: Para crear la API REST de forma ligera.
+  - **Spring Boot**: Para la gestión del ciclo de vida y la configuración de la aplicación.
+  - **Gson**: Para la serialización y deserialización de datos JSON.
+  - **Logback**: Para el registro de eventos y errores.
+
+### Frontend
+
+  - **HTML5** y **CSS3**
+  - **JavaScript (ES6+)**: Para la lógica del cliente y la comunicación con la API.
