@@ -1,9 +1,9 @@
 package com.rpgen;
 
-import com.rpgen.pokemon.web.PokemonBattleServer;
+/*import com.rpgen.pokemon.web.PokemonBattleServer;
 import com.rpgen.pokemon.web.PokemonConfigServer;
 import com.rpgen.pokemon.web.PokemonServer;
-import com.rpgen.chrono.web.ChronoBattleServer;
+import com.rpgen.chrono.web.ChronoBattleServer;*/
 import com.rpgen.core.web.BattleServer;
 
 import spark.Spark;
@@ -20,25 +20,25 @@ public class Main {
         System.out.println("Iniciando servidores...");
         
         // Inicializar primero el servidor de configuración de Pokémon
-        PokemonConfigServer pokemonConfigServer = new PokemonConfigServer();
+        /*PokemonConfigServer pokemonConfigServer = new PokemonConfigServer();
         pokemonConfigServer.init();
         System.out.println("Servidor de configuración de Pokémon iniciado");
         
         PokemonBattleServer pokemonBattleServer = new PokemonBattleServer();
         pokemonBattleServer.init();
-        System.out.println("Servidor de batalla de Pokémon iniciado");
+        System.out.println("Servidor de batalla de Pokémon iniciado");*/
         
         BattleServer battleServer = new BattleServer();
         battleServer.init();
         System.out.println("Servidor de batalla general iniciado");
         
-        PokemonServer pokemonServer = new PokemonServer();
+        /*PokemonServer pokemonServer = new PokemonServer();
         pokemonServer.init();
         System.out.println("Servidor de Pokémon iniciado");
         
         ChronoBattleServer chronoServer = new ChronoBattleServer();
         chronoServer.init();
-        System.out.println("Servidor de batalla de Chrono iniciado");
+        System.out.println("Servidor de batalla de Chrono iniciado");*/
         
         // Configurar manejo de errores
         Spark.exception(Exception.class, (exception, request, response) -> {
@@ -58,12 +58,12 @@ public class Main {
             return "Ruta no encontrada: " + request.pathInfo();
         });
         
-        System.out.println("Servidor iniciado en http://localhost:4567");
+        /*System.out.println("Servidor iniciado en http://localhost:4567");
         System.out.println("Rutas disponibles:");
         System.out.println("  - /api/pokemon/natures");
         System.out.println("  - /api/pokemon/items");
         System.out.println("  - /api/pokemon/:id/abilities");
         System.out.println("  - /api/pokemon/:id/configure");
-        System.out.println("  - /api/pokemon/:id/stats");
+        System.out.println("  - /api/pokemon/:id/stats");*/
     }
 } 
