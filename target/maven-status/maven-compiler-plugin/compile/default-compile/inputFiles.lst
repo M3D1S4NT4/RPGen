@@ -1,0 +1,15 @@
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\action\GameAction.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\battle\BattleEngine.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\action\AbstractGameAction.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\action\CombatCommandFactory.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\web\BattleServer.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\action\CombatCommand.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\Main.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\entity\Entity.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\entity\BaseEntity.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\action\BasicAttack.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\action\PredefinedActions.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\battle\BattleListener.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\action\AbstractCombatCommand.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\entity\Character.java
+C:\Users\PC Gaming\Escritorio\RPGen\src\main\java\com\rpgen\core\battle\DefaultBattleEngine.java
